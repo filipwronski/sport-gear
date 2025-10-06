@@ -25,7 +25,7 @@ Stack technologiczny:
 - Frontend: Astro (SSG/SSR) z React Islands architecture
 - Styling: Tailwind CSS + shadcn/ui
 - Backend: Supabase (PostgreSQL, Auth, Realtime, Edge Functions)
-- API zewnętrzne: OpenWeather API (dane pogodowe), OpenRouter (AI rekomendacje GPT-4)
+- API zewnętrzne: OpenWeather API (dane pogodowe), OpenRouter
 - Deployment: Github Action i Cloudflare
 
 Unikalna wartość produktu (USP):
@@ -190,7 +190,7 @@ In Scope - Funkcjonalności:
 In Scope - Technologie:
 - Astro + React (web only)
 - Supabase (backend-as-a-service)
-- OpenWeather API, OpenRouter (GPT-4)
+- OpenWeather API, OpenRouter
 - Tailwind CSS + shadcn/ui
 
 Poza zakresem MVP (co NIE JEST w pierwszej wersji):
@@ -217,7 +217,7 @@ Ograniczenia techniczne MVP:
 
 Limity Free Tier:
 - OpenWeather API: 1000 calls/day (wystarczające z cachingiem 1h)
-- OpenRouter GPT-4: 20 rekomendacji/dzień/user
+- OpenRouter
 - Supabase: 500MB bazy danych, 1GB transfer/miesiąc
 - Maksymalnie 100-200 aktywnych użytkowników w MVP
 
