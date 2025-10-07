@@ -1,0 +1,61 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.astro/
+.vercel/
+.netlify/
+.output/
+
+# Dependency lock files (za duże dla kontekstu AI)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Cache directories
+.cache/
+.temp/
+.tmp/
+*.cache
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE configs (opcjonalnie - odkomentuj jeśli chcesz ignorować)
+# .vscode/
+# .idea/
+
+# Supabase local
+.supabase/
+
+# Build artifacts
+*.tsbuildinfo
+
+# Large media files (opcjonalnie)
+# public/images/large/
+# *.mp4
+# *.webm
