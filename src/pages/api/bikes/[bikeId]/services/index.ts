@@ -177,31 +177,16 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
 
     const validatedBody = validationResult.data;
 
-    // Execute business logic - simplified without service layer for now
-    // const serviceRecordService = new ServiceRecordService();
-    // const result = await serviceRecordService.createService(
-    //   locals.userId,
-    //   bikeId,
-    //   validatedBody
-    // );
-
-    // Mock successful creation response for now
-    const mockResult = {
-      id: "550e8400-e29b-41d4-a716-446655440999",
-      bike_id: bikeId,
-      service_date: validatedBody.service_date,
-      mileage_at_service: validatedBody.mileage_at_service,
-      service_type: validatedBody.service_type,
-      service_location: validatedBody.service_location || null,
-      cost: validatedBody.cost || null,
-      currency: validatedBody.cost ? "PLN" : null,
-      notes: validatedBody.notes || null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    // Execute business logic
+    const serviceRecordService = new ServiceRecordService();
+    const result = await serviceRecordService.createService(
+      locals.userId,
+      bikeId,
+      validatedBody
+    );
 
     // Return successful response
-    return new Response(JSON.stringify(mockResult), {
+    return new Response(JSON.stringify(result), {
       status: 201,
       headers: {
         'Content-Type': 'application/json',

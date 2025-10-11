@@ -309,7 +309,7 @@ export interface FeedbackDTO {
  * Excludes auto-generated fields (id, timestamps)
  */
 export interface CreateFeedbackCommand {
-  location_id: string;
+  location_id?: string;
   temperature: number;
   feels_like: number;
   wind_speed: number;

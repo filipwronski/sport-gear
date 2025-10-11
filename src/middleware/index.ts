@@ -1,6 +1,35 @@
 import { defineMiddleware } from "astro:middleware";
 
 import { supabaseClient } from "../db/supabase.client";
+import { validateEnvironmentVariables, logEnvironmentValidation, getEnvironmentInfo } from "../lib/utils/env-validator";
+
+// Environment validation on startup (only run once)
+let envValidated = false;
+if (!envValidated) {
+  const validationResult = validateEnvironmentVariables();
+  logEnvironmentValidation(validationResult);
+  
+  if (!validationResult.isValid) {
+    console.error('\n🚨 Application startup failed due to environment configuration errors');
+    console.error('Please fix the environment variables and restart the application.\n');
+    
+    // In development, show current config for debugging
+    if (import.meta.env.DEV) {
+      console.log('📊 Current environment configuration:');
+      const envInfo = getEnvironmentInfo();
+      Object.entries(envInfo).forEach(([key, value]) => {
+        console.log(`   ${key}: ${value}`);
+      });
+    }
+    
+    // Don't crash in development, but log errors clearly
+    if (!import.meta.env.DEV) {
+      process.exit(1);
+    }
+  }
+  
+  envValidated = true;
+}
 
 /**
  * Astro middleware for authentication and Supabase client injection

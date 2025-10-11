@@ -1,7 +1,16 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
+import { BikeReminderService } from '../../../../services/bike-reminder.service';
 import { ReminderValidator } from '../../../../lib/validation/reminder.validator';
 import type { CreateReminderCommand, GetRemindersParams } from '../../../../types';
+
+// Initialize service client (bypasses RLS in development)
+const supabaseServiceClient = createClient(
+  import.meta.env.SUPABASE_URL,
+  import.meta.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+const bikeReminderService = new BikeReminderService(supabaseServiceClient);
 
 /**
  * GET /api/bikes/{bikeId}/reminders

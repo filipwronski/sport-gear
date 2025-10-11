@@ -31,7 +31,7 @@ export class FeedbackValidator {
     const validated: GetFeedbacksParams = {};
 
     // Validate limit (1-30, default 30)
-    if (params.limit !== undefined) {
+    if (params.limit !== undefined && params.limit !== null && params.limit !== '') {
       const limit = parseInt(params.limit, 10);
       if (isNaN(limit) || limit < 1 || limit > 30) {
         throw new ValidationError('Limit must be between 1 and 30');
@@ -40,7 +40,7 @@ export class FeedbackValidator {
     }
 
     // Validate offset (>= 0, default 0)
-    if (params.offset !== undefined) {
+    if (params.offset !== undefined && params.offset !== null && params.offset !== '') {
       const offset = parseInt(params.offset, 10);
       if (isNaN(offset) || offset < 0) {
         throw new ValidationError('Offset must be >= 0');
@@ -49,7 +49,7 @@ export class FeedbackValidator {
     }
 
     // Validate activity_type
-    if (params.activity_type !== undefined) {
+    if (params.activity_type !== undefined && params.activity_type !== null && params.activity_type !== '') {
       const validActivityTypes: ActivityTypeEnum[] = ['recovery', 'spokojna', 'tempo', 'interwaly'];
       if (!validActivityTypes.includes(params.activity_type)) {
         throw new ValidationError(
@@ -60,7 +60,7 @@ export class FeedbackValidator {
     }
 
     // Validate rating (1-5)
-    if (params.rating !== undefined) {
+    if (params.rating !== undefined && params.rating !== null && params.rating !== '') {
       const rating = parseInt(params.rating, 10);
       if (isNaN(rating) || rating < 1 || rating > 5) {
         throw new ValidationError('Rating must be between 1 and 5');
@@ -69,7 +69,7 @@ export class FeedbackValidator {
     }
 
     // Validate sort
-    if (params.sort !== undefined) {
+    if (params.sort !== undefined && params.sort !== null && params.sort !== '') {
       const validSorts = ['created_at_asc', 'created_at_desc', 'rating_asc', 'rating_desc'];
       if (!validSorts.includes(params.sort)) {
         throw new ValidationError(`Sort must be one of: ${validSorts.join(', ')}`);
@@ -86,9 +86,11 @@ export class FeedbackValidator {
   static validateCreateFeedbackCommand(command: any): CreateFeedbackCommand {
     const errors: Record<string, string> = {};
 
-    // Validate required fields
-    if (!command.location_id || typeof command.location_id !== 'string') {
-      errors.location_id = 'Location ID is required and must be a valid UUID string';
+    // Validate location_id (optional)
+    if (command.location_id !== undefined && command.location_id !== null && command.location_id !== '') {
+      if (typeof command.location_id !== 'string') {
+        errors.location_id = 'Location ID must be a valid UUID string';
+      }
     }
 
     // Validate temperature (-50 to 50)

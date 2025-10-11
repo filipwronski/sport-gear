@@ -1,4 +1,9 @@
 import type { APIRoute } from 'astro';
+import { FeedbackService } from '../../../services/feedback.service';
+import { FeedbackValidator } from '../../../lib/validation/feedback.validator';
+import { supabaseServiceClient } from '../../../db/supabase.admin.client';
+import { ValidationError, NotFoundError, DatabaseError } from '../../../lib/errors';
+import type { FeedbacksListDTO, FeedbackDTO } from '../../../types';
 
 /**
  * GET /api/feedbacks - Retrieve user's feedback history with filtering and pagination
@@ -17,12 +22,43 @@ export const GET: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // For now, return empty list
-    return new Response(JSON.stringify({
-      feedbacks: [],
-      total: 0,
-      has_more: false
-    }), {
+    // Parse and validate query parameters
+    const url = new URL(request.url);
+    const rawParams = {
+      limit: url.searchParams.get('limit'),
+      offset: url.searchParams.get('offset'),
+      activity_type: url.searchParams.get('activity_type'),
+      rating: url.searchParams.get('rating'),
+      sort: url.searchParams.get('sort')
+    };
+
+    let validatedParams;
+    try {
+      validatedParams = FeedbackValidator.validateGetFeedbacksParams(rawParams);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return new Response(JSON.stringify({
+          error: { 
+            code: 'VALIDATION_ERROR', 
+            message: error.message,
+            details: error.details 
+          }
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      throw error;
+    }
+
+    // Use FeedbackService to get user feedbacks
+    const feedbackService = new FeedbackService(
+      import.meta.env.DEV ? supabaseServiceClient : locals.supabase
+    );
+    
+    const result: FeedbacksListDTO = await feedbackService.getUserFeedbacks(userId, validatedParams);
+
+    return new Response(JSON.stringify(result), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -64,15 +100,52 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    // For now, return mock response
-    return new Response(JSON.stringify({
-      id: '550e8400-e29b-41d4-a716-446655440001',
-      message: 'Feedback would be created here',
-      received_data: body
-    }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Validate request body
+    let validatedCommand;
+    try {
+      validatedCommand = FeedbackValidator.validateCreateFeedbackCommand(body);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        return new Response(JSON.stringify({
+          error: { 
+            code: 'VALIDATION_ERROR', 
+            message: error.message,
+            details: error.details 
+          }
+        }), {
+          status: 422,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      throw error;
+    }
+
+    // Use FeedbackService to create feedback
+    const feedbackService = new FeedbackService(
+      import.meta.env.DEV ? supabaseServiceClient : locals.supabase
+    );
+    
+    try {
+      const result: FeedbackDTO = await feedbackService.createFeedback(userId, validatedCommand);
+
+      return new Response(JSON.stringify(result), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        return new Response(JSON.stringify({
+          error: { 
+            code: 'LOCATION_NOT_FOUND', 
+            message: 'The specified location_id does not exist or does not belong to you' 
+          }
+        }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      throw error;
+    }
 
   } catch (error) {
     console.error('POST /api/feedbacks error:', error);

@@ -71,10 +71,12 @@ export class FeedbackService {
     command: CreateFeedbackCommand
   ): Promise<FeedbackDTO> {
     try {
-      // Verify location belongs to user
-      const locationExists = await this.verifyLocationOwnership(userId, command.location_id);
-      if (!locationExists) {
-        throw new NotFoundError('Location not found or does not belong to you');
+      // Verify location belongs to user (only if location_id is provided)
+      if (command.location_id) {
+        const locationExists = await this.verifyLocationOwnership(userId, command.location_id);
+        if (!locationExists) {
+          throw new NotFoundError('Location not found or does not belong to you');
+        }
       }
 
       // Insert feedback
@@ -82,7 +84,7 @@ export class FeedbackService {
         .from('outfit_feedbacks')
         .insert({
           user_id: userId,
-          location_id: command.location_id,
+          location_id: command.location_id || null,
           temperature: command.temperature,
           feels_like: command.feels_like,
           wind_speed: command.wind_speed,
