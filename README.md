@@ -25,7 +25,7 @@ CycleGear helps road cyclists make confident decisions about what to wear before
 - Real-time weather data integration from OpenWeather API
 - Personalized thermal profile based on user feedback
 - Interactive SVG cyclist visualization showing recommended layers
-- 7-day weather forecast with quick outfit suggestions
+- **7-day weather forecast with quick outfit suggestions** ✨ NEW
 - History of proven outfits for similar conditions
 
 #### 👥 Local Community
@@ -268,6 +268,48 @@ pnpm preview
 - Affiliate marketplace
 - Route weather predictions
 - Advanced AI coaching
+
+## API Endpoints
+
+### Weather Forecast API ✨ NEW
+
+Get 7-day weather forecast with quick outfit recommendations for user locations.
+
+```bash
+GET /api/weather/forecast?location_id={uuid}
+Authorization: Bearer {jwt_token}
+```
+
+**Features:**
+- 6-hour cache for optimal performance
+- PostGIS coordinate extraction
+- Rule-based outfit recommendations
+- Comprehensive error handling
+- OpenWeather API integration
+
+**Response:**
+```json
+{
+  "forecast": [
+    {
+      "date": "2025-10-11",
+      "temperature_min": 5,
+      "temperature_max": 15,
+      "wind_speed": 10,
+      "rain_mm": 2.5,
+      "description": "light rain", 
+      "quick_recommendation": "Long sleeves, rain jacket recommended"
+    }
+    // ... 6 more days
+  ]
+}
+```
+
+**Documentation:** See `WEATHER_FORECAST_IMPLEMENTATION.md` for detailed implementation guide.
+
+### Other API Endpoints
+
+Additional API endpoints for locations, bikes, services, and community features are available. Full API documentation coming soon.
 
 ## License
 

@@ -1016,7 +1016,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    - Connection pool usage: < 70%
 
 **Narzędzia:**
-- Sentry: Error tracking + performance monitoring
 - Supabase Dashboard: Database metrics
 - Cloudflare Analytics: Request stats
 
@@ -1722,8 +1721,8 @@ console.error('[BikeAPI] Error creating bike', {
 3. ✅ **Security**: RLS policies + JWT auth + input validation
 4. ✅ **Performance**: Single query with JOINs, no N+1
 5. ✅ **Error Handling**: Centralized error handler z proper status codes
-6. ✅ **Testing**: Unit + Integration + E2E coverage
-7. ✅ **Monitoring**: Sentry + structured logging
+6. ✅ **Testing**: Unit 
+7. ✅ **Monitoring**: structured logging
 
 ### Szacowany czas implementacji:
 

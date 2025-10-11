@@ -1,46 +1,59 @@
-import type { Database } from './db/database.types';
+import type { Database } from "./db/database.types";
 
 // ============================================================================
 // Database Table Types - Shortcuts
 // ============================================================================
 
-type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
-type LocationRow = Database['public']['Tables']['user_locations']['Row'];
-type LocationInsert = Database['public']['Tables']['user_locations']['Insert'];
-type BikeRow = Database['public']['Tables']['bikes']['Row'];
-type BikeInsert = Database['public']['Tables']['bikes']['Insert'];
-type ServiceRecordRow = Database['public']['Tables']['service_records']['Row'];
-type ServiceRecordInsert = Database['public']['Tables']['service_records']['Insert'];
-type ServiceReminderRow = Database['public']['Tables']['service_reminders']['Row'];
-type ServiceReminderInsert = Database['public']['Tables']['service_reminders']['Insert'];
-type FeedbackRow = Database['public']['Tables']['outfit_feedbacks']['Row'];
-type FeedbackInsert = Database['public']['Tables']['outfit_feedbacks']['Insert'];
-type SharedOutfitRow = Database['public']['Tables']['shared_outfits']['Row'];
-type DefaultIntervalRow = Database['public']['Tables']['default_service_intervals']['Row'];
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
+type LocationRow = Database["public"]["Tables"]["user_locations"]["Row"];
+type LocationInsert = Database["public"]["Tables"]["user_locations"]["Insert"];
+type BikeRow = Database["public"]["Tables"]["bikes"]["Row"];
+type BikeInsert = Database["public"]["Tables"]["bikes"]["Insert"];
+type ServiceRecordRow = Database["public"]["Tables"]["service_records"]["Row"];
+type ServiceRecordInsert =
+  Database["public"]["Tables"]["service_records"]["Insert"];
+type ServiceReminderRow =
+  Database["public"]["Tables"]["service_reminders"]["Row"];
+type ServiceReminderInsert =
+  Database["public"]["Tables"]["service_reminders"]["Insert"];
+type FeedbackRow = Database["public"]["Tables"]["outfit_feedbacks"]["Row"];
+type FeedbackInsert =
+  Database["public"]["Tables"]["outfit_feedbacks"]["Insert"];
+type SharedOutfitRow = Database["public"]["Tables"]["shared_outfits"]["Row"];
+type DefaultIntervalRow =
+  Database["public"]["Tables"]["default_service_intervals"]["Row"];
 
 // ============================================================================
 // Enums
 // ============================================================================
 
-export type BikeTypeEnum = 'szosowy' | 'gravelowy' | 'mtb' | 'czasowy';
-export type BikeStatusEnum = 'active' | 'archived' | 'sold';
+export type BikeTypeEnum = "szosowy" | "gravelowy" | "mtb" | "czasowy";
+export type BikeStatusEnum = "active" | "archived" | "sold";
 export type ServiceTypeEnum =
-  | 'lancuch'
-  | 'kaseta'
-  | 'klocki_przod'
-  | 'klocki_tyl'
-  | 'opony'
-  | 'przerzutki'
-  | 'hamulce'
-  | 'przeglad_ogolny'
-  | 'inne';
-export type ServiceLocationEnum = 'warsztat' | 'samodzielnie';
-export type ActivityTypeEnum = 'recovery' | 'spokojna' | 'tempo' | 'interwaly';
-export type ThermalFeelingEnum = 'marzlak' | 'neutralnie' | 'szybko_mi_goraco';
-export type ReputationBadgeEnum = 'nowicjusz' | 'regularny' | 'ekspert' | 'mistrz';
-export type UnitsEnum = 'metric' | 'imperial';
-export type ReminderStatusEnum = 'active' | 'completed' | 'overdue' | 'upcoming';
+  | "lancuch"
+  | "kaseta"
+  | "klocki_przod"
+  | "klocki_tyl"
+  | "opony"
+  | "przerzutki"
+  | "hamulce"
+  | "przeglad_ogolny"
+  | "inne";
+export type ServiceLocationEnum = "warsztat" | "samodzielnie";
+export type ActivityTypeEnum = "recovery" | "spokojna" | "tempo" | "interwaly";
+export type ThermalFeelingEnum = "marzlak" | "neutralnie" | "szybko_mi_goraco";
+export type ReputationBadgeEnum =
+  | "nowicjusz"
+  | "regularny"
+  | "ekspert"
+  | "mistrz";
+export type UnitsEnum = "metric" | "imperial";
+export type ReminderStatusEnum =
+  | "active"
+  | "completed"
+  | "overdue"
+  | "upcoming";
 
 // ============================================================================
 // Nested Object Types
@@ -255,6 +268,13 @@ export interface ForecastDayDTO {
  */
 export interface ForecastDTO {
   forecast: ForecastDayDTO[];
+}
+
+/**
+ * Query parameters for GET /api/weather/forecast
+ */
+export interface GetForecastParams {
+  location_id: string;
 }
 
 // ============================================================================
@@ -665,6 +685,22 @@ export interface DashboardDTO {
 }
 
 // ============================================================================
+// API Error Response Types
+// ============================================================================
+
+/**
+ * Standard API error response format
+ * Used across all endpoints for consistent error handling
+ */
+export interface ApiErrorResponse {
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, string[]>; // dla błędów walidacji
+  };
+}
+
+// ============================================================================
 // API Query Parameters Types
 // ============================================================================
 
@@ -686,7 +722,7 @@ export interface GetFeedbacksParams {
   offset?: number;
   activity_type?: ActivityTypeEnum;
   rating?: number;
-  sort?: 'created_at_asc' | 'created_at_desc' | 'rating_asc' | 'rating_desc';
+  sort?: "created_at_asc" | "created_at_desc" | "rating_asc" | "rating_desc";
 }
 
 /**
@@ -701,7 +737,7 @@ export interface GetCommunityOutfitsParams {
   min_rating?: number;
   reputation_filter?: ReputationBadgeEnum;
   time_range?: number;
-  sort?: 'reputation' | 'distance' | 'created_at' | 'rating';
+  sort?: "reputation" | "distance" | "created_at" | "rating";
   limit?: number;
   offset?: number;
 }
@@ -725,19 +761,19 @@ export interface GetServicesParams {
   from_date?: string;
   to_date?: string;
   sort?:
-    | 'service_date_asc'
-    | 'service_date_desc'
-    | 'mileage_asc'
-    | 'mileage_desc'
-    | 'cost_asc'
-    | 'cost_desc';
+    | "service_date_asc"
+    | "service_date_desc"
+    | "mileage_asc"
+    | "mileage_desc"
+    | "cost_asc"
+    | "cost_desc";
 }
 
 /**
  * Query parameters for GET /api/bikes/{bikeId}/services/stats
  */
 export interface GetServiceStatsParams {
-  period?: 'month' | 'quarter' | 'year' | 'all';
+  period?: "month" | "quarter" | "year" | "all";
   from_date?: string;
   to_date?: string;
 }
@@ -746,8 +782,11 @@ export interface GetServiceStatsParams {
  * Query parameters for GET /api/bikes/{bikeId}/reminders
  */
 export interface GetRemindersParams {
-  status?: 'all' | 'active' | 'completed' | 'overdue';
+  status?: "all" | "active" | "completed" | "overdue";
   service_type?: ServiceTypeEnum;
-  sort?: 'km_remaining_asc' | 'km_remaining_desc' | 'created_at_asc' | 'created_at_desc';
+  sort?:
+    | "km_remaining_asc"
+    | "km_remaining_desc"
+    | "created_at_asc"
+    | "created_at_desc";
 }
-
