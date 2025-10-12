@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.SUPABASE_KEY;
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 const supabaseServiceKey = import.meta.env.SUPABASE_SERVICE_ROLE_KEY; // Service role key
 
 // Regular client for normal operations

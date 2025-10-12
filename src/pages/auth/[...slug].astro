@@ -1,0 +1,17 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AuthView from "../../components/auth/AuthView";
+
+const { slug } = Astro.params;
+const currentPath = slug ? `/auth/${slug}` : '/auth/login';
+
+// Redirect authenticated users to dashboard
+const token = Astro.cookies.get('sb-access-token')?.value;
+if (token) {
+  return Astro.redirect('/dashboard');
+}
+---
+
+<Layout title="CycleGear - Logowanie">
+  <AuthView client:load currentPath={currentPath} />
+</Layout>
