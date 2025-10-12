@@ -1,19 +1,19 @@
-import type { APIRoute } from 'astro';
-import { WeatherService } from '../../../services/weather.service';
-import { validateForecastParams } from '../../../lib/validation/weather.schemas';
-import { 
+import type { APIRoute } from "astro";
+import { WeatherService } from "../../../services/weather.service";
+import { validateForecastParams } from "../../../lib/validation/weather.schemas";
+import {
   ValidationError,
   UnauthorizedError,
   NotFoundError,
   RateLimitError,
   ServiceUnavailableError,
   InternalServerError,
-  ApiError
-} from '../../../lib/errors';
-import { 
-  createErrorResponse, 
-  createSuccessResponse 
-} from '../../../lib/utils/response.utils';
+  ApiError,
+} from "../../../lib/errors";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+} from "../../../lib/utils/response.utils";
 
 /**
  * GET /api/weather/forecast
@@ -37,17 +37,21 @@ export const GET: APIRoute = async ({ url, locals }) => {
     // Step 1: Authentication check (handled by middleware)
     const userId = locals.userId;
     if (!userId) {
-      return createErrorResponse('UNAUTHORIZED', 'Authentication required', 401);
+      return createErrorResponse(
+        "UNAUTHORIZED",
+        "Authentication required",
+        401,
+      );
     }
 
     // Step 2: Validate query parameters
-    const locationId = url.searchParams.get('location_id');
+    const locationId = url.searchParams.get("location_id");
     if (!locationId) {
       return createErrorResponse(
-        'VALIDATION_ERROR',
-        'Missing required parameter: location_id',
+        "VALIDATION_ERROR",
+        "Missing required parameter: location_id",
         400,
-        [{ field: 'location_id', message: 'location_id is required' }]
+        [{ field: "location_id", message: "location_id is required" }],
       );
     }
 
@@ -57,10 +61,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
     } catch (error) {
       if (error instanceof ValidationError) {
         return createErrorResponse(
-          'VALIDATION_ERROR',
+          "VALIDATION_ERROR",
           error.message,
           400,
-          error.validationDetails
+          error.validationDetails,
         );
       }
       throw error;
@@ -69,11 +73,11 @@ export const GET: APIRoute = async ({ url, locals }) => {
     // Step 3: Check for OpenWeather API key
     const apiKey = import.meta.env.OPENWEATHER_API_KEY;
     if (!apiKey) {
-      console.error('[GET /api/weather/forecast] Missing OPENWEATHER_API_KEY');
+      console.error("[GET /api/weather/forecast] Missing OPENWEATHER_API_KEY");
       return createErrorResponse(
-        'INTERNAL_ERROR',
-        'Weather service configuration error',
-        500
+        "INTERNAL_ERROR",
+        "Weather service configuration error",
+        500,
       );
     }
 
@@ -81,12 +85,11 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const weatherService = new WeatherService(locals.supabase, apiKey);
     const forecast = await weatherService.getForecastByLocation(
       validatedParams.location_id,
-      userId
+      userId,
     );
 
     // Step 5: Return successful response
     return createSuccessResponse(forecast);
-
   } catch (error) {
     // Step 6: Handle known errors with appropriate HTTP status codes
     if (error instanceof ApiError) {
@@ -94,52 +97,46 @@ export const GET: APIRoute = async ({ url, locals }) => {
         error.code,
         error.message,
         error.statusCode,
-        error.details ? Object.entries(error.details).map(([field, messages]) => ({
-          field,
-          message: Array.isArray(messages) ? messages.join(', ') : messages
-        })) : undefined
+        error.details
+          ? Object.entries(error.details).map(([field, messages]) => ({
+              field,
+              message: Array.isArray(messages) ? messages.join(", ") : messages,
+            }))
+          : undefined,
       );
     }
 
     // Handle legacy error types (for backward compatibility)
     if (error instanceof ValidationError) {
       return createErrorResponse(
-        'VALIDATION_ERROR',
+        "VALIDATION_ERROR",
         error.message,
         400,
-        error.validationDetails
+        error.validationDetails,
       );
     }
 
     if (error instanceof NotFoundError) {
-      return createErrorResponse(
-        'NOT_FOUND',
-        error.message,
-        404
-      );
+      return createErrorResponse("NOT_FOUND", error.message, 404);
     }
 
     if (error instanceof UnauthorizedError) {
-      return createErrorResponse(
-        'UNAUTHORIZED',
-        error.message,
-        401
-      );
+      return createErrorResponse("UNAUTHORIZED", error.message, 401);
     }
 
     // Step 7: Handle unexpected errors
-    console.error('[GET /api/weather/forecast] Unexpected error:', {
+    console.error("[GET /api/weather/forecast] Unexpected error:", {
       error: error.message,
       stack: error.stack,
       userId,
-      locationId: url.searchParams.get('location_id'),
-      timestamp: new Date().toISOString()
+      locationId: url.searchParams.get("location_id"),
+      timestamp: new Date().toISOString(),
     });
 
     return createErrorResponse(
-      'INTERNAL_ERROR',
-      'An unexpected error occurred while fetching weather forecast',
-      500
+      "INTERNAL_ERROR",
+      "An unexpected error occurred while fetching weather forecast",
+      500,
     );
   }
 };
@@ -150,13 +147,13 @@ export const GET: APIRoute = async ({ url, locals }) => {
  */
 const unsupportedMethod = (method: string): Response => {
   return createErrorResponse(
-    'METHOD_NOT_ALLOWED',
+    "METHOD_NOT_ALLOWED",
     `Method ${method} not allowed. Only GET is supported.`,
-    405
+    405,
   );
 };
 
-export const POST: APIRoute = () => unsupportedMethod('POST');
-export const PUT: APIRoute = () => unsupportedMethod('PUT');
-export const DELETE: APIRoute = () => unsupportedMethod('DELETE');
-export const PATCH: APIRoute = () => unsupportedMethod('PATCH');
+export const POST: APIRoute = () => unsupportedMethod("POST");
+export const PUT: APIRoute = () => unsupportedMethod("PUT");
+export const DELETE: APIRoute = () => unsupportedMethod("DELETE");
+export const PATCH: APIRoute = () => unsupportedMethod("PATCH");

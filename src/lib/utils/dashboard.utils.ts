@@ -6,7 +6,8 @@
 /**
  * UUID validation regex pattern
  */
-const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Validates if a string is a valid UUID
@@ -24,16 +25,16 @@ export function isValidUUID(value: string): boolean {
  */
 export function validateDashboardQuery(query: any): string[] {
   const errors: string[] = [];
-  
+
   // location_id (optional)
   if (query.location_id !== undefined) {
-    if (typeof query.location_id !== 'string') {
-      errors.push('location_id must be a string');
+    if (typeof query.location_id !== "string") {
+      errors.push("location_id must be a string");
     } else if (!isValidUUID(query.location_id)) {
-      errors.push('location_id must be a valid UUID');
+      errors.push("location_id must be a valid UUID");
     }
   }
-  
+
   return errors;
 }
 

@@ -22,7 +22,7 @@ export class ServiceRecordService {
       return {
         services: data || [],
         total: data?.length || 0,
-        has_more: false
+        has_more: false,
       };
     } catch (error) {
       console.error("[ServiceRecordService] Error:", error);

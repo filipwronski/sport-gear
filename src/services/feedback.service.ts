@@ -1,12 +1,12 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '../db/database.types';
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../db/database.types";
 import type {
   FeedbackDTO,
   FeedbacksListDTO,
   CreateFeedbackCommand,
   GetFeedbacksParams,
-} from '../types';
-import { DatabaseError, NotFoundError, ValidationError } from '../lib/errors';
+} from "../types";
+import { DatabaseError, NotFoundError, ValidationError } from "../lib/errors";
 
 /**
  * Service for managing outfit feedback operations
@@ -20,26 +20,28 @@ export class FeedbackService {
    */
   async getUserFeedbacks(
     userId: string,
-    params: GetFeedbacksParams
+    params: GetFeedbacksParams,
   ): Promise<FeedbacksListDTO> {
     try {
       // Build base query with count
       let query = this.supabase
-        .from('outfit_feedbacks')
-        .select('*', { count: 'exact' })
-        .eq('user_id', userId);
+        .from("outfit_feedbacks")
+        .select("*", { count: "exact" })
+        .eq("user_id", userId);
 
       // Apply filters
       if (params.activity_type) {
-        query = query.eq('activity_type', params.activity_type);
+        query = query.eq("activity_type", params.activity_type);
       }
       if (params.rating) {
-        query = query.eq('overall_rating', params.rating);
+        query = query.eq("overall_rating", params.rating);
       }
 
       // Apply sorting
-      const [sortField, sortDirection] = this.parseSortParam(params.sort || 'created_at_desc');
-      query = query.order(sortField, { ascending: sortDirection === 'asc' });
+      const [sortField, sortDirection] = this.parseSortParam(
+        params.sort || "created_at_desc",
+      );
+      query = query.order(sortField, { ascending: sortDirection === "asc" });
 
       // Apply pagination
       const limit = Math.min(params.limit || 30, 30); // Enforce max 30
@@ -55,7 +57,7 @@ export class FeedbackService {
       return {
         feedbacks: (data || []).map(this.mapToFeedbackDTO),
         total: count || 0,
-        has_more: (offset + limit) < (count || 0),
+        has_more: offset + limit < (count || 0),
       };
     } catch (error) {
       if (error instanceof DatabaseError) throw error;
@@ -68,20 +70,25 @@ export class FeedbackService {
    */
   async createFeedback(
     userId: string,
-    command: CreateFeedbackCommand
+    command: CreateFeedbackCommand,
   ): Promise<FeedbackDTO> {
     try {
       // Verify location belongs to user (only if location_id is provided)
       if (command.location_id) {
-        const locationExists = await this.verifyLocationOwnership(userId, command.location_id);
+        const locationExists = await this.verifyLocationOwnership(
+          userId,
+          command.location_id,
+        );
         if (!locationExists) {
-          throw new NotFoundError('Location not found or does not belong to you');
+          throw new NotFoundError(
+            "Location not found or does not belong to you",
+          );
         }
       }
 
       // Insert feedback
       const { data, error } = await this.supabase
-        .from('outfit_feedbacks')
+        .from("outfit_feedbacks")
         .insert({
           user_id: userId,
           location_id: command.location_id || null,
@@ -110,7 +117,8 @@ export class FeedbackService {
 
       return this.mapToFeedbackDTO(data);
     } catch (error) {
-      if (error instanceof NotFoundError || error instanceof DatabaseError) throw error;
+      if (error instanceof NotFoundError || error instanceof DatabaseError)
+        throw error;
       throw new DatabaseError(`Unexpected error creating feedback: ${error}`);
     }
   }
@@ -122,23 +130,24 @@ export class FeedbackService {
     try {
       // Delete with RLS enforcement and count verification
       const { error, count } = await this.supabase
-        .from('outfit_feedbacks')
-        .delete({ count: 'exact' })
-        .eq('id', feedbackId)
-        .eq('user_id', userId); // Explicit ownership check
+        .from("outfit_feedbacks")
+        .delete({ count: "exact" })
+        .eq("id", feedbackId)
+        .eq("user_id", userId); // Explicit ownership check
 
       if (error) {
         throw new DatabaseError(`Failed to delete feedback: ${error.message}`);
       }
 
       if (count === 0) {
-        throw new NotFoundError('Feedback not found or does not belong to you');
+        throw new NotFoundError("Feedback not found or does not belong to you");
       }
 
       // Recalculate thermal adjustment after deletion
       await this.maybeRecalculateThermalAdjustment(userId);
     } catch (error) {
-      if (error instanceof NotFoundError || error instanceof DatabaseError) throw error;
+      if (error instanceof NotFoundError || error instanceof DatabaseError)
+        throw error;
       throw new DatabaseError(`Unexpected error deleting feedback: ${error}`);
     }
   }
@@ -146,12 +155,15 @@ export class FeedbackService {
   /**
    * Verifies that location belongs to the user
    */
-  private async verifyLocationOwnership(userId: string, locationId: string): Promise<boolean> {
+  private async verifyLocationOwnership(
+    userId: string,
+    locationId: string,
+  ): Promise<boolean> {
     const { data, error } = await this.supabase
-      .from('user_locations')
-      .select('id')
-      .eq('id', locationId)
-      .eq('user_id', userId)
+      .from("user_locations")
+      .select("id")
+      .eq("id", locationId)
+      .eq("user_id", userId)
       .single();
 
     if (error) return false;
@@ -164,16 +176,20 @@ export class FeedbackService {
    * via update_thermal_adjustment() trigger on profiles.feedback_count changes.
    * This method serves as a fallback and manual trigger.
    */
-  private async maybeRecalculateThermalAdjustment(userId: string): Promise<void> {
+  private async maybeRecalculateThermalAdjustment(
+    userId: string,
+  ): Promise<void> {
     try {
       // Get current feedback count
       const { count, error } = await this.supabase
-        .from('outfit_feedbacks')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId);
+        .from("outfit_feedbacks")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", userId);
 
       if (error) {
-        console.warn(`Failed to get feedback count for thermal adjustment: ${error.message}`);
+        console.warn(
+          `Failed to get feedback count for thermal adjustment: ${error.message}`,
+        );
         return;
       }
 
@@ -181,34 +197,38 @@ export class FeedbackService {
       // This will trigger the update_thermal_adjustment() function automatically
       if ((count || 0) >= 5) {
         const { error: updateError } = await this.supabase
-          .from('profiles')
+          .from("profiles")
           .update({ feedback_count: count })
-          .eq('id', userId);
+          .eq("id", userId);
 
         if (updateError) {
-          console.warn(`Failed to update feedback count: ${updateError.message}`);
+          console.warn(
+            `Failed to update feedback count: ${updateError.message}`,
+          );
         }
       }
     } catch (error) {
-      console.warn(`Unexpected error in thermal adjustment calculation: ${error}`);
+      console.warn(
+        `Unexpected error in thermal adjustment calculation: ${error}`,
+      );
     }
   }
 
   /**
    * Parses sort parameter into field and direction
    */
-  private parseSortParam(sort: string): [string, 'asc' | 'desc'] {
+  private parseSortParam(sort: string): [string, "asc" | "desc"] {
     switch (sort) {
-      case 'created_at_asc':
-        return ['created_at', 'asc'];
-      case 'created_at_desc':
-        return ['created_at', 'desc'];
-      case 'rating_asc':
-        return ['overall_rating', 'asc'];
-      case 'rating_desc':
-        return ['overall_rating', 'desc'];
+      case "created_at_asc":
+        return ["created_at", "asc"];
+      case "created_at_desc":
+        return ["created_at", "desc"];
+      case "rating_asc":
+        return ["overall_rating", "asc"];
+      case "rating_desc":
+        return ["overall_rating", "desc"];
       default:
-        return ['created_at', 'desc'];
+        return ["created_at", "desc"];
     }
   }
 

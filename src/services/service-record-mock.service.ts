@@ -7,7 +7,7 @@ export class ServiceRecordService {
     return {
       services: [],
       total: 0,
-      has_more: false
+      has_more: false,
     };
   }
 }

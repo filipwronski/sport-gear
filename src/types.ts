@@ -790,3 +790,95 @@ export interface GetRemindersParams {
     | "created_at_asc"
     | "created_at_desc";
 }
+
+// ============================================================================
+// Community ViewModels
+// ============================================================================
+
+/**
+ * Community filters state - extends GetCommunityOutfitsParams with defaults
+ */
+export interface CommunityFiltersState {
+  location_id: string;
+  radius_km: number; // default: 50
+  temperature?: number;
+  temperature_range: number; // default: 3
+  wind_speed?: number;
+  activity_type?: ActivityTypeEnum;
+  min_rating?: number; // 1-5
+  reputation_filter?: ReputationBadgeEnum[];
+  time_range: number; // default: 24 (hours)
+  sort: "reputation" | "distance" | "created_at" | "rating"; // default: "reputation"
+  limit: number; // default: 10
+  offset: number; // default: 0
+}
+
+/**
+ * Complete community view state
+ */
+export interface CommunityViewState {
+  filters: CommunityFiltersState;
+  outfits: CommunityOutfitDTO[];
+  total: number;
+  hasMore: boolean;
+  isLoading: boolean;
+  error: string | null;
+  selectedOutfitId: string | null;
+  selectedOutfit: CommunityOutfitDTO | null;
+}
+
+/**
+ * Configuration for reputation badge display
+ */
+export interface ReputationBadgeConfig {
+  badge: ReputationBadgeEnum;
+  label: string;
+  color: string; // Tailwind class
+  icon: string; // Lucide icon name
+  minFeedbacks: number;
+  maxFeedbacks: number | null;
+}
+
+/**
+ * Outfit item configuration for icons and labels
+ */
+export interface OutfitItemConfig {
+  value: string;
+  label: string;
+  icon: string; // Lucide icon name
+  category: "head" | "torso" | "arms" | "hands" | "legs" | "feet" | "neck";
+}
+
+/**
+ * Sort option configuration
+ */
+export interface SortOption {
+  value: "reputation" | "distance" | "created_at" | "rating";
+  label: string;
+  icon: string; // Lucide icon name
+}
+
+/**
+ * Default community filters state
+ */
+export const DEFAULT_COMMUNITY_FILTERS: Omit<
+  CommunityFiltersState,
+  "location_id"
+> = {
+  radius_km: 50,
+  temperature_range: 3,
+  time_range: 24, // 24 hours
+  sort: "reputation",
+  limit: 10,
+  offset: 0,
+};
+
+/**
+ * Sort options configuration
+ */
+export const SORT_OPTIONS: SortOption[] = [
+  { value: "reputation", label: "Według reputacji", icon: "Award" },
+  { value: "distance", label: "Według odległości", icon: "MapPin" },
+  { value: "created_at", label: "Według daty", icon: "Clock" },
+  { value: "rating", label: "Według oceny", icon: "Star" },
+];

@@ -2,7 +2,11 @@
  * Internal types for recommendation service
  */
 
-import type { ActivityTypeEnum, ThermalPreferences, OutfitDTO } from "../../types";
+import type {
+  ActivityTypeEnum,
+  ThermalPreferences,
+  OutfitDTO,
+} from "../../types";
 
 /**
  * Input data for outfit recommendation algorithm

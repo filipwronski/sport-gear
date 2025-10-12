@@ -1,16 +1,16 @@
-import type { APIRoute } from 'astro';
-import { LocationService } from '../../../services/location.service';
-import { LocationValidator } from '../../../lib/validation/location.validator';
+import type { APIRoute } from "astro";
+import { LocationService } from "../../../services/location.service";
+import { LocationValidator } from "../../../lib/validation/location.validator";
 import {
   ValidationError,
   ConflictError,
   NotFoundError,
-} from '../../../lib/errors';
+} from "../../../lib/errors";
 import {
   createErrorResponse,
   createSuccessResponse,
   createNoContentResponse,
-} from '../../../lib/utils/response.utils';
+} from "../../../lib/utils/response.utils";
 
 const locationService = new LocationService();
 
@@ -28,13 +28,21 @@ export const PUT: APIRoute = async ({ locals, params, request }) => {
   try {
     const userId = locals.userId;
     if (!userId) {
-      return createErrorResponse('UNAUTHORIZED', 'User ID not found in request context', 401);
+      return createErrorResponse(
+        "UNAUTHORIZED",
+        "User ID not found in request context",
+        401,
+      );
     }
 
     // Validate UUID path parameter
     const locationId = params.id;
     if (!locationId || !LocationValidator.validateUUID(locationId)) {
-      return createErrorResponse('BAD_REQUEST', 'Invalid location ID format', 400);
+      return createErrorResponse(
+        "BAD_REQUEST",
+        "Invalid location ID format",
+        400,
+      );
     }
 
     // Parse request body
@@ -42,7 +50,11 @@ export const PUT: APIRoute = async ({ locals, params, request }) => {
     try {
       body = await request.json();
     } catch (e) {
-      return createErrorResponse('BAD_REQUEST', 'Invalid JSON in request body', 400);
+      return createErrorResponse(
+        "BAD_REQUEST",
+        "Invalid JSON in request body",
+        400,
+      );
     }
 
     // Validate request body
@@ -52,10 +64,10 @@ export const PUT: APIRoute = async ({ locals, params, request }) => {
     } catch (error) {
       if (error instanceof ValidationError) {
         return createErrorResponse(
-          'VALIDATION_ERROR',
+          "VALIDATION_ERROR",
           error.message,
           422,
-          error.validationDetails
+          error.validationDetails,
         );
       }
       throw error;
@@ -65,29 +77,29 @@ export const PUT: APIRoute = async ({ locals, params, request }) => {
     const updatedLocation = await locationService.updateLocation(
       userId,
       locationId,
-      command
+      command,
     );
 
     return createSuccessResponse(updatedLocation);
   } catch (error) {
     if (error instanceof ValidationError) {
       return createErrorResponse(
-        'VALIDATION_ERROR',
+        "VALIDATION_ERROR",
         error.message,
         422,
-        error.validationDetails
+        error.validationDetails,
       );
     }
 
     if (error instanceof NotFoundError) {
-      return createErrorResponse('NOT_FOUND', error.message, 404);
+      return createErrorResponse("NOT_FOUND", error.message, 404);
     }
 
-    console.error('[PUT /api/locations/[id]] Error:', error);
+    console.error("[PUT /api/locations/[id]] Error:", error);
     return createErrorResponse(
-      'INTERNAL_ERROR',
-      'An unexpected error occurred while updating location',
-      500
+      "INTERNAL_ERROR",
+      "An unexpected error occurred while updating location",
+      500,
     );
   }
 };
@@ -105,13 +117,21 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
   try {
     const userId = locals.userId;
     if (!userId) {
-      return createErrorResponse('UNAUTHORIZED', 'User ID not found in request context', 401);
+      return createErrorResponse(
+        "UNAUTHORIZED",
+        "User ID not found in request context",
+        401,
+      );
     }
 
     // Validate UUID path parameter
     const locationId = params.id;
     if (!locationId || !LocationValidator.validateUUID(locationId)) {
-      return createErrorResponse('BAD_REQUEST', 'Invalid location ID format', 400);
+      return createErrorResponse(
+        "BAD_REQUEST",
+        "Invalid location ID format",
+        400,
+      );
     }
 
     // Delete location using service layer
@@ -120,18 +140,18 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
     return createNoContentResponse();
   } catch (error) {
     if (error instanceof ConflictError) {
-      return createErrorResponse('CONFLICT', error.message, 409);
+      return createErrorResponse("CONFLICT", error.message, 409);
     }
 
     if (error instanceof NotFoundError) {
-      return createErrorResponse('NOT_FOUND', error.message, 404);
+      return createErrorResponse("NOT_FOUND", error.message, 404);
     }
 
-    console.error('[DELETE /api/locations/[id]] Error:', error);
+    console.error("[DELETE /api/locations/[id]] Error:", error);
     return createErrorResponse(
-      'INTERNAL_ERROR',
-      'An unexpected error occurred while deleting location',
-      500
+      "INTERNAL_ERROR",
+      "An unexpected error occurred while deleting location",
+      500,
     );
   }
 };

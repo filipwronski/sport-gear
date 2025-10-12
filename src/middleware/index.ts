@@ -1,33 +1,41 @@
 import { defineMiddleware } from "astro:middleware";
 
 import { supabaseClient } from "../db/supabase.client";
-import { validateEnvironmentVariables, logEnvironmentValidation, getEnvironmentInfo } from "../lib/utils/env-validator";
+import {
+  validateEnvironmentVariables,
+  logEnvironmentValidation,
+  getEnvironmentInfo,
+} from "../lib/utils/env-validator";
 
 // Environment validation on startup (only run once)
 let envValidated = false;
 if (!envValidated) {
   const validationResult = validateEnvironmentVariables();
   logEnvironmentValidation(validationResult);
-  
+
   if (!validationResult.isValid) {
-    console.error('\n🚨 Application startup failed due to environment configuration errors');
-    console.error('Please fix the environment variables and restart the application.\n');
-    
+    console.error(
+      "\n🚨 Application startup failed due to environment configuration errors",
+    );
+    console.error(
+      "Please fix the environment variables and restart the application.\n",
+    );
+
     // In development, show current config for debugging
     if (import.meta.env.DEV) {
-      console.log('📊 Current environment configuration:');
+      console.log("📊 Current environment configuration:");
       const envInfo = getEnvironmentInfo();
       Object.entries(envInfo).forEach(([key, value]) => {
         console.log(`   ${key}: ${value}`);
       });
     }
-    
+
     // Don't crash in development, but log errors clearly
     if (!import.meta.env.DEV) {
       process.exit(1);
     }
   }
-  
+
   envValidated = true;
 }
 
@@ -77,20 +85,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // Development mode: accept mock tokens for testing
-  const isDevelopment = import.meta.env.MODE === 'development' || import.meta.env.DEV;
-  
+  const isDevelopment =
+    import.meta.env.MODE === "development" || import.meta.env.DEV;
+
   if (isDevelopment) {
     // Accept specific mock tokens for testing
     const mockTokens = [
-      'test-token',
-      'mock-jwt-token',
-      'dev-token',
-      'curl-test-token'
+      "test-token",
+      "mock-jwt-token",
+      "dev-token",
+      "curl-test-token",
     ];
-    
+
     if (mockTokens.includes(token)) {
       // Use mock user ID for testing (valid UUID format)
-      locals.userId = '550e8400-e29b-41d4-a716-446655440000';
+      locals.userId = "550e8400-e29b-41d4-a716-446655440000";
       console.log(`[Middleware] Mock auth successful for token: ${token}`);
       return next();
     }

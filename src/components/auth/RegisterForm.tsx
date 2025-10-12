@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Eye, EyeOff, Mail, Lock, CheckCircle, XCircle } from 'lucide-react';
-import { useAuth, type RegisterFormData } from './useAuth';
-import GoogleAuthButton from './GoogleAuthButton';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Eye, EyeOff, Mail, Lock, CheckCircle, XCircle } from "lucide-react";
+import { useAuth, type RegisterFormData } from "./useAuth";
+import GoogleAuthButton from "./GoogleAuthButton";
 
 export interface RegisterFormProps {
   onSuccess: () => void;
@@ -21,17 +21,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     handleSubmit,
     formState: { errors },
     watch,
-    reset,
   } = useForm<RegisterFormData>({
     defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
-  const password = watch('password');
-  const confirmPassword = watch('confirmPassword');
+  const password = watch("password");
+  const confirmPassword = watch("confirmPassword");
 
   // Password strength validation
   const getPasswordStrength = (password: string) => {
@@ -46,13 +45,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     return { requirements, score };
   };
 
-  const passwordStrength = getPasswordStrength(password || '');
+  const passwordStrength = getPasswordStrength(password || "");
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
       await registerUser(data);
       onSuccess();
-    } catch (error) {
+    } catch {
       // Error is handled by useAuth hook
     }
   };
@@ -88,11 +87,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             autoComplete="email"
             aria-describedby={errors.email ? "register-email-error" : undefined}
             aria-invalid={!!errors.email}
-            {...register('email', {
-              required: 'Email jest wymagany',
+            {...register("email", {
+              required: "Email jest wymagany",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Wprowadź prawidłowy adres email',
+                message: "Wprowadź prawidłowy adres email",
               },
             })}
           />
@@ -116,17 +115,20 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
             id="register-password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             placeholder="utwórz silne hasło"
             className="pl-10 pr-10"
-            {...register('password', {
-              required: 'Hasło jest wymagane',
+            {...register("password", {
+              required: "Hasło jest wymagane",
               validate: (value) => {
                 const { requirements } = getPasswordStrength(value);
-                if (!requirements.length) return 'Hasło musi mieć co najmniej 8 znaków';
-                if (!requirements.uppercase) return 'Hasło musi zawierać wielką literę';
-                if (!requirements.lowercase) return 'Hasło musi zawierać małą literę';
-                if (!requirements.number) return 'Hasło musi zawierać cyfrę';
+                if (!requirements.length)
+                  return "Hasło musi mieć co najmniej 8 znaków";
+                if (!requirements.uppercase)
+                  return "Hasło musi zawierać wielką literę";
+                if (!requirements.lowercase)
+                  return "Hasło musi zawierać małą literę";
+                if (!requirements.number) return "Hasło musi zawierać cyfrę";
                 return true;
               },
             })}
@@ -135,7 +137,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             type="button"
             onClick={togglePasswordVisibility}
             className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-            aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
+            aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -156,23 +158,23 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                 <div
                   className={`h-2 rounded-full transition-all ${
                     passwordStrength.score === 4
-                      ? 'bg-green-500 w-full'
+                      ? "bg-green-500 w-full"
                       : passwordStrength.score === 3
-                      ? 'bg-yellow-500 w-3/4'
-                      : passwordStrength.score === 2
-                      ? 'bg-orange-500 w-1/2'
-                      : 'bg-red-500 w-1/4'
+                        ? "bg-yellow-500 w-3/4"
+                        : passwordStrength.score === 2
+                          ? "bg-orange-500 w-1/2"
+                          : "bg-red-500 w-1/4"
                   }`}
                 />
               </div>
               <span className="text-xs text-gray-500">
                 {passwordStrength.score === 4
-                  ? 'Silne'
+                  ? "Silne"
                   : passwordStrength.score === 3
-                  ? 'Średnie'
-                  : passwordStrength.score === 2
-                  ? 'Słabe'
-                  : 'Bardzo słabe'}
+                    ? "Średnie"
+                    : passwordStrength.score === 2
+                      ? "Słabe"
+                      : "Bardzo słabe"}
               </span>
             </div>
             <div className="text-xs space-y-1">
@@ -182,7 +184,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                 ) : (
                   <XCircle className="h-3 w-3 text-red-500" />
                 )}
-                <span className={passwordStrength.requirements.length ? 'text-green-600' : 'text-red-600'}>
+                <span
+                  className={
+                    passwordStrength.requirements.length
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
                   Co najmniej 8 znaków
                 </span>
               </div>
@@ -192,7 +200,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                 ) : (
                   <XCircle className="h-3 w-3 text-red-500" />
                 )}
-                <span className={passwordStrength.requirements.uppercase ? 'text-green-600' : 'text-red-600'}>
+                <span
+                  className={
+                    passwordStrength.requirements.uppercase
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
                   Wielka litera
                 </span>
               </div>
@@ -202,7 +216,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                 ) : (
                   <XCircle className="h-3 w-3 text-red-500" />
                 )}
-                <span className={passwordStrength.requirements.lowercase ? 'text-green-600' : 'text-red-600'}>
+                <span
+                  className={
+                    passwordStrength.requirements.lowercase
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
                   Mała litera
                 </span>
               </div>
@@ -212,7 +232,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                 ) : (
                   <XCircle className="h-3 w-3 text-red-500" />
                 )}
-                <span className={passwordStrength.requirements.number ? 'text-green-600' : 'text-red-600'}>
+                <span
+                  className={
+                    passwordStrength.requirements.number
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
                   Cyfra
                 </span>
               </div>
@@ -228,14 +254,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
             id="confirm-password"
-            type={showConfirmPassword ? 'text' : 'password'}
+            type={showConfirmPassword ? "text" : "password"}
             placeholder="powtórz hasło"
             className="pl-10 pr-10"
-            {...register('confirmPassword', {
-              required: 'Potwierdzenie hasła jest wymagane',
+            {...register("confirmPassword", {
+              required: "Potwierdzenie hasła jest wymagane",
               validate: (value) => {
                 if (value !== password) {
-                  return 'Hasła muszą być identyczne';
+                  return "Hasła muszą być identyczne";
                 }
                 return true;
               },
@@ -245,7 +271,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             type="button"
             onClick={toggleConfirmPasswordVisibility}
             className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-            aria-label={showConfirmPassword ? 'Ukryj potwierdzenie hasła' : 'Pokaż potwierdzenie hasła'}
+            aria-label={
+              showConfirmPassword
+                ? "Ukryj potwierdzenie hasła"
+                : "Pokaż potwierdzenie hasła"
+            }
           >
             {showConfirmPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -255,24 +285,33 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           </button>
         </div>
         {errors.confirmPassword && (
-          <p className="text-sm text-red-600">{errors.confirmPassword.message}</p>
+          <p className="text-sm text-red-600">
+            {errors.confirmPassword.message}
+          </p>
         )}
         {confirmPassword && password && confirmPassword !== password && (
           <p className="text-sm text-red-600">Hasła muszą być identyczne</p>
         )}
-        {confirmPassword && password && confirmPassword === password && confirmPassword.length > 0 && (
-          <div className="flex items-center space-x-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <p className="text-sm text-green-600">Hasła są identyczne</p>
-          </div>
-        )}
+        {confirmPassword &&
+          password &&
+          confirmPassword === password &&
+          confirmPassword.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <p className="text-sm text-green-600">Hasła są identyczne</p>
+            </div>
+          )}
       </div>
 
       {/* Register Button */}
       <Button
         type="submit"
         className="w-full"
-        disabled={authState.isLoading || passwordStrength.score < 4 || password !== confirmPassword}
+        disabled={
+          authState.isLoading ||
+          passwordStrength.score < 4 ||
+          password !== confirmPassword
+        }
       >
         {authState.isLoading ? (
           <div className="flex items-center space-x-2">
@@ -280,7 +319,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             <span>Rejestracja...</span>
           </div>
         ) : (
-          'Zarejestruj się'
+          "Zarejestruj się"
         )}
       </Button>
 

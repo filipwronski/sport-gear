@@ -1,12 +1,12 @@
-import type { APIRoute } from 'astro';
-import { LocationService } from '../../../services/location.service';
-import { LocationValidator } from '../../../lib/validation/location.validator';
-import { ValidationError } from '../../../lib/errors';
-import { 
-  createErrorResponse, 
-  createSuccessResponse, 
-  createCreatedResponse 
-} from '../../../lib/utils/response.utils';
+import type { APIRoute } from "astro";
+import { LocationService } from "../../../services/location.service";
+import { LocationValidator } from "../../../lib/validation/location.validator";
+import { ValidationError } from "../../../lib/errors";
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  createCreatedResponse,
+} from "../../../lib/utils/response.utils";
 
 const locationService = new LocationService();
 
@@ -23,7 +23,11 @@ export const GET: APIRoute = async ({ url, locals }) => {
   try {
     const userId = locals.userId;
     if (!userId) {
-      return createErrorResponse('UNAUTHORIZED', 'User ID not found in request context', 401);
+      return createErrorResponse(
+        "UNAUTHORIZED",
+        "User ID not found in request context",
+        401,
+      );
     }
 
     // Parse and validate query parameters
@@ -33,25 +37,28 @@ export const GET: APIRoute = async ({ url, locals }) => {
     } catch (error) {
       if (error instanceof ValidationError) {
         return createErrorResponse(
-          'VALIDATION_ERROR',
+          "VALIDATION_ERROR",
           error.message,
           422,
-          error.validationDetails
+          error.validationDetails,
         );
       }
       throw error;
     }
 
     // Fetch locations using service layer
-    const locations = await locationService.getUserLocations(userId, queryParams.defaultOnly);
+    const locations = await locationService.getUserLocations(
+      userId,
+      queryParams.defaultOnly,
+    );
 
     return createSuccessResponse(locations);
   } catch (error) {
-    console.error('[GET /api/locations] Error:', error);
+    console.error("[GET /api/locations] Error:", error);
     return createErrorResponse(
-      'INTERNAL_ERROR',
-      'An unexpected error occurred while fetching locations',
-      500
+      "INTERNAL_ERROR",
+      "An unexpected error occurred while fetching locations",
+      500,
     );
   }
 };
@@ -67,7 +74,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const userId = locals.userId;
     if (!userId) {
-      return createErrorResponse('UNAUTHORIZED', 'User ID not found in request context', 401);
+      return createErrorResponse(
+        "UNAUTHORIZED",
+        "User ID not found in request context",
+        401,
+      );
     }
 
     // Parse request body
@@ -75,7 +86,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
     try {
       body = await request.json();
     } catch (e) {
-      return createErrorResponse('BAD_REQUEST', 'Invalid JSON in request body', 400);
+      return createErrorResponse(
+        "BAD_REQUEST",
+        "Invalid JSON in request body",
+        400,
+      );
     }
 
     // Validate request body
@@ -85,10 +100,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     } catch (error) {
       if (error instanceof ValidationError) {
         return createErrorResponse(
-          'VALIDATION_ERROR',
+          "VALIDATION_ERROR",
           error.message,
           422,
-          error.validationDetails
+          error.validationDetails,
         );
       }
       throw error;
@@ -96,27 +111,27 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Create location using service layer
     const newLocation = await locationService.createLocationWithClient(
-      locals.supabase, 
-      userId, 
-      command
+      locals.supabase,
+      userId,
+      command,
     );
 
     return createCreatedResponse(newLocation, newLocation.id);
   } catch (error) {
     if (error instanceof ValidationError) {
       return createErrorResponse(
-        'VALIDATION_ERROR',
+        "VALIDATION_ERROR",
         error.message,
         422,
-        error.validationDetails
+        error.validationDetails,
       );
     }
 
-    console.error('[POST /api/locations] Error:', error);
+    console.error("[POST /api/locations] Error:", error);
     return createErrorResponse(
-      'INTERNAL_ERROR',
-      'An unexpected error occurred while creating location',
-      500
+      "INTERNAL_ERROR",
+      "An unexpected error occurred while creating location",
+      500,
     );
   }
 };

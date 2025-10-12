@@ -1,104 +1,119 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // ============================================================================
 // Enum schemas
 // ============================================================================
 
 export const serviceTypeSchema = z.enum([
-  'lancuch',
-  'kaseta',
-  'klocki_przod',
-  'klocki_tyl',
-  'opony',
-  'przerzutki',
-  'hamulce',
-  'przeglad_ogolny',
-  'inne'
+  "lancuch",
+  "kaseta",
+  "klocki_przod",
+  "klocki_tyl",
+  "opony",
+  "przerzutki",
+  "hamulce",
+  "przeglad_ogolny",
+  "inne",
 ]);
 
-export const serviceLocationSchema = z.enum(['warsztat', 'samodzielnie']);
+export const serviceLocationSchema = z.enum(["warsztat", "samodzielnie"]);
 
-export const serviceSortSchema = z.enum([
-  'service_date_asc',
-  'service_date_desc',
-  'mileage_asc',
-  'mileage_desc',
-  'cost_asc',
-  'cost_desc'
-]).default('service_date_desc');
+export const serviceSortSchema = z
+  .enum([
+    "service_date_asc",
+    "service_date_desc",
+    "mileage_asc",
+    "mileage_desc",
+    "cost_asc",
+    "cost_desc",
+  ])
+  .default("service_date_desc");
 
 // ============================================================================
 // Query params schemas
 // ============================================================================
 
-export const getServicesParamsSchema = z.object({
-  service_type: serviceTypeSchema.optional(),
-  service_location: serviceLocationSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(50),
-  offset: z.coerce.number().int().min(0).default(0),
-  from_date: z.string().datetime().optional(),
-  to_date: z.string().datetime().optional(),
-  sort: serviceSortSchema
-}).refine(
-  (data) => {
-    if (data.from_date && data.to_date) {
-      return new Date(data.from_date) <= new Date(data.to_date);
-    }
-    return true;
-  },
-  { message: 'from_date must be before or equal to to_date' }
-);
+export const getServicesParamsSchema = z
+  .object({
+    service_type: serviceTypeSchema.optional(),
+    service_location: serviceLocationSchema.optional(),
+    limit: z.coerce.number().int().min(1).max(100).default(50),
+    offset: z.coerce.number().int().min(0).default(0),
+    from_date: z.string().datetime().optional(),
+    to_date: z.string().datetime().optional(),
+    sort: serviceSortSchema,
+  })
+  .refine(
+    (data) => {
+      if (data.from_date && data.to_date) {
+        return new Date(data.from_date) <= new Date(data.to_date);
+      }
+      return true;
+    },
+    { message: "from_date must be before or equal to to_date" },
+  );
 
-export const getServiceStatsParamsSchema = z.object({
-  period: z.enum(['month', 'quarter', 'year', 'all']).default('all'),
-  from_date: z.string().datetime().optional(),
-  to_date: z.string().datetime().optional()
-}).refine(
-  (data) => {
-    if (data.from_date && data.to_date) {
-      return new Date(data.from_date) <= new Date(data.to_date);
-    }
-    return true;
-  },
-  { message: 'from_date must be before or equal to to_date' }
-);
+export const getServiceStatsParamsSchema = z
+  .object({
+    period: z.enum(["month", "quarter", "year", "all"]).default("all"),
+    from_date: z.string().datetime().optional(),
+    to_date: z.string().datetime().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.from_date && data.to_date) {
+        return new Date(data.from_date) <= new Date(data.to_date);
+      }
+      return true;
+    },
+    { message: "from_date must be before or equal to to_date" },
+  );
 
 // ============================================================================
 // Command schemas
 // ============================================================================
 
-export const createServiceSchema = z.object({
-  service_date: z.string().datetime().refine(
-    (date) => new Date(date) <= new Date(),
-    { message: 'service_date cannot be in the future' }
-  ),
-  mileage_at_service: z.number().int().positive(),
-  service_type: serviceTypeSchema,
-  service_location: serviceLocationSchema.optional(),
-  cost: z.number().min(0).optional(),
-  notes: z.string().max(1000).optional(),
-  create_reminder: z.boolean().optional().default(false),
-  reminder_interval_km: z.number().int().min(100).max(10000).optional()
-}).refine(
-  (data) => {
-    if (data.create_reminder) {
-      return data.reminder_interval_km !== undefined;
-    }
-    return true;
-  },
-  { message: 'reminder_interval_km is required when create_reminder is true' }
-);
+export const createServiceSchema = z
+  .object({
+    service_date: z
+      .string()
+      .datetime()
+      .refine((date) => new Date(date) <= new Date(), {
+        message: "service_date cannot be in the future",
+      }),
+    mileage_at_service: z.number().int().positive(),
+    service_type: serviceTypeSchema,
+    service_location: serviceLocationSchema.optional(),
+    cost: z.number().min(0).optional(),
+    notes: z.string().max(1000).optional(),
+    create_reminder: z.boolean().optional().default(false),
+    reminder_interval_km: z.number().int().min(100).max(10000).optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.create_reminder) {
+        return data.reminder_interval_km !== undefined;
+      }
+      return true;
+    },
+    {
+      message: "reminder_interval_km is required when create_reminder is true",
+    },
+  );
 
 export const updateServiceSchema = z.object({
-  service_date: z.string().datetime().refine(
-    (date) => new Date(date) <= new Date(),
-    { message: 'service_date cannot be in the future' }
-  ).optional(),
+  service_date: z
+    .string()
+    .datetime()
+    .refine((date) => new Date(date) <= new Date(), {
+      message: "service_date cannot be in the future",
+    })
+    .optional(),
   mileage_at_service: z.number().int().positive().optional(),
   service_type: serviceTypeSchema.optional(),
   service_location: serviceLocationSchema.optional(),
   cost: z.number().min(0).optional(),
-  notes: z.string().max(1000).optional()
+  notes: z.string().max(1000).optional(),
 });
 
 // ============================================================================
@@ -106,16 +121,16 @@ export const updateServiceSchema = z.object({
 // ============================================================================
 
 export const bikeIdParamSchema = z.object({
-  bikeId: z.string().uuid()
+  bikeId: z.string().uuid(),
 });
 
 export const serviceIdParamSchema = z.object({
-  id: z.string().uuid()
+  id: z.string().uuid(),
 });
 
 export const bikeServiceParamsSchema = z.object({
   bikeId: z.string().uuid(),
-  id: z.string().uuid()
+  id: z.string().uuid(),
 });
 
 // ============================================================================

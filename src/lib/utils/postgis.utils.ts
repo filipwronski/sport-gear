@@ -1,4 +1,4 @@
-import type { Coordinates } from '../../types';
+import type { Coordinates } from "../../types";
 
 /**
  * PostGIS utility functions for geographic data processing
@@ -42,7 +42,9 @@ export function validateLongitudeRange(lng: number): boolean {
  * Konwertuje współrzędne do formatu używanego przez PostGIS ST_MakePoint()
  * PostGIS używa kolejności (longitude, latitude) w przeciwieństwie do standardowej (lat, lng)
  */
-export function coordinatesToPostGISPoint(coordinates: Coordinates): [number, number] {
+export function coordinatesToPostGISPoint(
+  coordinates: Coordinates,
+): [number, number] {
   return [coordinates.longitude, coordinates.latitude];
 }
 
@@ -50,10 +52,15 @@ export function coordinatesToPostGISPoint(coordinates: Coordinates): [number, nu
  * Sprawdza czy dwie lokalizacje są identyczne (po zaokrągleniu)
  * Używane do optymalizacji - unikanie niepotrzebnych aktualizacji
  */
-export function areCoordinatesEqual(coord1: Coordinates, coord2: Coordinates): boolean {
+export function areCoordinatesEqual(
+  coord1: Coordinates,
+  coord2: Coordinates,
+): boolean {
   const rounded1 = roundCoordinates(coord1.latitude, coord1.longitude);
   const rounded2 = roundCoordinates(coord2.latitude, coord2.longitude);
-  
-  return rounded1.latitude === rounded2.latitude && 
-         rounded1.longitude === rounded2.longitude;
+
+  return (
+    rounded1.latitude === rounded2.latitude &&
+    rounded1.longitude === rounded2.longitude
+  );
 }

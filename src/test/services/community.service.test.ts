@@ -14,10 +14,7 @@ import {
   LocationNotFoundError,
   CommunityServiceError,
 } from "../../services/community.service";
-import type {
-  GetCommunityOutfitsParams,
-  Coordinates,
-} from "../../types";
+import type { GetCommunityOutfitsParams, Coordinates } from "../../types";
 import { supabase } from "../../db/supabase.client";
 
 const mockSupabase = vi.mocked(supabase);
@@ -81,10 +78,10 @@ describe("Community Service", () => {
       mockSupabase.from.mockReturnValue({ select: mockSelect } as any);
 
       await expect(getUserLocation(userId, locationId)).rejects.toThrow(
-        LocationNotFoundError
+        LocationNotFoundError,
       );
       await expect(getUserLocation(userId, locationId)).rejects.toThrow(
-        `Location with id ${locationId} does not exist or does not belong to the user`
+        `Location with id ${locationId} does not exist or does not belong to the user`,
       );
     });
 
@@ -99,7 +96,7 @@ describe("Community Service", () => {
       mockSupabase.from.mockReturnValue({ select: mockSelect } as any);
 
       await expect(getUserLocation(userId, locationId)).rejects.toThrow(
-        LocationNotFoundError
+        LocationNotFoundError,
       );
     });
 
@@ -115,10 +112,10 @@ describe("Community Service", () => {
       mockSupabase.from.mockReturnValue({ select: mockSelect } as any);
 
       await expect(getUserLocation(userId, locationId)).rejects.toThrow(
-        CommunityServiceError
+        CommunityServiceError,
       );
       await expect(getUserLocation(userId, locationId)).rejects.toThrow(
-        "Database error while fetching location"
+        "Database error while fetching location",
       );
     });
 
@@ -143,10 +140,10 @@ describe("Community Service", () => {
       });
 
       await expect(getUserLocation(userId, locationId)).rejects.toThrow(
-        CommunityServiceError
+        CommunityServiceError,
       );
       await expect(getUserLocation(userId, locationId)).rejects.toThrow(
-        "Error extracting coordinates"
+        "Error extracting coordinates",
       );
     });
   });
@@ -288,17 +285,20 @@ describe("Community Service", () => {
         result_offset: 0,
       });
 
-      expect(mockSupabase.rpc).toHaveBeenCalledWith("get_community_outfits_count", {
-        center_lng: 21.0122,
-        center_lat: 52.2297,
-        radius_meters: 50000,
-        time_range_hours: 24,
-        temperature: 15,
-        temperature_range: 3,
-        activity_type: "tempo",
-        min_rating: 4,
-        reputation_filter: "ekspert",
-      });
+      expect(mockSupabase.rpc).toHaveBeenCalledWith(
+        "get_community_outfits_count",
+        {
+          center_lng: 21.0122,
+          center_lat: 52.2297,
+          radius_meters: 50000,
+          time_range_hours: 24,
+          temperature: 15,
+          temperature_range: 3,
+          activity_type: "tempo",
+          min_rating: 4,
+          reputation_filter: "ekspert",
+        },
+      );
     });
 
     it("should handle empty results", async () => {
@@ -359,10 +359,10 @@ describe("Community Service", () => {
       });
 
       await expect(getCommunityOutfits(userId, validParams)).rejects.toThrow(
-        CommunityServiceError
+        CommunityServiceError,
       );
       await expect(getCommunityOutfits(userId, validParams)).rejects.toThrow(
-        "Spatial query failed"
+        "Spatial query failed",
       );
     });
 
@@ -382,10 +382,10 @@ describe("Community Service", () => {
       });
 
       await expect(getCommunityOutfits(userId, validParams)).rejects.toThrow(
-        CommunityServiceError
+        CommunityServiceError,
       );
       await expect(getCommunityOutfits(userId, validParams)).rejects.toThrow(
-        "Count query failed"
+        "Count query failed",
       );
     });
 
@@ -401,7 +401,7 @@ describe("Community Service", () => {
       mockSupabase.from.mockReturnValue({ select: mockSelect } as any);
 
       await expect(getCommunityOutfits(userId, validParams)).rejects.toThrow(
-        LocationNotFoundError
+        LocationNotFoundError,
       );
     });
   });

@@ -27,13 +27,16 @@ export const GET: APIRoute = async ({ url, locals }) => {
   try {
     const userId = locals.userId;
     if (!userId) {
-      return new Response(JSON.stringify({
-        error: 'Unauthorized',
-        message: 'User ID not found in request context'
-      }), { 
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "User ID not found in request context",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Parse and validate query parameters
@@ -81,13 +84,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const userId = locals.userId;
     if (!userId) {
-      return new Response(JSON.stringify({
-        error: 'Unauthorized',
-        message: 'User ID not found in request context'
-      }), { 
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "User ID not found in request context",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Parse request body

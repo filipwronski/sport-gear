@@ -1,8 +1,11 @@
-import type { APIRoute } from 'astro';
-import { BikeReminderService } from '../../../../../services/bike-reminder.service';
-import { supabaseClient, supabaseServiceClient } from '../../../../../db/supabase.admin.client';
-import { ReminderValidator } from '../../../../../lib/validation/reminder.validator';
-import type { CompleteReminderCommand } from '../../../../../types';
+import type { APIRoute } from "astro";
+import { BikeReminderService } from "../../../../../services/bike-reminder.service";
+import {
+  supabaseClient,
+  supabaseServiceClient,
+} from "../../../../../db/supabase.admin.client";
+import { ReminderValidator } from "../../../../../lib/validation/reminder.validator";
+import type { CompleteReminderCommand } from "../../../../../types";
 
 // Use service client in development to bypass RLS
 const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;
@@ -18,13 +21,13 @@ export const PUT: APIRoute = async ({ request, locals, params }) => {
     if (!locals.userId) {
       return new Response(
         JSON.stringify({
-          error: 'Unauthorized',
-          message: 'Authentication required'
+          error: "Unauthorized",
+          message: "Authentication required",
         }),
         {
           status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -34,26 +37,26 @@ export const PUT: APIRoute = async ({ request, locals, params }) => {
     if (!bikeId || !ReminderValidator.validateUUID(bikeId)) {
       return new Response(
         JSON.stringify({
-          error: 'Bad Request',
-          message: 'Invalid bike ID format'
+          error: "Bad Request",
+          message: "Invalid bike ID format",
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     if (!reminderId || !ReminderValidator.validateUUID(reminderId)) {
       return new Response(
         JSON.stringify({
-          error: 'Bad Request',
-          message: 'Invalid reminder ID format'
+          error: "Bad Request",
+          message: "Invalid reminder ID format",
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -64,29 +67,30 @@ export const PUT: APIRoute = async ({ request, locals, params }) => {
     } catch {
       return new Response(
         JSON.stringify({
-          error: 'Bad Request',
-          message: 'Invalid JSON in request body'
+          error: "Bad Request",
+          message: "Invalid JSON in request body",
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     // Validate request body
-    const validationResult = ReminderValidator.validateCompleteReminderCommand(body);
+    const validationResult =
+      ReminderValidator.validateCompleteReminderCommand(body);
     if (!validationResult.valid) {
       return new Response(
         JSON.stringify({
-          error: 'Validation Error',
-          message: 'Invalid field values',
-          details: validationResult.errors
+          error: "Validation Error",
+          message: "Invalid field values",
+          details: validationResult.errors,
         }),
         {
           status: 422,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -95,65 +99,68 @@ export const PUT: APIRoute = async ({ request, locals, params }) => {
       locals.userId,
       bikeId,
       reminderId,
-      body
+      body,
     );
 
     return new Response(JSON.stringify(reminder), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { "Content-Type": "application/json" },
     });
-
   } catch (error: any) {
-    console.error('PUT /api/bikes/[bikeId]/reminders/[id]/complete error:', error);
+    console.error(
+      "PUT /api/bikes/[bikeId]/reminders/[id]/complete error:",
+      error,
+    );
 
-    if (error.name === 'BikeNotFoundError') {
+    if (error.name === "BikeNotFoundError") {
       return new Response(
         JSON.stringify({
-          error: 'Bike Not Found',
-          message: 'Bike not found'
+          error: "Bike Not Found",
+          message: "Bike not found",
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
-    if (error.name === 'ReminderNotFoundError') {
+    if (error.name === "ReminderNotFoundError") {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
-          message: 'Reminder not found'
+          error: "Not Found",
+          message: "Reminder not found",
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
-    if (error.name === 'ServiceRecordNotFoundError') {
+    if (error.name === "ServiceRecordNotFoundError") {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
-          message: 'Service record not found or service record doesn\'t belong to this bike'
+          error: "Not Found",
+          message:
+            "Service record not found or service record doesn't belong to this bike",
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred'
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 };

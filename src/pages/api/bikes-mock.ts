@@ -21,11 +21,11 @@ const mockBikes: BikeDTO[] = [
       service_type: "lancuch",
       target_mileage: 2000,
       km_remaining: 1000,
-      status: "upcoming"
+      status: "upcoming",
     },
     active_reminders_count: 1,
-    total_cost: 250.50
-  }
+    total_cost: 250.5,
+  },
 ];
 
 /**
@@ -35,50 +35,56 @@ export const GET: APIRoute = async ({ url, locals }) => {
   try {
     const userId = locals.userId;
     if (!userId) {
-      return new Response(JSON.stringify({
-        error: 'Unauthorized',
-        message: 'User ID not found in request context'
-      }), { 
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "User ID not found in request context",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Parse query parameters (mock filtering)
-    const status = url.searchParams.get('status');
-    const type = url.searchParams.get('type');
-    
+    const status = url.searchParams.get("status");
+    const type = url.searchParams.get("type");
+
     let filteredBikes = [...mockBikes];
-    
+
     if (status) {
-      filteredBikes = filteredBikes.filter(bike => bike.status === status);
+      filteredBikes = filteredBikes.filter((bike) => bike.status === status);
     }
-    
+
     if (type) {
-      filteredBikes = filteredBikes.filter(bike => bike.type === type);
+      filteredBikes = filteredBikes.filter((bike) => bike.type === type);
     }
 
     const response: BikesListDTO = {
       bikes: filteredBikes,
-      total: filteredBikes.length
+      total: filteredBikes.length,
     };
 
     return new Response(JSON.stringify(response), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'private, max-age=60',
+        "Content-Type": "application/json",
+        "Cache-Control": "private, max-age=60",
       },
     });
   } catch (error) {
-    console.error('[MockBikes] Error:', error);
-    return new Response(JSON.stringify({
-      error: 'Internal server error',
-      message: 'An unexpected error occurred'
-    }), { 
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error("[MockBikes] Error:", error);
+    return new Response(
+      JSON.stringify({
+        error: "Internal server error",
+        message: "An unexpected error occurred",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 };
 
@@ -89,13 +95,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const userId = locals.userId;
     if (!userId) {
-      return new Response(JSON.stringify({
-        error: 'Unauthorized',
-        message: 'User ID not found in request context'
-      }), { 
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "User ID not found in request context",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Parse request body
@@ -103,28 +112,34 @@ export const POST: APIRoute = async ({ request, locals }) => {
     try {
       body = await request.json();
     } catch {
-      return new Response(JSON.stringify({
-        error: 'Bad request',
-        message: 'Invalid JSON format'
-      }), { 
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Bad request",
+          message: "Invalid JSON format",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Basic validation (simplified)
     const data = body as any;
     if (!data.name || !data.type) {
-      return new Response(JSON.stringify({
-        error: 'Validation failed',
-        details: {
-          name: !data.name ? ['Name is required'] : undefined,
-          type: !data.type ? ['Type is required'] : undefined
-        }
-      }), { 
-        status: 422,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(
+        JSON.stringify({
+          error: "Validation failed",
+          details: {
+            name: !data.name ? ["Name is required"] : undefined,
+            type: !data.type ? ["Type is required"] : undefined,
+          },
+        }),
+        {
+          status: 422,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // Create mock bike
@@ -140,7 +155,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       updated_at: new Date().toISOString(),
       next_service: null,
       active_reminders_count: 0,
-      total_cost: 0
+      total_cost: 0,
     };
 
     // Add to mock storage
@@ -148,16 +163,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     return new Response(JSON.stringify(newBike), {
       status: 201,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error('[MockBikes] Error:', error);
-    return new Response(JSON.stringify({
-      error: 'Internal server error',
-      message: 'An unexpected error occurred'
-    }), { 
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error("[MockBikes] Error:", error);
+    return new Response(
+      JSON.stringify({
+        error: "Internal server error",
+        message: "An unexpected error occurred",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   }
 };

@@ -411,7 +411,7 @@ export class BikeService {
    */
   async getEquipmentStatus(userId: string): Promise<{
     active_bikes_count: number;
-    upcoming_services: Array<{
+    upcoming_services: {
       bike_id: string;
       bike_name: string;
       service_type: ServiceTypeEnum;
@@ -419,7 +419,7 @@ export class BikeService {
       current_mileage: number;
       km_remaining: number;
       status: ReminderStatusEnum;
-    }>;
+    }[];
     overdue_services_count: number;
   }> {
     try {
@@ -427,15 +427,16 @@ export class BikeService {
       const [activeBikesResult, remindersResult] = await Promise.all([
         // Count active bikes
         supabaseClient
-          .from('bikes')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId)
-          .eq('status', 'active'),
-        
+          .from("bikes")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("status", "active"),
+
         // Get upcoming services with bike details
         supabaseClient
-          .from('service_reminders')
-          .select(`
+          .from("service_reminders")
+          .select(
+            `
             id,
             service_type,
             target_mileage,
@@ -448,12 +449,13 @@ export class BikeService {
               user_id,
               status
             )
-          `)
-          .eq('bikes.user_id', userId)
-          .eq('bikes.status', 'active')
-          .is('completed_at', null)
-          .order('target_mileage', { ascending: true })
-          .limit(10)
+          `,
+          )
+          .eq("bikes.user_id", userId)
+          .eq("bikes.status", "active")
+          .is("completed_at", null)
+          .order("target_mileage", { ascending: true })
+          .limit(10),
       ]);
 
       const activeBikesCount = activeBikesResult.count || 0;
@@ -461,20 +463,21 @@ export class BikeService {
 
       // Calculate km_remaining and status for each reminder
       const upcomingServices = reminders
-        .map(reminder => {
+        .map((reminder) => {
           const bike = reminder.bikes as any;
           const currentMileage = bike.current_mileage || 0;
-          const targetMileage = reminder.target_mileage || 
-                               (reminder.triggered_at_mileage + reminder.interval_km);
+          const targetMileage =
+            reminder.target_mileage ||
+            reminder.triggered_at_mileage + reminder.interval_km;
           const kmRemaining = targetMileage - currentMileage;
-          
+
           let status: ReminderStatusEnum;
           if (kmRemaining <= 0) {
-            status = 'overdue';
+            status = "overdue";
           } else if (kmRemaining <= 100) {
-            status = 'upcoming';
+            status = "upcoming";
           } else {
-            status = 'active';
+            status = "active";
           }
 
           return {
@@ -484,23 +487,24 @@ export class BikeService {
             target_mileage: targetMileage,
             current_mileage: currentMileage,
             km_remaining: kmRemaining,
-            status
+            status,
           };
         })
         .sort((a, b) => a.km_remaining - b.km_remaining)
         .slice(0, 5); // Top 5 most urgent
 
-      const overdueCount = upcomingServices.filter(s => s.status === 'overdue').length;
+      const overdueCount = upcomingServices.filter(
+        (s) => s.status === "overdue",
+      ).length;
 
       return {
         active_bikes_count: activeBikesCount,
         upcoming_services: upcomingServices,
-        overdue_services_count: overdueCount
+        overdue_services_count: overdueCount,
       };
-
     } catch (error) {
-      console.error('Equipment status error:', error);
-      throw new Error('Failed to fetch equipment status');
+      console.error("Equipment status error:", error);
+      throw new Error("Failed to fetch equipment status");
     }
   }
 }

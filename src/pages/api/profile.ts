@@ -1,9 +1,9 @@
-import type { APIRoute } from 'astro';
-import { ProfileService } from '../../services/ProfileService';
-import { getAuthenticatedUser } from '../../lib/auth/getAuthenticatedUser';
-import { handleApiError } from '../../lib/errors/errorHandler';
-import { updateProfileSchema } from '../../lib/validation/profile.schema';
-import { BadRequestError } from '../../lib/errors';
+import type { APIRoute } from "astro";
+import { ProfileService } from "../../services/ProfileService";
+import { getAuthenticatedUser } from "../../lib/auth/getAuthenticatedUser";
+import { handleApiError } from "../../lib/errors/errorHandler";
+import { updateProfileSchema } from "../../lib/validation/profile.schema";
+import { BadRequestError } from "../../lib/errors";
 
 /**
  * GET /api/profile - Get current user profile
@@ -13,16 +13,16 @@ export const GET: APIRoute = async (context) => {
   try {
     const user = await getAuthenticatedUser(context);
     const profileService = new ProfileService();
-    
+
     const profile = await profileService.getProfile(user.id);
 
     return new Response(JSON.stringify(profile), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
       },
     });
   } catch (error) {
@@ -44,7 +44,7 @@ export const PUT: APIRoute = async (context) => {
     try {
       body = await context.request.json();
     } catch {
-      throw new BadRequestError('Invalid JSON in request body');
+      throw new BadRequestError("Invalid JSON in request body");
     }
 
     // Validate with Zod schema
@@ -52,13 +52,16 @@ export const PUT: APIRoute = async (context) => {
 
     // Update profile
     const profileService = new ProfileService();
-    const updatedProfile = await profileService.updateProfile(user.id, validatedData);
+    const updatedProfile = await profileService.updateProfile(
+      user.id,
+      validatedData,
+    );
 
     return new Response(JSON.stringify(updatedProfile), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
       },
     });
   } catch (error) {

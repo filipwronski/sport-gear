@@ -7,7 +7,7 @@ import type {
 } from "../types";
 import { ConflictError, NotFoundError } from "../lib/errors";
 
-type LocationRow = Database['public']['Tables']['user_locations']['Row'];
+type LocationRow = Database["public"]["Tables"]["user_locations"]["Row"];
 
 /**
  * LocationService - Business logic layer for location management
@@ -28,20 +28,25 @@ export class LocationService {
    * @returns Array of LocationDTO with transformed coordinates
    * @throws Error if database query fails
    */
-  async getUserLocations(userId: string, defaultOnly?: boolean): Promise<LocationDTO[]> {
+  async getUserLocations(
+    userId: string,
+    defaultOnly?: boolean,
+  ): Promise<LocationDTO[]> {
     let query = supabaseClient
-      .from('user_locations')
-      .select('*')
-      .eq('user_id', userId);
+      .from("user_locations")
+      .select("*")
+      .eq("user_id", userId);
 
     if (defaultOnly) {
-      query = query.eq('is_default', true);
+      query = query.eq("is_default", true);
     }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) {
-      console.error('[LocationService] Error fetching locations:', error);
+      console.error("[LocationService] Error fetching locations:", error);
       throw new Error(`Failed to fetch locations: ${error.message}`);
     }
 
@@ -60,25 +65,31 @@ export class LocationService {
    */
   async createLocation(
     userId: string,
-    command: CreateLocationCommand
+    command: CreateLocationCommand,
   ): Promise<LocationDTO> {
     // If setting as default, first unset other default locations
     if (command.is_default) {
       const { error: updateError } = await supabaseClient
-        .from('user_locations')
+        .from("user_locations")
         .update({ is_default: false })
-        .eq('user_id', userId)
-        .eq('is_default', true);
+        .eq("user_id", userId)
+        .eq("is_default", true);
 
       if (updateError) {
-        console.error('[LocationService] Error updating default locations:', updateError);
-        throw new Error(`Failed to update default location: ${updateError.message}`);
+        console.error(
+          "[LocationService] Error updating default locations:",
+          updateError,
+        );
+        throw new Error(
+          `Failed to update default location: ${updateError.message}`,
+        );
       }
     }
 
     // Create location using RPC function with PostGIS point
-    const { data: locationId, error } = await supabaseClient
-      .rpc('insert_location', {
+    const { data: locationId, error } = await supabaseClient.rpc(
+      "insert_location",
+      {
         p_user_id: userId,
         p_latitude: command.latitude,
         p_longitude: command.longitude,
@@ -86,27 +97,33 @@ export class LocationService {
         p_country_code: command.country_code,
         p_is_default: command.is_default ?? false,
         p_label: command.label ?? null,
-      });
+      },
+    );
 
     if (error) {
-      console.error('[LocationService] Error creating location:', error);
+      console.error("[LocationService] Error creating location:", error);
       throw new Error(`Failed to create location: ${error.message}`);
     }
 
     if (!locationId) {
-      throw new Error('No location ID returned from RPC function');
+      throw new Error("No location ID returned from RPC function");
     }
 
     // Fetch the created location to return as DTO
     const { data, error: fetchError } = await supabaseClient
-      .from('user_locations')
-      .select('*')
-      .eq('id', locationId)
+      .from("user_locations")
+      .select("*")
+      .eq("id", locationId)
       .single();
 
     if (fetchError) {
-      console.error('[LocationService] Error fetching created location:', fetchError);
-      throw new Error(`Failed to fetch created location: ${fetchError.message}`);
+      console.error(
+        "[LocationService] Error fetching created location:",
+        fetchError,
+      );
+      throw new Error(
+        `Failed to fetch created location: ${fetchError.message}`,
+      );
     }
 
     return this.transformToDTO(data);
@@ -120,53 +137,62 @@ export class LocationService {
   async createLocationWithClient(
     client: any,
     userId: string,
-    command: CreateLocationCommand
+    command: CreateLocationCommand,
   ): Promise<LocationDTO> {
     // If setting as default, first unset other default locations
     if (command.is_default) {
       const { error: updateError } = await client
-        .from('user_locations')
+        .from("user_locations")
         .update({ is_default: false })
-        .eq('user_id', userId)
-        .eq('is_default', true);
+        .eq("user_id", userId)
+        .eq("is_default", true);
 
       if (updateError) {
-        console.error('[LocationService] Error updating default locations:', updateError);
-        throw new Error(`Failed to update default location: ${updateError.message}`);
+        console.error(
+          "[LocationService] Error updating default locations:",
+          updateError,
+        );
+        throw new Error(
+          `Failed to update default location: ${updateError.message}`,
+        );
       }
     }
 
     // Create location using RPC function with PostGIS point
-    const { data: locationId, error } = await client
-      .rpc('insert_location', {
-        p_user_id: userId,
-        p_latitude: command.latitude,
-        p_longitude: command.longitude,
-        p_city: command.city,
-        p_country_code: command.country_code,
-        p_is_default: command.is_default ?? false,
-        p_label: command.label ?? null,
-      });
+    const { data: locationId, error } = await client.rpc("insert_location", {
+      p_user_id: userId,
+      p_latitude: command.latitude,
+      p_longitude: command.longitude,
+      p_city: command.city,
+      p_country_code: command.country_code,
+      p_is_default: command.is_default ?? false,
+      p_label: command.label ?? null,
+    });
 
     if (error) {
-      console.error('[LocationService] Error creating location:', error);
+      console.error("[LocationService] Error creating location:", error);
       throw new Error(`Failed to create location: ${error.message}`);
     }
 
     if (!locationId) {
-      throw new Error('No location ID returned from RPC function');
+      throw new Error("No location ID returned from RPC function");
     }
 
     // Fetch the created location to return as DTO
     const { data, error: fetchError } = await client
-      .from('user_locations')
-      .select('*')
-      .eq('id', locationId)
+      .from("user_locations")
+      .select("*")
+      .eq("id", locationId)
       .single();
 
     if (fetchError) {
-      console.error('[LocationService] Error fetching created location:', fetchError);
-      throw new Error(`Failed to fetch created location: ${fetchError.message}`);
+      console.error(
+        "[LocationService] Error fetching created location:",
+        fetchError,
+      );
+      throw new Error(
+        `Failed to fetch created location: ${fetchError.message}`,
+      );
     }
 
     return this.transformToDTO(data);
@@ -186,46 +212,57 @@ export class LocationService {
   async updateLocation(
     userId: string,
     locationId: string,
-    command: UpdateLocationCommand
+    command: UpdateLocationCommand,
   ): Promise<LocationDTO> {
     // Check if location exists and belongs to user
     const { data: existing, error: fetchError } = await supabaseClient
-      .from('user_locations')
-      .select('id, is_default')
-      .eq('id', locationId)
-      .eq('user_id', userId)
+      .from("user_locations")
+      .select("id, is_default")
+      .eq("id", locationId)
+      .eq("user_id", userId)
       .single();
 
     if (fetchError || !existing) {
-      throw new NotFoundError('Location not found or access denied');
+      throw new NotFoundError("Location not found or access denied");
     }
 
     // If setting as default, update other locations first
     if (command.is_default === true) {
       const { error: updateError } = await supabaseClient
-        .from('user_locations')
+        .from("user_locations")
         .update({ is_default: false })
-        .eq('user_id', userId)
-        .eq('is_default', true)
-        .neq('id', locationId);
+        .eq("user_id", userId)
+        .eq("is_default", true)
+        .neq("id", locationId);
 
       if (updateError) {
-        console.error('[LocationService] Error updating default locations:', updateError);
-        throw new Error(`Failed to update default location: ${updateError.message}`);
+        console.error(
+          "[LocationService] Error updating default locations:",
+          updateError,
+        );
+        throw new Error(
+          `Failed to update default location: ${updateError.message}`,
+        );
       }
     }
 
     // Update coordinates via RPC function if provided
     if (command.latitude !== undefined && command.longitude !== undefined) {
-      const { error: rpcError } = await supabaseClient.rpc('update_location_coordinates', {
-        p_location_id: locationId,
-        p_user_id: userId,
-        p_latitude: command.latitude,
-        p_longitude: command.longitude,
-      });
+      const { error: rpcError } = await supabaseClient.rpc(
+        "update_location_coordinates",
+        {
+          p_location_id: locationId,
+          p_user_id: userId,
+          p_latitude: command.latitude,
+          p_longitude: command.longitude,
+        },
+      );
 
       if (rpcError) {
-        console.error('[LocationService] Error updating coordinates:', rpcError);
+        console.error(
+          "[LocationService] Error updating coordinates:",
+          rpcError,
+        );
         throw new Error(`Failed to update coordinates: ${rpcError.message}`);
       }
     }
@@ -233,21 +270,26 @@ export class LocationService {
     // Update other fields if provided
     const updateData: Partial<LocationRow> = {};
     if (command.city !== undefined) updateData.city = command.city;
-    if (command.country_code !== undefined) updateData.country_code = command.country_code;
-    if (command.is_default !== undefined) updateData.is_default = command.is_default;
+    if (command.country_code !== undefined)
+      updateData.country_code = command.country_code;
+    if (command.is_default !== undefined)
+      updateData.is_default = command.is_default;
     if (command.label !== undefined) updateData.label = command.label;
 
     if (Object.keys(updateData).length > 0) {
       updateData.updated_at = new Date().toISOString();
 
       const { error: updateError } = await supabaseClient
-        .from('user_locations')
+        .from("user_locations")
         .update(updateData)
-        .eq('id', locationId)
-        .eq('user_id', userId);
+        .eq("id", locationId)
+        .eq("user_id", userId);
 
       if (updateError) {
-        console.error('[LocationService] Error updating location fields:', updateError);
+        console.error(
+          "[LocationService] Error updating location fields:",
+          updateError,
+        );
         throw new Error(`Failed to update location: ${updateError.message}`);
       }
     }
@@ -257,7 +299,7 @@ export class LocationService {
     const updated = locations.find((loc) => loc.id === locationId);
 
     if (!updated) {
-      throw new Error('Failed to retrieve updated location');
+      throw new Error("Failed to retrieve updated location");
     }
 
     return updated;
@@ -276,49 +318,52 @@ export class LocationService {
   async deleteLocation(userId: string, locationId: string): Promise<void> {
     // Fetch all user locations to check business rules
     const { data: userLocations, error: fetchError } = await supabaseClient
-      .from('user_locations')
-      .select('id, is_default')
-      .eq('user_id', userId);
+      .from("user_locations")
+      .select("id, is_default")
+      .eq("user_id", userId);
 
     if (fetchError) {
-      console.error('[LocationService] Error fetching user locations:', fetchError);
+      console.error(
+        "[LocationService] Error fetching user locations:",
+        fetchError,
+      );
       throw new Error(`Database error: ${fetchError.message}`);
     }
 
     if (!userLocations || userLocations.length === 0) {
-      throw new NotFoundError('No locations found');
+      throw new NotFoundError("No locations found");
     }
 
     // Find target location
     const targetLocation = userLocations.find((loc) => loc.id === locationId);
 
     if (!targetLocation) {
-      throw new NotFoundError('Location not found or access denied');
+      throw new NotFoundError("Location not found or access denied");
     }
 
     // Business rule: Cannot delete last location
     if (userLocations.length === 1) {
       throw new ConflictError(
-        'Cannot delete the last location. User must have at least one location.'
+        "Cannot delete the last location. User must have at least one location.",
       );
     }
 
     // Business rule: Cannot delete default location
     if (targetLocation.is_default) {
       throw new ConflictError(
-        'Cannot delete default location. Set another location as default first.'
+        "Cannot delete default location. Set another location as default first.",
       );
     }
 
     // Delete location
     const { error: deleteError } = await supabaseClient
-      .from('user_locations')
+      .from("user_locations")
       .delete()
-      .eq('id', locationId)
-      .eq('user_id', userId);
+      .eq("id", locationId)
+      .eq("user_id", userId);
 
     if (deleteError) {
-      console.error('[LocationService] Error deleting location:', deleteError);
+      console.error("[LocationService] Error deleting location:", deleteError);
       throw new Error(`Failed to delete location: ${deleteError.message}`);
     }
   }

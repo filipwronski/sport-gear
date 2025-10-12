@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { 
+import { z } from "zod";
+import {
   ApiError as CustomApiError,
   BikeNotFoundError,
   ServiceNotFoundError,
@@ -8,8 +8,8 @@ import {
   MileageLowerThanPreviousError,
   DateInFutureError,
   InvalidDateRangeError,
-  CannotDeleteServiceError
-} from './errors/index.js';
+  CannotDeleteServiceError,
+} from "./errors/index.js";
 
 /**
  * Centralized error handling for API endpoints
@@ -44,8 +44,8 @@ export function handleError(error: unknown): Response {
         error: {
           code: error.code,
           message: error.message,
-          details: error.details
-        }
+          details: error.details,
+        },
       }),
       {
         status: error.statusCode,
@@ -74,15 +74,15 @@ export function handleError(error: unknown): Response {
     return new Response(
       JSON.stringify({
         error: {
-          code: 'VALIDATION_ERROR',
-          message: 'Invalid request data',
-          details: error.errors
-        }
+          code: "VALIDATION_ERROR",
+          message: "Invalid request data",
+          details: error.errors,
+        },
       }),
       {
         status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 
@@ -239,7 +239,7 @@ interface ErrorResponseOptions {
   code: string;
   message: string;
   statusCode: number;
-  details?: Array<{ field?: string; service?: string; message: string }>;
+  details?: { field?: string; service?: string; message: string }[];
   retryAfter?: number;
   debug?: string;
 }

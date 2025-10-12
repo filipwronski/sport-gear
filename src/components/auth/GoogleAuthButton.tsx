@@ -1,6 +1,6 @@
-import React from 'react';
-import { Button } from '../ui/button';
-import { useAuth } from './useAuth';
+import React from "react";
+import { Button } from "../ui/button";
+import { useAuth } from "./useAuth";
 
 export interface GoogleAuthButtonProps {
   onSuccess: () => void;
@@ -13,7 +13,7 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ onSuccess }) => {
     try {
       await googleAuth();
       onSuccess();
-    } catch (error) {
+    } catch {
       // Error is handled by useAuth hook
     }
   };

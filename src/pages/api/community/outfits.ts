@@ -11,11 +11,11 @@ import {
 
 /**
  * GET /api/community/outfits
- * 
+ *
  * Returns community-shared outfits within specified radius from user location
  * with advanced filtering by weather conditions, activity type, and ratings.
  * Uses PostGIS spatial queries for efficient geographic search.
- * 
+ *
  * Query Parameters:
  * - location_id (required): UUID of user location for spatial center
  * - radius_km (optional): Search radius in kilometers (1-100, default: 50)
@@ -28,9 +28,9 @@ import {
  * - sort (optional): Sort order (reputation|distance|created_at|rating, default: reputation)
  * - limit (optional): Results per page (1-50, default: 10)
  * - offset (optional): Pagination offset (default: 0)
- * 
+ *
  * Authentication: Required (JWT token in Authorization header)
- * 
+ *
  * Responses:
  * - 200: Success with paginated community outfits
  * - 400: Validation error (invalid parameters)
@@ -50,14 +50,14 @@ export const GET: APIRoute = async ({ request, locals }) => {
         {
           status: 401,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
     // Step 2: Parse and validate query parameters
     const url = new URL(request.url);
     const rawParams: Record<string, string | undefined> = {};
-    
+
     // Extract all query parameters
     url.searchParams.forEach((value, key) => {
       rawParams[key] = value;
@@ -76,7 +76,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
           {
             status: 400,
             headers: { "Content-Type": "application/json" },
-          }
+          },
         );
       }
       throw error; // Re-throw unexpected validation errors
@@ -96,7 +96,6 @@ export const GET: APIRoute = async ({ request, locals }) => {
         "Access-Control-Allow-Headers": "Authorization, Content-Type",
       },
     });
-
   } catch (error) {
     // Step 5: Handle service layer errors
     if (error instanceof LocationNotFoundError) {
@@ -108,7 +107,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
         {
           status: 404,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -129,7 +128,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
         {
           status: 500,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -150,14 +149,14 @@ export const GET: APIRoute = async ({ request, locals }) => {
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 };
 
 /**
  * OPTIONS /api/community/outfits
- * 
+ *
  * Handles CORS preflight requests for cross-origin API access
  */
 export const OPTIONS: APIRoute = async () => {

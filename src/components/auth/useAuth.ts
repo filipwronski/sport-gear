@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
-import { supabaseClient } from '../../db/supabase.client';
-import type { AuthError } from '@supabase/supabase-js';
-import { useToast, authToastMessages, type ToastMessage } from './useToast';
+import { useState, useCallback } from "react";
+import { supabaseClient } from "../../db/supabase.client";
+import type { AuthError } from "@supabase/supabase-js";
+import { useToast, authToastMessages } from "./useToast";
 
 // Form data types based on implementation plan
 export interface LoginFormData {
@@ -37,8 +37,8 @@ export interface AuthHookReturn {
 }
 
 // Brute force protection
-const FAILED_ATTEMPTS_KEY = 'auth_failed_attempts';
-const LOCKOUT_KEY = 'auth_lockout_until';
+const FAILED_ATTEMPTS_KEY = "auth_failed_attempts";
+const LOCKOUT_KEY = "auth_lockout_until";
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
@@ -52,7 +52,7 @@ export const useAuth = (): AuthHookReturn => {
 
   // Clear error message
   const clearError = useCallback(() => {
-    setAuthState(prev => ({ ...prev, error: null }));
+    setAuthState((prev) => ({ ...prev, error: null }));
   }, []);
 
   // Check if user is locked out
@@ -71,11 +71,15 @@ export const useAuth = (): AuthHookReturn => {
 
   // Handle failed login attempt
   const handleFailedAttempt = useCallback(() => {
-    const attempts = parseInt(localStorage.getItem(FAILED_ATTEMPTS_KEY) || '0') + 1;
+    const attempts =
+      parseInt(localStorage.getItem(FAILED_ATTEMPTS_KEY) || "0") + 1;
     localStorage.setItem(FAILED_ATTEMPTS_KEY, attempts.toString());
-    
+
     if (attempts >= MAX_ATTEMPTS) {
-      localStorage.setItem(LOCKOUT_KEY, (Date.now() + LOCKOUT_DURATION).toString());
+      localStorage.setItem(
+        LOCKOUT_KEY,
+        (Date.now() + LOCKOUT_DURATION).toString(),
+      );
     }
   }, []);
 
@@ -88,164 +92,188 @@ export const useAuth = (): AuthHookReturn => {
   // Translate Supabase errors to Polish messages
   const translateError = useCallback((error: AuthError | Error): string => {
     const message = error.message.toLowerCase();
-    
-    if (message.includes('invalid login credentials') || message.includes('invalid email or password')) {
-      return 'Nieprawidłowy email lub hasło';
+
+    if (
+      message.includes("invalid login credentials") ||
+      message.includes("invalid email or password")
+    ) {
+      return "Nieprawidłowy email lub hasło";
     }
-    if (message.includes('user already registered')) {
-      return 'Konto z tym adresem email już istnieje';
+    if (message.includes("user already registered")) {
+      return "Konto z tym adresem email już istnieje";
     }
-    if (message.includes('password should be at least')) {
-      return 'Hasło musi mieć co najmniej 8 znaków i zawierać wielką literę, małą literę oraz cyfrę';
+    if (message.includes("password should be at least")) {
+      return "Hasło musi mieć co najmniej 8 znaków i zawierać wielką literę, małą literę oraz cyfrę";
     }
-    if (message.includes('signup is disabled')) {
-      return 'Rejestracja jest obecnie wyłączona';
+    if (message.includes("signup is disabled")) {
+      return "Rejestracja jest obecnie wyłączona";
     }
-    if (message.includes('email not confirmed')) {
-      return 'Sprawdź swoją skrzynkę email i kliknij link weryfikacyjny';
+    if (message.includes("email not confirmed")) {
+      return "Sprawdź swoją skrzynkę email i kliknij link weryfikacyjny";
     }
-    if (message.includes('network') || message.includes('fetch')) {
-      return 'Brak połączenia z internetem. Spróbuj ponownie.';
+    if (message.includes("network") || message.includes("fetch")) {
+      return "Brak połączenia z internetem. Spróbuj ponownie.";
     }
-    
-    return 'Wystąpił błąd. Spróbuj ponownie później.';
+
+    return "Wystąpił błąd. Spróbuj ponownie później.";
   }, []);
 
   // Login function
-  const login = useCallback(async (data: LoginFormData): Promise<void> => {
-    if (isLockedOut()) {
-      showToast(authToastMessages.loginTooManyAttempts);
-      setAuthState({
-        isLoading: false,
-        error: 'Zbyt wiele prób. Spróbuj ponownie za 15 minut',
-        successMessage: null,
-      });
-      return;
-    }
+  const login = useCallback(
+    async (data: LoginFormData): Promise<void> => {
+      if (isLockedOut()) {
+        showToast(authToastMessages.loginTooManyAttempts);
+        setAuthState({
+          isLoading: false,
+          error: "Zbyt wiele prób. Spróbuj ponownie za 15 minut",
+          successMessage: null,
+        });
+        return;
+      }
 
-    setAuthState({ isLoading: true, error: null, successMessage: null });
+      setAuthState({ isLoading: true, error: null, successMessage: null });
 
-    try {
-      const { data: authData, error } = await supabaseClient.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
-
-      if (error) {
-        handleFailedAttempt();
-
-        // Show specific error messages via toast
-        const errorMessage = translateError(error);
-        if (errorMessage.includes('Nieprawidłowy email lub hasło')) {
-          showToast(authToastMessages.loginError);
-        } else if (errorMessage.includes('Zbyt wiele prób')) {
-          showToast(authToastMessages.loginTooManyAttempts);
-        } else {
-          showToast({
-            type: 'error',
-            title: 'Błąd logowania',
-            description: errorMessage,
+      try {
+        const { data: authData, error } =
+          await supabaseClient.auth.signInWithPassword({
+            email: data.email,
+            password: data.password,
           });
+
+        if (error) {
+          handleFailedAttempt();
+
+          // Show specific error messages via toast
+          const errorMessage = translateError(error);
+          if (errorMessage.includes("Nieprawidłowy email lub hasło")) {
+            showToast(authToastMessages.loginError);
+          } else if (errorMessage.includes("Zbyt wiele prób")) {
+            showToast(authToastMessages.loginTooManyAttempts);
+          } else {
+            showToast({
+              type: "error",
+              title: "Błąd logowania",
+              description: errorMessage,
+            });
+          }
+
+          throw error;
         }
 
-        throw error;
-      }
+        if (authData.user && authData.session) {
+          clearFailedAttempts();
 
-      if (authData.user && authData.session) {
-        clearFailedAttempts();
+          // Set remember me cookie if requested
+          if (data.rememberMe) {
+            document.cookie = `remember_user=true; max-age=${30 * 24 * 60 * 60}; path=/; secure; samesite=strict`;
+          }
 
-        // Set remember me cookie if requested
-        if (data.rememberMe) {
-          document.cookie = `remember_user=true; max-age=${30 * 24 * 60 * 60}; path=/; secure; samesite=strict`;
+          // Show success toast and redirect
+          showToast(authToastMessages.loginSuccess);
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 1500);
         }
-
-        // Show success toast and redirect
-        showToast(authToastMessages.loginSuccess);
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1500);
+      } catch (error) {
+        setAuthState({
+          isLoading: false,
+          error: translateError(error as AuthError),
+          successMessage: null,
+        });
       }
-    } catch (error) {
-      setAuthState({
-        isLoading: false,
-        error: translateError(error as AuthError),
-        successMessage: null,
-      });
-    }
-  }, [isLockedOut, handleFailedAttempt, clearFailedAttempts, translateError, showToast]);
+    },
+    [
+      isLockedOut,
+      handleFailedAttempt,
+      clearFailedAttempts,
+      translateError,
+      showToast,
+    ],
+  );
 
   // Register function
-  const register = useCallback(async (data: RegisterFormData): Promise<void> => {
-    setAuthState({ isLoading: true, error: null, successMessage: null });
+  const register = useCallback(
+    async (data: RegisterFormData): Promise<void> => {
+      setAuthState({ isLoading: true, error: null, successMessage: null });
 
-    try {
-      const { data: authData, error } = await supabaseClient.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+      try {
+        const { data: authData, error } = await supabaseClient.auth.signUp({
+          email: data.email,
+          password: data.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
 
-      if (error) {
-        const errorMessage = translateError(error);
-        if (errorMessage.includes('już istnieje')) {
-          showToast(authToastMessages.registerEmailExists);
-        } else {
-          showToast({
-            type: 'error',
-            title: 'Błąd rejestracji',
-            description: errorMessage,
+        if (error) {
+          const errorMessage = translateError(error);
+          if (errorMessage.includes("już istnieje")) {
+            showToast(authToastMessages.registerEmailExists);
+          } else {
+            showToast({
+              type: "error",
+              title: "Błąd rejestracji",
+              description: errorMessage,
+            });
+          }
+          throw error;
+        }
+
+        if (authData.user) {
+          showToast(authToastMessages.registerSuccess);
+          setAuthState({
+            isLoading: false,
+            error: null,
+            successMessage:
+              "Sprawdź swoją skrzynkę email i kliknij link weryfikacyjny, aby aktywować konto.",
           });
         }
-        throw error;
+      } catch (error) {
+        setAuthState({
+          isLoading: false,
+          error: translateError(error as AuthError),
+          successMessage: null,
+        });
       }
+    },
+    [translateError, showToast],
+  );
 
-      if (authData.user) {
-        showToast(authToastMessages.registerSuccess);
+  // Reset password function
+  const resetPassword = useCallback(
+    async (data: ResetPasswordFormData): Promise<void> => {
+      setAuthState({ isLoading: true, error: null, successMessage: null });
+
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(
+          data.email,
+          {
+            redirectTo: `${window.location.origin}/auth/reset-password`,
+          },
+        );
+
+        if (error) {
+          showToast(authToastMessages.resetPasswordError);
+          throw error;
+        }
+
+        showToast(authToastMessages.resetPasswordSuccess);
         setAuthState({
           isLoading: false,
           error: null,
-          successMessage: 'Sprawdź swoją skrzynkę email i kliknij link weryfikacyjny, aby aktywować konto.',
+          successMessage:
+            "Link do resetowania hasła został wysłany na Twój adres email.",
+        });
+      } catch (error) {
+        setAuthState({
+          isLoading: false,
+          error: translateError(error as AuthError),
+          successMessage: null,
         });
       }
-    } catch (error) {
-      setAuthState({
-        isLoading: false,
-        error: translateError(error as AuthError),
-        successMessage: null,
-      });
-    }
-  }, [translateError, showToast]);
-
-  // Reset password function
-  const resetPassword = useCallback(async (data: ResetPasswordFormData): Promise<void> => {
-    setAuthState({ isLoading: true, error: null, successMessage: null });
-
-    try {
-      const { error } = await supabaseClient.auth.resetPasswordForEmail(data.email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      });
-
-      if (error) {
-        showToast(authToastMessages.resetPasswordError);
-        throw error;
-      }
-
-      showToast(authToastMessages.resetPasswordSuccess);
-      setAuthState({
-        isLoading: false,
-        error: null,
-        successMessage: 'Link do resetowania hasła został wysłany na Twój adres email.',
-      });
-    } catch (error) {
-      setAuthState({
-        isLoading: false,
-        error: translateError(error as AuthError),
-        successMessage: null,
-      });
-    }
-  }, [translateError, showToast]);
+    },
+    [translateError, showToast],
+  );
 
   // Google OAuth function
   const googleAuth = useCallback(async (): Promise<void> => {
@@ -253,7 +281,7 @@ export const useAuth = (): AuthHookReturn => {
 
     try {
       const { error } = await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
@@ -265,10 +293,10 @@ export const useAuth = (): AuthHookReturn => {
       }
 
       // OAuth will redirect, so we don't need to handle success here
-    } catch (error) {
+    } catch {
       setAuthState({
         isLoading: false,
-        error: 'Błąd autoryzacji Google. Spróbuj ponownie.',
+        error: "Błąd autoryzacji Google. Spróbuj ponownie.",
         successMessage: null,
       });
     }

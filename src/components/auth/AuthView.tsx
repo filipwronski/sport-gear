@@ -1,56 +1,62 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Toaster } from '../ui/sonner';
-import AuthTabs from './AuthTabs';
-import ResetPasswordForm from './ResetPasswordForm';
-import { useAuth } from './useAuth';
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Toaster } from "../ui/sonner";
+import AuthTabs from "./AuthTabs";
+import ResetPasswordForm from "./ResetPasswordForm";
+import { useAuth } from "./useAuth";
 
 export interface AuthViewProps {
   currentPath: string;
 }
 
 const AuthView: React.FC<AuthViewProps> = ({ currentPath }) => {
-  const [currentView, setCurrentView] = useState<'auth' | 'reset'>('auth');
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [currentView, setCurrentView] = useState<"auth" | "reset">("auth");
+  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   const { authState, clearError } = useAuth();
 
   // Parse current path to determine view
   useEffect(() => {
-    if (currentPath.includes('reset-password')) {
-      setCurrentView('reset');
+    if (currentPath.includes("reset-password")) {
+      setCurrentView("reset");
     } else {
-      setCurrentView('auth');
-      if (currentPath.includes('register')) {
-        setActiveTab('register');
+      setCurrentView("auth");
+      if (currentPath.includes("register")) {
+        setActiveTab("register");
       } else {
-        setActiveTab('login');
+        setActiveTab("login");
       }
     }
   }, [currentPath]);
 
   // Handle successful authentication
   const handleAuthSuccess = () => {
-    window.location.href = '/dashboard';
+    window.location.href = "/dashboard";
   };
 
   // Handle forgot password click
   const handleForgotPassword = () => {
-    setCurrentView('reset');
-    window.history.pushState({}, '', '/auth/reset-password');
+    setCurrentView("reset");
+    window.history.pushState({}, "", "/auth/reset-password");
   };
 
   // Handle back to login from reset password
   const handleBackToLogin = () => {
-    setCurrentView('auth');
-    setActiveTab('login');
-    window.history.pushState({}, '', '/auth/login');
+    setCurrentView("auth");
+    setActiveTab("login");
+    window.history.pushState({}, "", "/auth/login");
   };
 
   // Handle tab change
-  const handleTabChange = (tab: 'login' | 'register') => {
+  const handleTabChange = (tab: "login" | "register") => {
     setActiveTab(tab);
     clearError();
-    window.history.pushState({}, '', `/auth/${tab}`);
+    window.history.pushState({}, "", `/auth/${tab}`);
   };
 
   return (
@@ -79,14 +85,18 @@ const AuthView: React.FC<AuthViewProps> = ({ currentPath }) => {
         >
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">
-              {currentView === 'reset' ? 'Resetuj hasło' : activeTab === 'login' ? 'Zaloguj się' : 'Zarejestruj się'}
+              {currentView === "reset"
+                ? "Resetuj hasło"
+                : activeTab === "login"
+                  ? "Zaloguj się"
+                  : "Zarejestruj się"}
             </CardTitle>
             <CardDescription className="text-center">
-              {currentView === 'reset' 
-                ? 'Wprowadź swój adres email, aby otrzymać link do resetowania hasła'
-                : activeTab === 'login' 
-                ? 'Wprowadź swoje dane, aby się zalogować'
-                : 'Utwórz nowe konto, aby rozpocząć'}
+              {currentView === "reset"
+                ? "Wprowadź swój adres email, aby otrzymać link do resetowania hasła"
+                : activeTab === "login"
+                  ? "Wprowadź swoje dane, aby się zalogować"
+                  : "Utwórz nowe konto, aby rozpocząć"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -108,13 +118,15 @@ const AuthView: React.FC<AuthViewProps> = ({ currentPath }) => {
                 role="status"
                 aria-live="polite"
               >
-                <p className="text-sm text-green-600">{authState.successMessage}</p>
+                <p className="text-sm text-green-600">
+                  {authState.successMessage}
+                </p>
               </div>
             )}
 
             {/* Content based on current view */}
-            {currentView === 'reset' ? (
-              <ResetPasswordForm 
+            {currentView === "reset" ? (
+              <ResetPasswordForm
                 onSuccess={handleAuthSuccess}
                 onBack={handleBackToLogin}
               />
@@ -132,11 +144,11 @@ const AuthView: React.FC<AuthViewProps> = ({ currentPath }) => {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">
-            Korzystając z CycleGear, akceptujesz nasze{' '}
+            Korzystając z CycleGear, akceptujesz nasze{" "}
             <a href="/privacy" className="text-blue-600 hover:underline">
               Warunki użytkowania
-            </a>{' '}
-            i{' '}
+            </a>{" "}
+            i{" "}
             <a href="/privacy" className="text-blue-600 hover:underline">
               Politykę prywatności
             </a>
@@ -144,11 +156,7 @@ const AuthView: React.FC<AuthViewProps> = ({ currentPath }) => {
         </div>
 
         {/* Toast Notifications */}
-        <Toaster
-          position="top-right"
-          richColors
-          closeButton
-        />
+        <Toaster position="top-right" richColors closeButton />
       </div>
     </div>
   );

@@ -23,16 +23,23 @@ export class ServiceRecordService {
   async getServicesByBikeId(
     userId: string,
     bikeId: string,
-    params: any
+    params: any,
   ): Promise<ServicesListDTO> {
     try {
       // Simple query without complex joins for now
-      const { data: services, error, count } = await supabaseClient
+      const {
+        data: services,
+        error,
+        count,
+      } = await supabaseClient
         .from("service_records")
         .select("*", { count: "exact" })
         .eq("bike_id", bikeId)
         .limit(params.limit || 50)
-        .range(params.offset || 0, (params.offset || 0) + (params.limit || 50) - 1);
+        .range(
+          params.offset || 0,
+          (params.offset || 0) + (params.limit || 50) - 1,
+        );
 
       if (error) {
         console.error("[ServiceRecordService] Error fetching services:", error);
@@ -78,7 +85,10 @@ export class ServiceRecordService {
         .single();
 
       if (serviceError) {
-        console.error("[ServiceRecordService] Error creating service:", serviceError);
+        console.error(
+          "[ServiceRecordService] Error creating service:",
+          serviceError,
+        );
         throw new Error("Failed to create service record");
       }
 
@@ -189,13 +199,19 @@ export class ServiceRecordService {
       } else {
         switch (params.period) {
           case "month":
-            fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+            fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split("T")[0];
             break;
           case "quarter":
-            fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+            fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split("T")[0];
             break;
           case "year":
-            fromDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+            fromDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+              .toISOString()
+              .split("T")[0];
             break;
         }
       }
@@ -203,7 +219,9 @@ export class ServiceRecordService {
       // Get basic stats
       const { data, error } = await supabaseClient
         .from("service_records")
-        .select("cost, mileage_at_service, service_type, service_location, service_date")
+        .select(
+          "cost, mileage_at_service, service_type, service_location, service_date",
+        )
         .eq("bike_id", bikeId)
         .gte("service_date", fromDate)
         .lte("service_date", toDate);
@@ -215,10 +233,16 @@ export class ServiceRecordService {
 
       // Calculate stats
       const services = data || [];
-      const total_cost = services.reduce((sum, record) => sum + (record.cost || 0), 0);
+      const total_cost = services.reduce(
+        (sum, record) => sum + (record.cost || 0),
+        0,
+      );
       const total_services = services.length;
-      const mileages = services.map(r => r.mileage_at_service).sort((a, b) => a - b);
-      const total_mileage = mileages.length > 1 ? mileages[mileages.length - 1] - mileages[0] : 0;
+      const mileages = services
+        .map((r) => r.mileage_at_service)
+        .sort((a, b) => a - b);
+      const total_mileage =
+        mileages.length > 1 ? mileages[mileages.length - 1] - mileages[0] : 0;
       const cost_per_km = total_mileage > 0 ? total_cost / total_mileage : 0;
 
       // Group by type
@@ -234,13 +258,16 @@ export class ServiceRecordService {
         current.total_cost += cost;
       });
 
-      const breakdown_by_type = Array.from(typeMap.entries()).map(([service_type, stats]) => ({
-        service_type,
-        count: stats.count,
-        total_cost: stats.total_cost,
-        avg_cost: stats.count > 0 ? stats.total_cost / stats.count : 0,
-        percentage: total_cost > 0 ? (stats.total_cost / total_cost) * 100 : 0,
-      }));
+      const breakdown_by_type = Array.from(typeMap.entries()).map(
+        ([service_type, stats]) => ({
+          service_type,
+          count: stats.count,
+          total_cost: stats.total_cost,
+          avg_cost: stats.count > 0 ? stats.total_cost / stats.count : 0,
+          percentage:
+            total_cost > 0 ? (stats.total_cost / total_cost) * 100 : 0,
+        }),
+      );
 
       // Group by location
       const breakdown_by_location = {
@@ -263,7 +290,7 @@ export class ServiceRecordService {
         total_mileage,
         breakdown_by_type,
         breakdown_by_location,
-        timeline: []
+        timeline: [],
       };
     } catch (error) {
       console.error("[ServiceRecordService] Error:", error);

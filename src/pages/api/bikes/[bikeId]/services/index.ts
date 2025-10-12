@@ -1,11 +1,11 @@
-import type { APIRoute } from 'astro';
-import { z } from 'zod';
-import { ServiceRecordService } from '../../../../../services/service-record-working.service';
-import { 
+import type { APIRoute } from "astro";
+import { z } from "zod";
+import { ServiceRecordService } from "../../../../../services/service-record-working.service";
+import {
   getServicesParamsSchema,
   createServiceSchema,
-  bikeIdParamSchema
-} from '../../../../../lib/validation/service.schemas';
+  bikeIdParamSchema,
+} from "../../../../../lib/validation/service.schemas";
 
 /**
  * GET /api/bikes/{bikeId}/services
@@ -19,30 +19,32 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
         JSON.stringify({
           error: {
             code: "UNAUTHORIZED",
-            message: "Authentication required"
-          }
+            message: "Authentication required",
+          },
         }),
         {
           status: 401,
-          headers: { "Content-Type": "application/json" }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     // Validate bikeId parameter
-    const bikeIdValidation = bikeIdParamSchema.safeParse({ bikeId: params.bikeId });
+    const bikeIdValidation = bikeIdParamSchema.safeParse({
+      bikeId: params.bikeId,
+    });
     if (!bikeIdValidation.success) {
       return new Response(
         JSON.stringify({
           error: {
             code: "INVALID_UUID",
-            message: "Invalid bike ID format"
-          }
+            message: "Invalid bike ID format",
+          },
         }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -51,13 +53,13 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
     // Parse and validate query parameters
     const url = new URL(request.url);
     const queryParams = {
-      service_type: url.searchParams.get('service_type') || undefined,
-      service_location: url.searchParams.get('service_location') || undefined,
-      limit: url.searchParams.get('limit') || undefined,
-      offset: url.searchParams.get('offset') || undefined,
-      from_date: url.searchParams.get('from_date') || undefined,
-      to_date: url.searchParams.get('to_date') || undefined,
-      sort: url.searchParams.get('sort') || undefined
+      service_type: url.searchParams.get("service_type") || undefined,
+      service_location: url.searchParams.get("service_location") || undefined,
+      limit: url.searchParams.get("limit") || undefined,
+      offset: url.searchParams.get("offset") || undefined,
+      from_date: url.searchParams.get("from_date") || undefined,
+      to_date: url.searchParams.get("to_date") || undefined,
+      sort: url.searchParams.get("sort") || undefined,
     };
 
     // Validate query parameters with Zod
@@ -68,31 +70,30 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
     const result = await serviceRecordService.getServicesByBikeId(
       locals.userId,
       bikeId,
-      validatedParams
+      validatedParams,
     );
 
     // Return successful response with cache headers
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'private, max-age=300', // 5 minutes cache
-      }
+        "Content-Type": "application/json",
+        "Cache-Control": "private, max-age=300", // 5 minutes cache
+      },
     });
-
   } catch (error) {
     console.error("Service endpoint error:", error);
     return new Response(
       JSON.stringify({
         error: {
           code: "INTERNAL_ERROR",
-          message: "An unexpected error occurred"
-        }
+          message: "An unexpected error occurred",
+        },
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" }
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 };
@@ -109,30 +110,32 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
         JSON.stringify({
           error: {
             code: "UNAUTHORIZED",
-            message: "Authentication required"
-          }
+            message: "Authentication required",
+          },
         }),
         {
           status: 401,
-          headers: { "Content-Type": "application/json" }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     // Validate bikeId parameter
-    const bikeIdValidation = bikeIdParamSchema.safeParse({ bikeId: params.bikeId });
+    const bikeIdValidation = bikeIdParamSchema.safeParse({
+      bikeId: params.bikeId,
+    });
     if (!bikeIdValidation.success) {
       return new Response(
         JSON.stringify({
           error: {
             code: "INVALID_UUID",
-            message: "Invalid bike ID format"
-          }
+            message: "Invalid bike ID format",
+          },
         }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -147,13 +150,13 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
         JSON.stringify({
           error: {
             code: "VALIDATION_ERROR",
-            message: "Request body must be valid JSON"
-          }
+            message: "Request body must be valid JSON",
+          },
         }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -165,13 +168,13 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
           error: {
             code: "VALIDATION_ERROR",
             message: "Invalid request data",
-            details: validationResult.error.errors
-          }
+            details: validationResult.error.errors,
+          },
         }),
         {
           status: 400,
-          headers: { "Content-Type": "application/json" }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -182,30 +185,29 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
     const result = await serviceRecordService.createService(
       locals.userId,
       bikeId,
-      validatedBody
+      validatedBody,
     );
 
     // Return successful response
     return new Response(JSON.stringify(result), {
       status: 201,
       headers: {
-        'Content-Type': 'application/json',
-      }
+        "Content-Type": "application/json",
+      },
     });
-
   } catch (error) {
     console.error("Service endpoint error:", error);
     return new Response(
       JSON.stringify({
         error: {
           code: "INTERNAL_ERROR",
-          message: "An unexpected error occurred"
-        }
+          message: "An unexpected error occurred",
+        },
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" }
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 };

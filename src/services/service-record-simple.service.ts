@@ -1,8 +1,5 @@
 import { supabaseClient } from "../db/supabase.client";
-import type {
-  ServiceRecordDTO,
-  ServicesListDTO
-} from "../types";
+import type { ServiceRecordDTO, ServicesListDTO } from "../types";
 
 /**
  * Simplified ServiceRecordService for testing
@@ -14,15 +11,22 @@ export class ServiceRecordService {
   async getServicesByBikeId(
     userId: string,
     bikeId: string,
-    params: any
+    params: any,
   ): Promise<ServicesListDTO> {
     // Simple query without complex joins
-    const { data: services, error, count } = await supabaseClient
+    const {
+      data: services,
+      error,
+      count,
+    } = await supabaseClient
       .from("service_records")
       .select("*", { count: "exact" })
       .eq("bike_id", bikeId)
       .limit(params.limit || 50)
-      .range(params.offset || 0, (params.offset || 0) + (params.limit || 50) - 1);
+      .range(
+        params.offset || 0,
+        (params.offset || 0) + (params.limit || 50) - 1,
+      );
 
     if (error) {
       console.error("[ServiceRecordService] Error:", error);

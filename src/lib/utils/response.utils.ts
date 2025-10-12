@@ -7,7 +7,7 @@ interface ApiErrorResponse {
   error: {
     code: string;
     message: string;
-    details?: Array<{ field: string; message: string }>;
+    details?: { field: string; message: string }[];
   };
 }
 
@@ -19,7 +19,7 @@ export function createErrorResponse(
   code: string,
   message: string,
   status: number,
-  details?: Array<{ field: string; message: string }>
+  details?: { field: string; message: string }[],
 ): Response {
   const body: ApiErrorResponse = {
     error: {
@@ -31,7 +31,7 @@ export function createErrorResponse(
 
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
   });
 }
 
@@ -39,13 +39,13 @@ export function createErrorResponse(
  * Creates a successful response with data
  * Used for GET, POST, PUT endpoints that return data
  */
-export function createSuccessResponse<T>(data: T, status: number = 200): Response {
+export function createSuccessResponse<T>(data: T, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 
-      'Content-Type': 'application/json',
+    headers: {
+      "Content-Type": "application/json",
       // Cache private data for 5 minutes (as per plan)
-      'Cache-Control': 'private, max-age=300'
+      "Cache-Control": "private, max-age=300",
     },
   });
 }
@@ -62,12 +62,15 @@ export function createNoContentResponse(): Response {
  * Creates a 201 Created response with Location header
  * Used for POST endpoints that create new resources
  */
-export function createCreatedResponse<T>(data: T, resourceId: string): Response {
+export function createCreatedResponse<T>(
+  data: T,
+  resourceId: string,
+): Response {
   return new Response(JSON.stringify(data), {
     status: 201,
-    headers: { 
-      'Content-Type': 'application/json',
-      'Location': `/api/locations/${resourceId}`
+    headers: {
+      "Content-Type": "application/json",
+      Location: `/api/locations/${resourceId}`,
     },
   });
 }

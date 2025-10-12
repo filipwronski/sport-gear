@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../db/database.types';
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "../db/database.types";
 import type {
   ServiceReminderDTO,
   CreateReminderCommand,
@@ -7,35 +7,43 @@ import type {
   DefaultIntervalDTO,
   GetRemindersParams,
   ServiceTypeEnum,
-  ReminderStatusEnum
-} from '../types';
+  ReminderStatusEnum,
+} from "../types";
 
 // Custom error classes for better error handling
 export class BikeNotFoundError extends Error {
   constructor(bikeId: string) {
     super(`Bike with ID ${bikeId} does not exist or you don't have access`);
-    this.name = 'BikeNotFoundError';
+    this.name = "BikeNotFoundError";
   }
 }
 
 export class ReminderNotFoundError extends Error {
   constructor(reminderId?: string) {
-    super(reminderId ? `Reminder with ID ${reminderId} not found` : 'Reminder not found');
-    this.name = 'ReminderNotFoundError';
+    super(
+      reminderId
+        ? `Reminder with ID ${reminderId} not found`
+        : "Reminder not found",
+    );
+    this.name = "ReminderNotFoundError";
   }
 }
 
 export class ReminderConflictError extends Error {
   constructor(serviceType: ServiceTypeEnum) {
-    super(`Active reminder for service type '${serviceType}' already exists for this bike`);
-    this.name = 'ReminderConflictError';
+    super(
+      `Active reminder for service type '${serviceType}' already exists for this bike`,
+    );
+    this.name = "ReminderConflictError";
   }
 }
 
 export class ServiceRecordNotFoundError extends Error {
   constructor(serviceId: string) {
-    super(`Service record with ID ${serviceId} not found or doesn't belong to this bike`);
-    this.name = 'ServiceRecordNotFoundError';
+    super(
+      `Service record with ID ${serviceId} not found or doesn't belong to this bike`,
+    );
+    this.name = "ServiceRecordNotFoundError";
   }
 }
 
@@ -52,45 +60,49 @@ export class BikeReminderService {
   async getReminders(
     userId: string,
     bikeId: string,
-    params: GetRemindersParams = {}
+    params: GetRemindersParams = {},
   ): Promise<ServiceReminderDTO[]> {
     // Verify bike ownership first
     await this.verifyBikeOwnership(userId, bikeId);
 
     // Build query with filters
     let query = this.supabase
-      .from('service_reminders')
-      .select(`
+      .from("service_reminders")
+      .select(
+        `
         *,
         bikes!inner(current_mileage)
-      `)
-      .eq('bike_id', bikeId);
+      `,
+      )
+      .eq("bike_id", bikeId);
 
     // Apply status filter
-    if (params.status && params.status !== 'all') {
-      if (params.status === 'active') {
-        query = query.is('completed_at', null);
-      } else if (params.status === 'completed') {
-        query = query.not('completed_at', 'is', null);
+    if (params.status && params.status !== "all") {
+      if (params.status === "active") {
+        query = query.is("completed_at", null);
+      } else if (params.status === "completed") {
+        query = query.not("completed_at", "is", null);
       }
       // For 'overdue' we'll filter after computing the status
     }
 
     // Apply service type filter
     if (params.service_type) {
-      query = query.eq('service_type', params.service_type);
+      query = query.eq("service_type", params.service_type);
     }
 
     // Apply sorting
-    const sortField = params.sort?.includes('km_remaining') ? 'triggered_at_mileage' : 'created_at';
-    const sortDirection = params.sort?.includes('desc') ? false : true;
+    const sortField = params.sort?.includes("km_remaining")
+      ? "triggered_at_mileage"
+      : "created_at";
+    const sortDirection = params.sort?.includes("desc") ? false : true;
     query = query.order(sortField, { ascending: sortDirection });
 
     const { data, error } = await query;
 
     if (error) {
-      console.error('Error fetching reminders:', error);
-      throw new Error('Failed to fetch reminders');
+      console.error("Error fetching reminders:", error);
+      throw new Error("Failed to fetch reminders");
     }
 
     if (!data) {
@@ -98,11 +110,11 @@ export class BikeReminderService {
     }
 
     // Transform data and compute fields
-    const reminders = data.map(row => this.transformToReminderDTO(row));
+    const reminders = data.map((row) => this.transformToReminderDTO(row));
 
     // Apply overdue filter if needed (after computing status)
-    if (params.status === 'overdue') {
-      return reminders.filter(r => r.status === 'overdue');
+    if (params.status === "overdue") {
+      return reminders.filter((r) => r.status === "overdue");
     }
 
     return reminders;
@@ -114,7 +126,7 @@ export class BikeReminderService {
   async createReminder(
     userId: string,
     bikeId: string,
-    command: CreateReminderCommand
+    command: CreateReminderCommand,
   ): Promise<ServiceReminderDTO> {
     // Verify bike ownership and get current mileage
     const bike = await this.verifyBikeOwnership(userId, bikeId);
@@ -122,11 +134,11 @@ export class BikeReminderService {
 
     // Check for existing active reminder of the same type
     const { data: existingReminder } = await this.supabase
-      .from('service_reminders')
-      .select('id')
-      .eq('bike_id', bikeId)
-      .eq('service_type', command.service_type)
-      .is('completed_at', null)
+      .from("service_reminders")
+      .select("id")
+      .eq("bike_id", bikeId)
+      .eq("service_type", command.service_type)
+      .is("completed_at", null)
       .single();
 
     if (existingReminder) {
@@ -135,22 +147,24 @@ export class BikeReminderService {
 
     // Insert new reminder
     const { data, error } = await this.supabase
-      .from('service_reminders')
+      .from("service_reminders")
       .insert({
         bike_id: bikeId,
         service_type: command.service_type,
         interval_km: command.interval_km,
-        triggered_at_mileage: currentMileage
+        triggered_at_mileage: currentMileage,
       })
-      .select(`
+      .select(
+        `
         *,
         bikes!inner(current_mileage)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
-      console.error('Error creating reminder:', error);
-      throw new Error('Failed to create reminder');
+      console.error("Error creating reminder:", error);
+      throw new Error("Failed to create reminder");
     }
 
     return this.transformToReminderDTO(data);
@@ -163,17 +177,17 @@ export class BikeReminderService {
     userId: string,
     bikeId: string,
     reminderId: string,
-    command: CompleteReminderCommand
+    command: CompleteReminderCommand,
   ): Promise<ServiceReminderDTO> {
     // Verify bike ownership
     await this.verifyBikeOwnership(userId, bikeId);
 
     // Verify reminder exists and belongs to this bike
     const { data: reminder } = await this.supabase
-      .from('service_reminders')
-      .select('*')
-      .eq('id', reminderId)
-      .eq('bike_id', bikeId)
+      .from("service_reminders")
+      .select("*")
+      .eq("id", reminderId)
+      .eq("bike_id", bikeId)
       .single();
 
     if (!reminder) {
@@ -182,10 +196,10 @@ export class BikeReminderService {
 
     // Verify service record exists and belongs to the same bike
     const { data: serviceRecord } = await this.supabase
-      .from('service_records')
-      .select('id, bike_id, service_type')
-      .eq('id', command.completed_service_id)
-      .eq('bike_id', bikeId)
+      .from("service_records")
+      .select("id, bike_id, service_type")
+      .eq("id", command.completed_service_id)
+      .eq("bike_id", bikeId)
       .single();
 
     if (!serviceRecord) {
@@ -194,22 +208,24 @@ export class BikeReminderService {
 
     // Update reminder as completed
     const { data, error } = await this.supabase
-      .from('service_reminders')
+      .from("service_reminders")
       .update({
         completed_at: new Date().toISOString(),
         completed_service_id: command.completed_service_id,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
-      .eq('id', reminderId)
-      .select(`
+      .eq("id", reminderId)
+      .select(
+        `
         *,
         bikes!inner(current_mileage)
-      `)
+      `,
+      )
       .single();
 
     if (error) {
-      console.error('Error completing reminder:', error);
-      throw new Error('Failed to complete reminder');
+      console.error("Error completing reminder:", error);
+      throw new Error("Failed to complete reminder");
     }
 
     return this.transformToReminderDTO(data);
@@ -221,20 +237,20 @@ export class BikeReminderService {
   async deleteReminder(
     userId: string,
     bikeId: string,
-    reminderId: string
+    reminderId: string,
   ): Promise<void> {
     // Verify bike ownership
     await this.verifyBikeOwnership(userId, bikeId);
 
     const { error } = await this.supabase
-      .from('service_reminders')
+      .from("service_reminders")
       .delete()
-      .eq('id', reminderId)
-      .eq('bike_id', bikeId);
+      .eq("id", reminderId)
+      .eq("bike_id", bikeId);
 
     if (error) {
-      console.error('Error deleting reminder:', error);
-      throw new Error('Failed to delete reminder');
+      console.error("Error deleting reminder:", error);
+      throw new Error("Failed to delete reminder");
     }
   }
 
@@ -243,13 +259,13 @@ export class BikeReminderService {
    */
   async getDefaultIntervals(): Promise<DefaultIntervalDTO[]> {
     const { data, error } = await this.supabase
-      .from('default_service_intervals')
-      .select('*')
-      .order('default_interval_km', { ascending: true });
+      .from("default_service_intervals")
+      .select("*")
+      .order("default_interval_km", { ascending: true });
 
     if (error) {
-      console.error('Error fetching default intervals:', error);
-      throw new Error('Failed to fetch default intervals');
+      console.error("Error fetching default intervals:", error);
+      throw new Error("Failed to fetch default intervals");
     }
 
     return data || [];
@@ -260,10 +276,10 @@ export class BikeReminderService {
    */
   private async verifyBikeOwnership(userId: string, bikeId: string) {
     const { data: bike, error } = await this.supabase
-      .from('bikes')
-      .select('id, current_mileage')
-      .eq('id', bikeId)
-      .eq('user_id', userId)
+      .from("bikes")
+      .select("id, current_mileage")
+      .eq("id", bikeId)
+      .eq("user_id", userId)
       .single();
 
     if (error || !bike) {
@@ -284,13 +300,13 @@ export class BikeReminderService {
     // Compute status
     let status: ReminderStatusEnum;
     if (row.completed_at) {
-      status = 'completed';
+      status = "completed";
     } else if (kmRemaining < 0) {
-      status = 'overdue';
+      status = "overdue";
     } else if (kmRemaining <= 200) {
-      status = 'active';
+      status = "active";
     } else {
-      status = 'upcoming';
+      status = "upcoming";
     }
 
     return {
@@ -306,7 +322,7 @@ export class BikeReminderService {
       completed_at: row.completed_at,
       completed_service_id: row.completed_service_id,
       created_at: row.created_at,
-      updated_at: row.updated_at
+      updated_at: row.updated_at,
     };
   }
 }

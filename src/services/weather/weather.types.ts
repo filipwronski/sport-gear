@@ -35,10 +35,10 @@ export interface OpenWeatherCurrentResponse {
   wind: {
     speed: number; // m/s
   };
-  weather: Array<{
+  weather: {
     description: string;
     icon: string;
-  }>;
+  }[];
   rain?: {
     "1h": number; // mm/h
   };
@@ -48,7 +48,7 @@ export interface OpenWeatherCurrentResponse {
  * OpenWeather API forecast response
  */
 export interface OpenWeatherForecastResponse {
-  list: Array<{
+  list: {
     dt: number; // Unix timestamp
     main: {
       temp: number;
@@ -58,22 +58,25 @@ export interface OpenWeatherForecastResponse {
     wind: {
       speed: number; // m/s
     };
-    weather: Array<{
+    weather: {
       description: string;
       icon: string;
-    }>;
+    }[];
     rain?: {
       "3h": number; // mm/3h
     };
     dt_txt: string; // "2023-10-15 12:00:00"
-  }>;
+  }[];
 }
 
 /**
  * Weather API error types
  */
 export class WeatherAPIError extends Error {
-  constructor(message: string, public statusCode?: number) {
+  constructor(
+    message: string,
+    public statusCode?: number,
+  ) {
     super(message);
     this.name = "WeatherAPIError";
   }

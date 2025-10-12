@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { ValidationError } from '../errors';
+import { z } from "zod";
+import { ValidationError } from "../errors";
 
 /**
  * Weather Forecast Validation Schemas
@@ -11,7 +11,7 @@ import { ValidationError } from '../errors';
  * Validates location_id as valid UUID v4
  */
 export const GetForecastParamsSchema = z.object({
-  location_id: z.string().uuid({ message: "location_id must be valid UUID" })
+  location_id: z.string().uuid({ message: "location_id must be valid UUID" }),
 });
 
 /**
@@ -27,15 +27,15 @@ export type GetForecastParams = z.infer<typeof GetForecastParamsSchema>;
  */
 export function validateForecastParams(params: unknown): GetForecastParams {
   const result = GetForecastParamsSchema.safeParse(params);
-  
+
   if (!result.success) {
-    const validationDetails = result.error.issues.map(issue => ({
-      field: issue.path.join('.'),
-      message: issue.message
+    const validationDetails = result.error.issues.map((issue) => ({
+      field: issue.path.join("."),
+      message: issue.message,
     }));
-    
-    throw new ValidationError('Invalid forecast parameters', validationDetails);
+
+    throw new ValidationError("Invalid forecast parameters", validationDetails);
   }
-  
+
   return result.data;
 }

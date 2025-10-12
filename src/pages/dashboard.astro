@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/navigation/Navbar";
+import DashboardContainer from "../components/dashboard/DashboardContainer";
+
+const userId = Astro.locals.userId;
+if (!userId) {
+  return Astro.redirect("/");
+}
+
+const url = new URL(Astro.request.url);
+const locationId = url.searchParams.get("location_id") || undefined;
+---
+
+<Layout title="Dashboard - CycleGear">
+  <Navbar client:load userId={userId} />
+  <main class="min-h-screen bg-gray-50 pb-20 md:pb-0">
+    <DashboardContainer
+      client:load
+      userId={userId}
+      initialLocationId={locationId}
+    />
+  </main>
+</Layout>

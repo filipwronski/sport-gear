@@ -9,11 +9,11 @@
 export class LocationNotFoundError extends Error {
   constructor(locationId?: string) {
     super(
-      locationId 
+      locationId
         ? `Location '${locationId}' not found or does not belong to user`
-        : 'User has no default location configured. Please set up a location first.'
+        : "User has no default location configured. Please set up a location first.",
     );
-    this.name = 'LocationNotFoundError';
+    this.name = "LocationNotFoundError";
   }
 }
 
@@ -23,7 +23,7 @@ export class LocationNotFoundError extends Error {
 export class WeatherServiceError extends Error {
   constructor(message: string) {
     super(`Weather service error: ${message}`);
-    this.name = 'WeatherServiceError';
+    this.name = "WeatherServiceError";
   }
 }
 
@@ -33,7 +33,7 @@ export class WeatherServiceError extends Error {
 export class EquipmentServiceError extends Error {
   constructor(message: string) {
     super(`Equipment service error: ${message}`);
-    this.name = 'EquipmentServiceError';
+    this.name = "EquipmentServiceError";
   }
 }
 
@@ -43,6 +43,6 @@ export class EquipmentServiceError extends Error {
 export class CommunityServiceError extends Error {
   constructor(message: string) {
     super(`Community service error: ${message}`);
-    this.name = 'CommunityServiceError';
+    this.name = "CommunityServiceError";
   }
 }

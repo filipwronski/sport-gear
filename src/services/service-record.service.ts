@@ -141,7 +141,10 @@ export class ServiceRecordService {
         .single();
 
       if (serviceError) {
-        console.error("[ServiceRecordService] Error creating service:", serviceError);
+        console.error(
+          "[ServiceRecordService] Error creating service:",
+          serviceError,
+        );
         throw new Error("Failed to create service record");
       }
 
@@ -154,11 +157,15 @@ export class ServiceRecordService {
             service_type: command.service_type,
             triggered_at_mileage: command.mileage_at_service,
             interval_km: command.reminder_interval_km,
-            target_mileage: command.mileage_at_service + command.reminder_interval_km,
+            target_mileage:
+              command.mileage_at_service + command.reminder_interval_km,
           });
 
         if (reminderError) {
-          console.error("[ServiceRecordService] Error creating reminder:", reminderError);
+          console.error(
+            "[ServiceRecordService] Error creating reminder:",
+            reminderError,
+          );
           // Don't fail the service creation if reminder fails
         }
       }
@@ -199,7 +206,10 @@ export class ServiceRecordService {
         serviceId, // Exclude current service from check
       );
 
-      if (lastServiceMileage && command.mileage_at_service < lastServiceMileage) {
+      if (
+        lastServiceMileage &&
+        command.mileage_at_service < lastServiceMileage
+      ) {
         throw new MileageLowerThanPreviousError(
           command.mileage_at_service,
           lastServiceMileage,
@@ -344,7 +354,10 @@ export class ServiceRecordService {
   /**
    * Verifies that a bike belongs to the specified user
    */
-  private async verifyBikeOwnership(userId: string, bikeId: string): Promise<void> {
+  private async verifyBikeOwnership(
+    userId: string,
+    bikeId: string,
+  ): Promise<void> {
     const { data, error } = await this.getClient()
       .from("bikes")
       .select("id")
@@ -493,7 +506,14 @@ export class ServiceRecordService {
       return this.getTotalStatsFallback(bikeId, dateRange);
     }
 
-    return data || { total_cost: 0, total_services: 0, cost_per_km: 0, total_mileage: 0 };
+    return (
+      data || {
+        total_cost: 0,
+        total_services: 0,
+        cost_per_km: 0,
+        total_mileage: 0,
+      }
+    );
   }
 
   /**
@@ -516,13 +536,24 @@ export class ServiceRecordService {
       .lte("service_date", dateRange.to);
 
     if (error || !data) {
-      return { total_cost: 0, total_services: 0, cost_per_km: 0, total_mileage: 0 };
+      return {
+        total_cost: 0,
+        total_services: 0,
+        cost_per_km: 0,
+        total_mileage: 0,
+      };
     }
 
-    const total_cost = data.reduce((sum, record) => sum + (record.cost || 0), 0);
+    const total_cost = data.reduce(
+      (sum, record) => sum + (record.cost || 0),
+      0,
+    );
     const total_services = data.length;
-    const mileages = data.map(r => r.mileage_at_service).sort((a, b) => a - b);
-    const total_mileage = mileages.length > 1 ? mileages[mileages.length - 1] - mileages[0] : 0;
+    const mileages = data
+      .map((r) => r.mileage_at_service)
+      .sort((a, b) => a - b);
+    const total_mileage =
+      mileages.length > 1 ? mileages[mileages.length - 1] - mileages[0] : 0;
     const cost_per_km = total_mileage > 0 ? total_cost / total_mileage : 0;
 
     return { total_cost, total_services, cost_per_km, total_mileage };
@@ -547,7 +578,10 @@ export class ServiceRecordService {
     }
 
     // Group by service type
-    const typeMap = new Map<ServiceTypeEnum, { count: number; total_cost: number }>();
+    const typeMap = new Map<
+      ServiceTypeEnum,
+      { count: number; total_cost: number }
+    >();
 
     data.forEach((record) => {
       const type = record.service_type as ServiceTypeEnum;
@@ -605,7 +639,8 @@ export class ServiceRecordService {
     };
 
     data.forEach((record) => {
-      const location = (record.service_location as ServiceLocationEnum) || "samodzielnie";
+      const location =
+        (record.service_location as ServiceLocationEnum) || "samodzielnie";
       const cost = record.cost || 0;
 
       breakdown[location].count += 1;

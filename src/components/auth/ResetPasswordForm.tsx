@@ -1,27 +1,27 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Mail, ArrowLeft } from 'lucide-react';
-import { useAuth, type ResetPasswordFormData } from './useAuth';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Mail, ArrowLeft } from "lucide-react";
+import { useAuth, type ResetPasswordFormData } from "./useAuth";
 
 export interface ResetPasswordFormProps {
-  onSuccess: () => void;
   onBack: () => void;
 }
 
-const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSuccess, onBack }) => {
+const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
+  onBack,
+}) => {
   const { authState, resetPassword } = useAuth();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<ResetPasswordFormData>({
     defaultValues: {
-      email: '',
+      email: "",
     },
   });
 
@@ -29,7 +29,7 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSuccess, onBack
     try {
       await resetPassword(data);
       // Success message is handled by useAuth hook
-    } catch (error) {
+    } catch {
       // Error is handled by useAuth hook
     }
   };
@@ -46,11 +46,11 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSuccess, onBack
             type="email"
             placeholder="wprowadź swój email"
             className="pl-10"
-            {...register('email', {
-              required: 'Email jest wymagany',
+            {...register("email", {
+              required: "Email jest wymagany",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Wprowadź prawidłowy adres email',
+                message: "Wprowadź prawidłowy adres email",
               },
             })}
           />
@@ -61,18 +61,14 @@ const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onSuccess, onBack
       </div>
 
       {/* Reset Button */}
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={authState.isLoading}
-      >
+      <Button type="submit" className="w-full" disabled={authState.isLoading}>
         {authState.isLoading ? (
           <div className="flex items-center space-x-2">
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             <span>Wysyłanie...</span>
           </div>
         ) : (
-          'Wyślij link resetujący'
+          "Wyślij link resetujący"
         )}
       </Button>
 

@@ -1,6 +1,6 @@
 /**
  * GET /api/recommendations
- * 
+ *
  * Returns personalized cycling outfit recommendations based on weather conditions,
  * user preferences, and activity type. Uses hybrid approach: fast rule-based algorithm
  * with optional AI enhancement for additional tips.
@@ -63,7 +63,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const params = validated.data;
 
     // 3. Verify location ownership
-    const locationExists = await verifyLocationOwnership(params.location_id, userId);
+    const locationExists = await verifyLocationOwnership(
+      params.location_id,
+      userId,
+    );
     if (!locationExists) {
       return createErrorResponse({
         code: "LOCATION_NOT_FOUND",
@@ -169,7 +172,7 @@ async function verifyLocationOwnership(
 ): Promise<boolean> {
   // Use service client in development to bypass RLS issues
   const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;
-  
+
   const { data, error } = await client
     .from("user_locations")
     .select("id")
@@ -187,7 +190,7 @@ async function verifyLocationOwnership(
 async function getUserProfile(userId: string) {
   // Use service client in development to bypass RLS issues
   const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;
-  
+
   const { data, error } = await client
     .from("profiles")
     .select("thermal_adjustment, thermal_preferences")

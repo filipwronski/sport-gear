@@ -1,4 +1,4 @@
-import { supabaseClient } from '../db/supabase.client';
+import { supabaseClient } from "../db/supabase.client";
 import type {
   Database,
   ProfileDTO,
@@ -13,15 +13,16 @@ import type {
   ThermalPreferences,
   ReputationBadgeEnum,
   Coordinates,
-} from '../types';
-import { NotFoundErrorWithStatus, InternalServerError } from '../lib/errors';
+} from "../types";
+import { NotFoundErrorWithStatus, InternalServerError } from "../lib/errors";
 
-type ProfileRow = Database['public']['Tables']['profiles']['Row'];
-type LocationRow = Database['public']['Tables']['user_locations']['Row'];
-type BikeRow = Database['public']['Tables']['bikes']['Row'];
-type ServiceRecordRow = Database['public']['Tables']['service_records']['Row'];
-type ServiceReminderRow = Database['public']['Tables']['service_reminders']['Row'];
-type FeedbackRow = Database['public']['Tables']['outfit_feedbacks']['Row'];
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
+type LocationRow = Database["public"]["Tables"]["user_locations"]["Row"];
+type BikeRow = Database["public"]["Tables"]["bikes"]["Row"];
+type ServiceRecordRow = Database["public"]["Tables"]["service_records"]["Row"];
+type ServiceReminderRow =
+  Database["public"]["Tables"]["service_reminders"]["Row"];
+type FeedbackRow = Database["public"]["Tables"]["outfit_feedbacks"]["Row"];
 
 /**
  * ProfileService - Business logic layer for user profile management
@@ -44,32 +45,34 @@ export class ProfileService {
    */
   async getProfile(userId: string): Promise<ProfileDTO> {
     const { data, error } = await supabaseClient
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
       .single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
+      if (error.code === "PGRST116") {
         // Profile doesn't exist, return mock profile for testing
-        console.log(`Profile not found for user: ${userId}, returning mock profile`);
+        console.log(
+          `Profile not found for user: ${userId}, returning mock profile`,
+        );
         return {
           id: userId,
-          display_name: 'Mock Test User',
+          display_name: "Mock Test User",
           thermal_preferences: null,
           thermal_adjustment: null,
           feedback_count: 0,
           pseudonym: null,
           reputation_badge: null,
           share_with_community: false,
-          units: 'metric',
+          units: "metric",
           default_location_id: null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
       }
-      console.error('Error fetching profile:', error);
-      throw new InternalServerError('Failed to fetch profile');
+      console.error("Error fetching profile:", error);
+      throw new InternalServerError("Failed to fetch profile");
     }
 
     return this.transformRowToDTO(data);
@@ -81,13 +84,13 @@ export class ProfileService {
    */
   private async createProfile(userId: string): Promise<ProfileDTO> {
     const { data, error } = await supabaseClient
-      .from('profiles')
+      .from("profiles")
       .insert({
         id: userId,
         display_name: null,
         thermal_preferences: null,
         share_with_community: false,
-        units: 'metric',
+        units: "metric",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
@@ -95,8 +98,8 @@ export class ProfileService {
       .single();
 
     if (error) {
-      console.error('Error creating profile:', error);
-      throw new InternalServerError('Failed to create profile');
+      console.error("Error creating profile:", error);
+      throw new InternalServerError("Failed to create profile");
     }
 
     return this.transformRowToDTO(data);
@@ -113,28 +116,34 @@ export class ProfileService {
    */
   async updateProfile(
     userId: string,
-    command: UpdateProfileCommand
+    command: UpdateProfileCommand,
   ): Promise<ProfileDTO> {
     // First, try to get the existing profile (this will return mock if not exists)
     let currentProfile: ProfileDTO;
     try {
       currentProfile = await this.getProfile(userId);
     } catch (error) {
-      throw new InternalServerError('Failed to fetch current profile for update');
+      throw new InternalServerError(
+        "Failed to fetch current profile for update",
+      );
     }
 
-    // For testing purposes, if this is a mock profile (no real DB record), 
+    // For testing purposes, if this is a mock profile (no real DB record),
     // just return updated mock data
-    if (!currentProfile.created_at || currentProfile.display_name === 'Mock Test User') {
-      console.log('Updating mock profile with new data');
+    if (
+      !currentProfile.created_at ||
+      currentProfile.display_name === "Mock Test User"
+    ) {
+      console.log("Updating mock profile with new data");
       return {
         ...currentProfile,
         ...command,
         updated_at: new Date().toISOString(),
         // Handle pseudonym generation for mock profile
-        pseudonym: command.share_with_community && !currentProfile.pseudonym 
-          ? await this.generatePseudonym() 
-          : currentProfile.pseudonym,
+        pseudonym:
+          command.share_with_community && !currentProfile.pseudonym
+            ? await this.generatePseudonym()
+            : currentProfile.pseudonym,
       };
     }
 
@@ -160,9 +169,9 @@ export class ProfileService {
       // If enabling sharing and no pseudonym exists, generate one
       if (command.share_with_community) {
         const { data: currentProfileData } = await supabaseClient
-          .from('profiles')
-          .select('pseudonym')
-          .eq('id', userId)
+          .from("profiles")
+          .select("pseudonym")
+          .eq("id", userId)
           .single();
 
         if (!currentProfileData?.pseudonym) {
@@ -173,15 +182,15 @@ export class ProfileService {
 
     // Execute update
     const { data, error } = await supabaseClient
-      .from('profiles')
+      .from("profiles")
       .update(updateData)
-      .eq('id', userId)
+      .eq("id", userId)
       .select()
       .single();
 
     if (error) {
-      console.error('Error updating profile:', error);
-      throw new InternalServerError('Failed to update profile');
+      console.error("Error updating profile:", error);
+      throw new InternalServerError("Failed to update profile");
     }
 
     return this.transformRowToDTO(data);
@@ -227,8 +236,8 @@ export class ProfileService {
         export_timestamp: new Date().toISOString(),
       };
     } catch (error) {
-      console.error('Error exporting user data:', error);
-      throw new InternalServerError('Failed to export user data');
+      console.error("Error exporting user data:", error);
+      throw new InternalServerError("Failed to export user data");
     }
   }
 
@@ -246,13 +255,13 @@ export class ProfileService {
 
     // Delete profile (CASCADE will handle related records)
     const { error } = await supabaseClient
-      .from('profiles')
+      .from("profiles")
       .delete()
-      .eq('id', userId);
+      .eq("id", userId);
 
     if (error) {
-      console.error('Error deleting account:', error);
-      throw new InternalServerError('Failed to delete account');
+      console.error("Error deleting account:", error);
+      throw new InternalServerError("Failed to delete account");
     }
 
     // Note: shared_outfits with pseudonym will remain (anonymized)
@@ -277,7 +286,7 @@ export class ProfileService {
       pseudonym: row.pseudonym,
       reputation_badge: row.reputation_badge as ReputationBadgeEnum | null,
       share_with_community: row.share_with_community,
-      units: row.units as 'metric' | 'imperial' | null,
+      units: row.units as "metric" | "imperial" | null,
       default_location_id: row.default_location_id,
       created_at: row.created_at,
       updated_at: row.updated_at,
@@ -289,9 +298,9 @@ export class ProfileService {
    * Uses Polish cycling-themed words with retry logic
    */
   private async generatePseudonym(): Promise<string> {
-    const adjectives = ['szybki', 'wolny', 'dzielny', 'silny', 'zwinny'];
-    const nouns = ['kolarz', 'rowerzysta', 'pedał', 'jeździec', 'rajdowiec'];
-    
+    const adjectives = ["szybki", "wolny", "dzielny", "silny", "zwinny"];
+    const nouns = ["kolarz", "rowerzysta", "pedał", "jeździec", "rajdowiec"];
+
     let pseudonym: string;
     let attempts = 0;
     const maxAttempts = 10;
@@ -304,9 +313,9 @@ export class ProfileService {
 
       // Check uniqueness
       const { data } = await supabaseClient
-        .from('profiles')
-        .select('pseudonym')
-        .eq('pseudonym', pseudonym)
+        .from("profiles")
+        .select("pseudonym")
+        .eq("pseudonym", pseudonym)
         .maybeSingle();
 
       if (!data) {
@@ -325,13 +334,13 @@ export class ProfileService {
    */
   private async getLocations(userId: string): Promise<LocationDTO[]> {
     const { data, error } = await supabaseClient
-      .from('user_locations')
-      .select('*')
-      .eq('user_id', userId);
+      .from("user_locations")
+      .select("*")
+      .eq("user_id", userId);
 
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row) => ({
       id: row.id,
       location: this.parseGeometry(row.location),
       city: row.city,
@@ -348,14 +357,14 @@ export class ProfileService {
    */
   private async getBikes(userId: string): Promise<BikeDTO[]> {
     const { data, error } = await supabaseClient
-      .from('bikes')
-      .select('*')
-      .eq('user_id', userId);
+      .from("bikes")
+      .select("*")
+      .eq("user_id", userId);
 
     if (error) throw error;
 
     // Transform to BikeDTO (simplified for export)
-    return (data || []).map(row => ({
+    return (data || []).map((row) => ({
       id: row.id,
       name: row.name,
       type: row.type as any,
@@ -376,13 +385,13 @@ export class ProfileService {
    */
   private async getServiceRecords(userId: string): Promise<ServiceRecordDTO[]> {
     const { data, error } = await supabaseClient
-      .from('service_records')
-      .select('*, bikes!inner(user_id)')
-      .eq('bikes.user_id', userId);
+      .from("service_records")
+      .select("*, bikes!inner(user_id)")
+      .eq("bikes.user_id", userId);
 
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row) => ({
       id: row.id,
       bike_id: row.bike_id,
       service_date: row.service_date,
@@ -400,15 +409,17 @@ export class ProfileService {
   /**
    * Get all service reminders for user's bikes
    */
-  private async getServiceReminders(userId: string): Promise<ServiceReminderDTO[]> {
+  private async getServiceReminders(
+    userId: string,
+  ): Promise<ServiceReminderDTO[]> {
     const { data, error } = await supabaseClient
-      .from('service_reminders')
-      .select('*, bikes!inner(user_id)')
-      .eq('bikes.user_id', userId);
+      .from("service_reminders")
+      .select("*, bikes!inner(user_id)")
+      .eq("bikes.user_id", userId);
 
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row) => ({
       id: row.id,
       bike_id: row.bike_id,
       service_type: row.service_type as any,
@@ -417,7 +428,7 @@ export class ProfileService {
       target_mileage: row.target_mileage,
       current_mileage: 0, // Would need bike current_mileage
       km_remaining: 0, // Would need calculation
-      status: 'active' as any, // Would need calculation
+      status: "active" as any, // Would need calculation
       completed_at: row.completed_at,
       completed_service_id: row.completed_service_id,
       created_at: row.created_at,
@@ -430,13 +441,13 @@ export class ProfileService {
    */
   private async getFeedbacks(userId: string): Promise<FeedbackDTO[]> {
     const { data, error } = await supabaseClient
-      .from('outfit_feedbacks')
-      .select('*')
-      .eq('user_id', userId);
+      .from("outfit_feedbacks")
+      .select("*")
+      .eq("user_id", userId);
 
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row) => ({
       id: row.id,
       temperature: row.temperature,
       feels_like: row.feels_like,
@@ -459,7 +470,9 @@ export class ProfileService {
   /**
    * Get all shared outfits for user
    */
-  private async getSharedOutfits(userId: string): Promise<CommunityOutfitDTO[]> {
+  private async getSharedOutfits(
+    userId: string,
+  ): Promise<CommunityOutfitDTO[]> {
     // This would need to query a view or join multiple tables
     // For now, return empty array as it's complex to implement without the view
     return [];
@@ -489,20 +502,20 @@ export class ProfileService {
   async getDefaultLocationId(userId: string): Promise<string | null> {
     try {
       const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('default_location_id')
-        .eq('id', userId)
+        .from("profiles")
+        .select("default_location_id")
+        .eq("id", userId)
         .single();
 
       if (error) {
-        console.error('Get default location error:', error);
-        throw new InternalServerError('Failed to fetch default location');
+        console.error("Get default location error:", error);
+        throw new InternalServerError("Failed to fetch default location");
       }
 
       return data?.default_location_id || null;
     } catch (error) {
-      console.error('Get default location error:', error);
-      throw new InternalServerError('Failed to fetch default location');
+      console.error("Get default location error:", error);
+      throw new InternalServerError("Failed to fetch default location");
     }
   }
 
@@ -522,14 +535,14 @@ export class ProfileService {
   }> {
     try {
       const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('feedback_count, thermal_adjustment')
-        .eq('id', userId)
+        .from("profiles")
+        .select("feedback_count, thermal_adjustment")
+        .eq("id", userId)
         .single();
 
       if (error) {
-        console.error('Get personalization status error:', error);
-        throw new InternalServerError('Failed to fetch personalization status');
+        console.error("Get personalization status error:", error);
+        throw new InternalServerError("Failed to fetch personalization status");
       }
 
       const feedbackCount = data?.feedback_count || 0;
@@ -539,13 +552,12 @@ export class ProfileService {
         feedback_count: feedbackCount,
         personalization_active: feedbackCount >= 5,
         thermal_adjustment: thermalAdjustment,
-        next_personalization_at: feedbackCount < 5 
-          ? 5 
-          : feedbackCount + (5 - (feedbackCount % 5))
+        next_personalization_at:
+          feedbackCount < 5 ? 5 : feedbackCount + (5 - (feedbackCount % 5)),
       };
     } catch (error) {
-      console.error('Get personalization status error:', error);
-      throw new InternalServerError('Failed to fetch personalization status');
+      console.error("Get personalization status error:", error);
+      throw new InternalServerError("Failed to fetch personalization status");
     }
   }
 }

@@ -1,7 +1,10 @@
-import type { APIRoute } from 'astro';
-import { BikeReminderService } from '../../../../services/bike-reminder.service';
-import { supabaseClient, supabaseServiceClient } from '../../../../db/supabase.admin.client';
-import { ReminderValidator } from '../../../../lib/validation/reminder.validator';
+import type { APIRoute } from "astro";
+import { BikeReminderService } from "../../../../services/bike-reminder.service";
+import {
+  supabaseClient,
+  supabaseServiceClient,
+} from "../../../../db/supabase.admin.client";
+import { ReminderValidator } from "../../../../lib/validation/reminder.validator";
 
 // Use service client in development to bypass RLS
 const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;
@@ -17,13 +20,13 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
     if (!locals.userId) {
       return new Response(
         JSON.stringify({
-          error: 'Unauthorized',
-          message: 'Authentication required'
+          error: "Unauthorized",
+          message: "Authentication required",
         }),
         {
           status: 401,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
@@ -33,78 +36,73 @@ export const DELETE: APIRoute = async ({ locals, params }) => {
     if (!bikeId || !ReminderValidator.validateUUID(bikeId)) {
       return new Response(
         JSON.stringify({
-          error: 'Bad Request',
-          message: 'Invalid bike ID format'
+          error: "Bad Request",
+          message: "Invalid bike ID format",
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     if (!reminderId || !ReminderValidator.validateUUID(reminderId)) {
       return new Response(
         JSON.stringify({
-          error: 'Bad Request',
-          message: 'Invalid reminder ID format'
+          error: "Bad Request",
+          message: "Invalid reminder ID format",
         }),
         {
           status: 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     // Delete reminder
-    await bikeReminderService.deleteReminder(
-      locals.userId,
-      bikeId,
-      reminderId
-    );
+    await bikeReminderService.deleteReminder(locals.userId, bikeId, reminderId);
 
     return new Response(null, {
-      status: 204
+      status: 204,
     });
-
   } catch (error: any) {
-    console.error('DELETE /api/bikes/[bikeId]/reminders/[id] error:', error);
+    console.error("DELETE /api/bikes/[bikeId]/reminders/[id] error:", error);
 
-    if (error.name === 'BikeNotFoundError') {
+    if (error.name === "BikeNotFoundError") {
       return new Response(
         JSON.stringify({
-          error: 'Bike Not Found',
-          message: 'Bike not found'
+          error: "Bike Not Found",
+          message: "Bike not found",
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
-    if (error.name === 'ReminderNotFoundError') {
+    if (error.name === "ReminderNotFoundError") {
       return new Response(
         JSON.stringify({
-          error: 'Not Found',
-          message: 'Reminder not found'
+          error: "Not Found",
+          message: "Reminder not found",
         }),
         {
           status: 404,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     return new Response(
       JSON.stringify({
-        error: 'Internal Server Error',
-        message: 'An unexpected error occurred'
+        error: "Internal Server Error",
+        message: "An unexpected error occurred",
       }),
       {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 };

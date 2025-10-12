@@ -1,0 +1,14 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import BikeDetailsView from "../../components/bikes/BikeDetailsView";
+
+const { bikeId } = Astro.params;
+
+if (!bikeId) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout title="Bike Details - CycleGear">
+  <BikeDetailsView bikeId={bikeId} client:load />
+</Layout>

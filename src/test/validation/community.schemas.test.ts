@@ -115,7 +115,7 @@ describe("Community Validation Schemas", () => {
         const rawParams = {};
 
         expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-          CommunityValidationError
+          CommunityValidationError,
         );
 
         try {
@@ -123,7 +123,7 @@ describe("Community Validation Schemas", () => {
         } catch (error) {
           expect(error).toBeInstanceOf(CommunityValidationError);
           expect((error as CommunityValidationError).details).toHaveProperty(
-            "location_id"
+            "location_id",
           );
         }
       });
@@ -134,16 +134,16 @@ describe("Community Validation Schemas", () => {
         };
 
         expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-          CommunityValidationError
+          CommunityValidationError,
         );
 
         try {
           validateGetCommunityOutfitsParams(rawParams);
         } catch (error) {
           expect(error).toBeInstanceOf(CommunityValidationError);
-          expect((error as CommunityValidationError).details.location_id).toContain(
-            "valid UUID"
-          );
+          expect(
+            (error as CommunityValidationError).details.location_id,
+          ).toContain("valid UUID");
         }
       });
 
@@ -151,7 +151,10 @@ describe("Community Validation Schemas", () => {
         const testCases = [
           { radius_km: "0", expectedMessage: "between 1 and 100" },
           { radius_km: "101", expectedMessage: "between 1 and 100" },
-          { radius_km: "abc", expectedMessage: "Expected number, received nan" },
+          {
+            radius_km: "abc",
+            expectedMessage: "Expected number, received nan",
+          },
         ];
 
         testCases.forEach(({ radius_km, expectedMessage }) => {
@@ -161,16 +164,16 @@ describe("Community Validation Schemas", () => {
           };
 
           expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-            CommunityValidationError
+            CommunityValidationError,
           );
 
           try {
             validateGetCommunityOutfitsParams(rawParams);
           } catch (error) {
             expect(error).toBeInstanceOf(CommunityValidationError);
-            expect((error as CommunityValidationError).details.radius_km).toContain(
-              expectedMessage
-            );
+            expect(
+              (error as CommunityValidationError).details.radius_km,
+            ).toContain(expectedMessage);
           }
         });
       });
@@ -189,16 +192,16 @@ describe("Community Validation Schemas", () => {
           };
 
           expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-            CommunityValidationError
+            CommunityValidationError,
           );
 
           try {
             validateGetCommunityOutfitsParams(rawParams);
           } catch (error) {
             expect(error).toBeInstanceOf(CommunityValidationError);
-            expect((error as CommunityValidationError).details.temperature).toContain(
-              expectedMessage
-            );
+            expect(
+              (error as CommunityValidationError).details.temperature,
+            ).toContain(expectedMessage);
           }
         });
       });
@@ -210,16 +213,16 @@ describe("Community Validation Schemas", () => {
         };
 
         expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-          CommunityValidationError
+          CommunityValidationError,
         );
 
         try {
           validateGetCommunityOutfitsParams(rawParams);
         } catch (error) {
           expect(error).toBeInstanceOf(CommunityValidationError);
-          expect((error as CommunityValidationError).details.activity_type).toContain(
-            "recovery, spokojna, tempo, interwaly"
-          );
+          expect(
+            (error as CommunityValidationError).details.activity_type,
+          ).toContain("recovery, spokojna, tempo, interwaly");
         }
       });
 
@@ -230,16 +233,16 @@ describe("Community Validation Schemas", () => {
         };
 
         expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-          CommunityValidationError
+          CommunityValidationError,
         );
 
         try {
           validateGetCommunityOutfitsParams(rawParams);
         } catch (error) {
           expect(error).toBeInstanceOf(CommunityValidationError);
-          expect((error as CommunityValidationError).details.reputation_filter).toContain(
-            "nowicjusz, regularny, ekspert, mistrz"
-          );
+          expect(
+            (error as CommunityValidationError).details.reputation_filter,
+          ).toContain("nowicjusz, regularny, ekspert, mistrz");
         }
       });
 
@@ -250,7 +253,7 @@ describe("Community Validation Schemas", () => {
         };
 
         expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-          CommunityValidationError
+          CommunityValidationError,
         );
 
         try {
@@ -258,7 +261,7 @@ describe("Community Validation Schemas", () => {
         } catch (error) {
           expect(error).toBeInstanceOf(CommunityValidationError);
           expect((error as CommunityValidationError).details.sort).toContain(
-            "reputation, distance, created_at, rating"
+            "reputation, distance, created_at, rating",
           );
         }
       });
@@ -276,7 +279,7 @@ describe("Community Validation Schemas", () => {
           };
 
           expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-            CommunityValidationError
+            CommunityValidationError,
           );
 
           try {
@@ -284,7 +287,7 @@ describe("Community Validation Schemas", () => {
           } catch (error) {
             expect(error).toBeInstanceOf(CommunityValidationError);
             expect((error as CommunityValidationError).details.limit).toContain(
-              expectedMessage
+              expectedMessage,
             );
           }
         });
@@ -297,7 +300,7 @@ describe("Community Validation Schemas", () => {
         };
 
         expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-          CommunityValidationError
+          CommunityValidationError,
         );
 
         try {
@@ -305,7 +308,7 @@ describe("Community Validation Schemas", () => {
         } catch (error) {
           expect(error).toBeInstanceOf(CommunityValidationError);
           expect((error as CommunityValidationError).details.offset).toContain(
-            "non-negative"
+            "non-negative",
           );
         }
       });
@@ -320,7 +323,7 @@ describe("Community Validation Schemas", () => {
         };
 
         expect(() => validateGetCommunityOutfitsParams(rawParams)).toThrow(
-          CommunityValidationError
+          CommunityValidationError,
         );
 
         try {
@@ -328,7 +331,7 @@ describe("Community Validation Schemas", () => {
         } catch (error) {
           expect(error).toBeInstanceOf(CommunityValidationError);
           const details = (error as CommunityValidationError).details;
-          
+
           expect(details).toHaveProperty("location_id");
           expect(details).toHaveProperty("radius_km");
           expect(details).toHaveProperty("temperature");

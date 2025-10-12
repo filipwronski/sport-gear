@@ -1,4 +1,4 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute } from "astro";
 
 /**
  * POST /api/bikes/{bikeId}/services - Mock POST without database
@@ -10,20 +10,20 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
       return new Response(
         JSON.stringify({
           error: "Unauthorized",
-          message: "Authentication required"
+          message: "Authentication required",
         }),
         {
           status: 401,
-          headers: { "Content-Type": "application/json" }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     const bikeId = params.bikeId;
-    
+
     // Parse request body
     const requestBody = await request.json();
-    
+
     // Mock successful creation response
     const mockServiceRecord = {
       id: "550e8400-e29b-41d4-a716-446655440999",
@@ -37,27 +37,26 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
       notes: requestBody.notes || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      message: "Mock POST works without database"
+      message: "Mock POST works without database",
     };
 
     return new Response(JSON.stringify(mockServiceRecord), {
       status: 201,
       headers: {
-        'Content-Type': 'application/json',
-      }
+        "Content-Type": "application/json",
+      },
     });
-
   } catch (error) {
     console.error("Service POST error:", error);
     return new Response(
       JSON.stringify({
         error: "Catch error",
-        message: String(error)
+        message: String(error),
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" }
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 };

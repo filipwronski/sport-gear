@@ -16,13 +16,18 @@ import type {
  */
 export class LocationNotFoundError extends Error {
   constructor(locationId: string) {
-    super(`Location with id ${locationId} does not exist or does not belong to the user`);
+    super(
+      `Location with id ${locationId} does not exist or does not belong to the user`,
+    );
     this.name = "LocationNotFoundError";
   }
 }
 
 export class CommunityServiceError extends Error {
-  constructor(message: string, public readonly cause?: Error) {
+  constructor(
+    message: string,
+    public readonly cause?: Error,
+  ) {
     super(message);
     this.name = "CommunityServiceError";
   }
@@ -31,7 +36,7 @@ export class CommunityServiceError extends Error {
 /**
  * Gets user location coordinates for spatial queries
  * Validates that location belongs to the authenticated user
- * 
+ *
  * @param userId - Authenticated user ID from auth.uid()
  * @param locationId - Location ID to fetch coordinates for
  * @returns Location coordinates or null if not found
@@ -39,14 +44,16 @@ export class CommunityServiceError extends Error {
  */
 export async function getUserLocation(
   userId: string,
-  locationId: string
+  locationId: string,
 ): Promise<Coordinates> {
   try {
     const { data, error } = await supabaseClient
       .from("user_locations")
-      .select(`
+      .select(
+        `
         location
-      `)
+      `,
+      )
       .eq("id", locationId)
       .eq("user_id", userId)
       .single();
@@ -56,7 +63,10 @@ export async function getUserLocation(
         // No rows returned
         throw new LocationNotFoundError(locationId);
       }
-      throw new CommunityServiceError("Database error while fetching location", error);
+      throw new CommunityServiceError(
+        "Database error while fetching location",
+        error,
+      );
     }
 
     if (!data?.location) {
@@ -68,11 +78,14 @@ export async function getUserLocation(
     // We need to extract coordinates using ST_X and ST_Y
     const { data: coordsData, error: coordsError } = await supabaseClient.rpc(
       "extract_coordinates",
-      { location_point: data.location }
+      { location_point: data.location },
     );
 
     if (coordsError) {
-      throw new CommunityServiceError("Error extracting coordinates", coordsError);
+      throw new CommunityServiceError(
+        "Error extracting coordinates",
+        coordsError,
+      );
     }
 
     return {
@@ -80,17 +93,23 @@ export async function getUserLocation(
       longitude: coordsData.longitude,
     };
   } catch (error) {
-    if (error instanceof LocationNotFoundError || error instanceof CommunityServiceError) {
+    if (
+      error instanceof LocationNotFoundError ||
+      error instanceof CommunityServiceError
+    ) {
       throw error;
     }
-    throw new CommunityServiceError("Unexpected error while fetching location", error as Error);
+    throw new CommunityServiceError(
+      "Unexpected error while fetching location",
+      error as Error,
+    );
   }
 }
 
 /**
  * Transforms database row to CommunityOutfitDTO
  * Handles JSON parsing and type conversion
- * 
+ *
  * @param row - Raw database row from RPC function
  * @returns Transformed CommunityOutfitDTO
  */
@@ -118,7 +137,7 @@ function transformToCommunityOutfitDTO(row: any): CommunityOutfitDTO {
 /**
  * Gets community outfits with spatial filtering and advanced queries
  * Main service function that orchestrates the spatial query
- * 
+ *
  * @param userId - Authenticated user ID
  * @param params - Validated query parameters
  * @returns Paginated list of community outfits with metadata
@@ -127,7 +146,7 @@ function transformToCommunityOutfitDTO(row: any): CommunityOutfitDTO {
  */
 export async function getCommunityOutfits(
   userId: string,
-  params: GetCommunityOutfitsParams
+  params: GetCommunityOutfitsParams,
 ): Promise<CommunityOutfitsListDTO> {
   try {
     // Step 1: Get location coordinates and validate user access
@@ -166,7 +185,7 @@ export async function getCommunityOutfits(
         activity_type: params.activity_type ?? null,
         min_rating: params.min_rating ?? null,
         reputation_filter: params.reputation_filter ?? null,
-      }
+      },
     );
 
     if (countError) {
@@ -185,10 +204,16 @@ export async function getCommunityOutfits(
       has_more: params.offset! + params.limit! < total,
     };
   } catch (error) {
-    if (error instanceof LocationNotFoundError || error instanceof CommunityServiceError) {
+    if (
+      error instanceof LocationNotFoundError ||
+      error instanceof CommunityServiceError
+    ) {
       throw error;
     }
-    throw new CommunityServiceError("Unexpected error in community service", error as Error);
+    throw new CommunityServiceError(
+      "Unexpected error in community service",
+      error as Error,
+    );
   }
 }
 
@@ -204,7 +229,7 @@ export async function getCommunityOutfits(
  */
 export async function getCommunityActivity(
   locationId: string,
-  userId: string
+  userId: string,
 ): Promise<{
   recent_outfits_count: number;
   similar_conditions_count: number;
@@ -212,20 +237,19 @@ export async function getCommunityActivity(
   try {
     // Get user location coordinates
     const location = await getUserLocation(userId, locationId);
-    
+
     // Simplified implementation - return mock data for now
     // In real implementation, this would use spatial queries
     return {
       recent_outfits_count: 5,
-      similar_conditions_count: 3
+      similar_conditions_count: 3,
     };
-
   } catch (error) {
-    console.error('Community activity error:', error);
+    console.error("Community activity error:", error);
     // Graceful fallback for dashboard - don't break the entire response
     return {
       recent_outfits_count: 0,
-      similar_conditions_count: 0
+      similar_conditions_count: 0,
     };
   }
 }

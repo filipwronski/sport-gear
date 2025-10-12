@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { useAuth, type LoginFormData } from './useAuth';
-import GoogleAuthButton from './GoogleAuthButton';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { useAuth, type LoginFormData } from "./useAuth";
+import GoogleAuthButton from "./GoogleAuthButton";
 
 export interface LoginFormProps {
   onSuccess: () => void;
   onForgotPassword: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onForgotPassword }) => {
+const LoginForm: React.FC<LoginFormProps> = ({
+  onSuccess,
+  onForgotPassword,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const { authState, login } = useAuth();
 
@@ -20,11 +23,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onForgotPassword }) =>
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<LoginFormData>({
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
       rememberMe: false,
     },
   });
@@ -33,7 +35,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onForgotPassword }) =>
     try {
       await login(data);
       onSuccess();
-    } catch (error) {
+    } catch {
       // Error is handled by useAuth hook
     }
   };
@@ -65,11 +67,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onForgotPassword }) =>
             autoComplete="email"
             aria-describedby={errors.email ? "email-error" : undefined}
             aria-invalid={!!errors.email}
-            {...register('email', {
-              required: 'Email jest wymagany',
+            {...register("email", {
+              required: "Email jest wymagany",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Wprowadź prawidłowy adres email',
+                message: "Wprowadź prawidłowy adres email",
               },
             })}
           />
@@ -96,17 +98,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onForgotPassword }) =>
           />
           <Input
             id="password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             placeholder="wprowadź swoje hasło"
             className="pl-10 pr-10"
             autoComplete="current-password"
             aria-describedby={errors.password ? "password-error" : undefined}
             aria-invalid={!!errors.password}
-            {...register('password', {
-              required: 'Hasło jest wymagane',
+            {...register("password", {
+              required: "Hasło jest wymagane",
               minLength: {
                 value: 8,
-                message: 'Hasło musi mieć co najmniej 8 znaków',
+                message: "Hasło musi mieć co najmniej 8 znaków",
               },
             })}
           />
@@ -114,7 +116,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onForgotPassword }) =>
             type="button"
             onClick={togglePasswordVisibility}
             className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-            aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
+            aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -141,29 +143,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onForgotPassword }) =>
           id="rememberMe"
           type="checkbox"
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          {...register('rememberMe')}
+          {...register("rememberMe")}
         />
-        <Label
-          htmlFor="rememberMe"
-          className="text-sm cursor-pointer"
-        >
+        <Label htmlFor="rememberMe" className="text-sm cursor-pointer">
           Zapamiętaj mnie
         </Label>
       </div>
 
       {/* Login Button */}
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={authState.isLoading}
-      >
+      <Button type="submit" className="w-full" disabled={authState.isLoading}>
         {authState.isLoading ? (
           <div className="flex items-center space-x-2">
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             <span>Logowanie...</span>
           </div>
         ) : (
-          'Zaloguj się'
+          "Zaloguj się"
         )}
       </Button>
 

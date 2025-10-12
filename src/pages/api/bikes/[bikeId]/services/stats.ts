@@ -1,4 +1,4 @@
-import type { APIRoute } from 'astro';
+import type { APIRoute } from "astro";
 
 /**
  * GET /api/bikes/{bikeId}/services/stats - Working version without imports
@@ -11,23 +11,23 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
         JSON.stringify({
           error: {
             code: "UNAUTHORIZED",
-            message: "Authentication required"
-          }
+            message: "Authentication required",
+          },
         }),
         {
           status: 401,
-          headers: { "Content-Type": "application/json" }
-        }
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 
     const bikeId = params.bikeId;
-    
+
     // Parse query parameters
     const url = new URL(request.url);
-    const period = url.searchParams.get('period') || 'all';
-    const from_date = url.searchParams.get('from_date');
-    const to_date = url.searchParams.get('to_date');
+    const period = url.searchParams.get("period") || "all";
+    const from_date = url.searchParams.get("from_date");
+    const to_date = url.searchParams.get("to_date");
 
     // Calculate date range
     const now = new Date();
@@ -41,13 +41,19 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
     } else {
       switch (period) {
         case "month":
-          fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+          fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0];
           break;
         case "quarter":
-          fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+          fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0];
           break;
         case "year":
-          fromDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+          fromDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0];
           break;
       }
     }
@@ -56,7 +62,7 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
     const mockStats = {
       period: {
         from: fromDate,
-        to: toDate
+        to: toDate,
       },
       total_cost: 0,
       total_services: 0,
@@ -65,32 +71,31 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
       breakdown_by_type: [],
       breakdown_by_location: {
         warsztat: { count: 0, total_cost: 0 },
-        samodzielnie: { count: 0, total_cost: 0 }
+        samodzielnie: { count: 0, total_cost: 0 },
       },
-      timeline: []
+      timeline: [],
     };
 
     return new Response(JSON.stringify(mockStats), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'private, max-age=3600'
-      }
+        "Content-Type": "application/json",
+        "Cache-Control": "private, max-age=3600",
+      },
     });
-
   } catch (error) {
     console.error("Service stats error:", error);
     return new Response(
       JSON.stringify({
         error: {
           code: "INTERNAL_ERROR",
-          message: "An unexpected error occurred"
-        }
+          message: "An unexpected error occurred",
+        },
       }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" }
-      }
+        headers: { "Content-Type": "application/json" },
+      },
     );
   }
 };
