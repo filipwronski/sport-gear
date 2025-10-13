@@ -1,0 +1,233 @@
+---
+import { Button } from "@/components/ui/button";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="O nas - CycleGear" description="Poznaj historię CycleGear i nasz zespół. Dowiedz się, dlaczego stworzyliśmy aplikację dla pasjonatów rowerów.">
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-blue-50 to-indigo-100 py-20 px-4">
+    <div class="container mx-auto text-center max-w-3xl">
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+        O CycleGear
+      </h1>
+      <p class="text-xl text-gray-600 leading-relaxed">
+        Jesteśmy zespołem pasjonatów rowerów, którzy chcą pomóc innym rowerzystom
+        lepiej zarządzać swoimi maszynami i dzielić się miłością do dwóch kółek.
+      </p>
+    </div>
+  </section>
+
+  <!-- Story Section -->
+  <section class="py-20 px-4 bg-white">
+    <div class="container mx-auto max-w-4xl">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-900 mb-6">Nasza historia</h2>
+          <div class="space-y-4 text-gray-700 leading-relaxed">
+            <p>
+              CycleGear powstał z prostej obserwacji - wielu rowerzystów poświęca mnóstwo czasu
+              i pieniędzy na swoje rowery, ale nie ma dobrego narzędzia do ich zarządzania.
+            </p>
+            <p>
+              Założyciele aplikacji sami są zapalonymi rowerzystami z wieloletnim doświadczeniem.
+              Wiedzieliśmy, jak frustrujące może być zapominanie o przeglądach, gubienie się
+              w historii serwisowej czy brak wiedzy o tym, kiedy wymienić konkretne części.
+            </p>
+            <p>
+              Zaczęliśmy od prostego arkusza kalkulacyjnego, potem stworzyliśmy pierwszą wersję
+              aplikacji mobilnej. Teraz CycleGear to kompleksowa platforma dla wszystkich rowerzystów
+              - od niedzielnych amatorów po profesjonalnych kolarzy.
+            </p>
+          </div>
+        </div>
+        <div class="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8">
+          <div class="text-center">
+            <div class="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Nasza misja</h3>
+            <p class="text-gray-700">
+              Ułatwić życie rowerzystom poprzez dostarczanie narzędzi do lepszego
+              zarządzania rowerami i budowania społeczności pasjonatów.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-20 px-4 bg-gray-50">
+    <div class="container mx-auto max-w-6xl">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">CycleGear w liczbach</h2>
+        <p class="text-xl text-gray-600">Zobacz, jak szybko rośniemy razem z naszą społecznością</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class="text-4xl font-bold text-blue-600 mb-2">50,000+</div>
+          <div class="text-gray-600">Zarejestrowanych rowerów</div>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl font-bold text-green-600 mb-2">25,000+</div>
+          <div class="text-gray-600">Aktywnych użytkowników</div>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl font-bold text-purple-600 mb-2">100,000+</div>
+          <div class="text-gray-600">Przejechanych kilometrów</div>
+        </div>
+        <div class="text-center">
+          <div class="text-4xl font-bold text-orange-600 mb-2">98%</div>
+          <div class="text-gray-600">Zadowolonych użytkowników</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="py-20 px-4 bg-white">
+    <div class="container mx-auto max-w-6xl">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Nasz zespół</h2>
+        <p class="text-xl text-gray-600">Poznaj ludzi stojących za CycleGear</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Team Member 1 -->
+        <div class="text-center">
+          <div class="w-32 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Jan Kowalski</h3>
+          <p class="text-blue-600 font-medium mb-3">CEO & Założyciel</p>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Były kolarz zawodowy z 15-letnim doświadczeniem.
+            Wie wszystko o serwisowaniu rowerów i potrzebach rowerzystów.
+          </p>
+        </div>
+
+        <!-- Team Member 2 -->
+        <div class="text-center">
+          <div class="w-32 h-32 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Anna Nowak</h3>
+          <p class="text-green-600 font-medium mb-3">CTO & Współzałożycielka</p>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Inżynier oprogramowania z pasją do tworzenia intuicyjnych aplikacji.
+            Kocha łączenie technologii z miłością do rowerów.
+          </p>
+        </div>
+
+        <!-- Team Member 3 -->
+        <div class="text-center">
+          <div class="w-32 h-32 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Marek Wiśniewski</h3>
+          <p class="text-purple-600 font-medium mb-3">Community Manager</p>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Organizator grupowych wyjazdów rowerowych.
+            Wie, jak budować zaangażowaną społeczność rowerzystów.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values Section -->
+  <section class="py-20 px-4 bg-gradient-to-br from-gray-50 to-blue-50">
+    <div class="container mx-auto max-w-4xl">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Nasze wartości</h2>
+        <p class="text-xl text-gray-600">To, w co wierzymy i co nas napędza</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white p-8 rounded-xl shadow-sm">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Innowacja</h3>
+          <p class="text-gray-600">
+            Stale szukamy nowych sposobów, aby ułatwić życie rowerzystom.
+            Wykorzystujemy najnowsze technologie, aby stworzyć najlepsze możliwe doświadczenie.
+          </p>
+        </div>
+
+        <div class="bg-white p-8 rounded-xl shadow-sm">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Pasja</h3>
+          <p class="text-gray-600">
+            Kochamy rowery i rowerzystów. Wszystko, co robimy, wynika z prawdziwej
+            miłości do dwóch kółek i ludzi, którzy je kochają.
+          </p>
+        </div>
+
+        <div class="bg-white p-8 rounded-xl shadow-sm">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Społeczność</h3>
+          <p class="text-gray-600">
+            Wierzymy w siłę społeczności. CycleGear to nie tylko aplikacja,
+            to miejsce spotkań pasjonatów rowerów z całego świata.
+          </p>
+        </div>
+
+        <div class="bg-white p-8 rounded-xl shadow-sm">
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Jakość</h3>
+          <p class="text-gray-600">
+            Wszystko, co robimy, musi być najwyższej jakości. Od kodu aplikacji
+            po obsługę klienta - zawsze dążymy do doskonałości.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 px-4 bg-gradient-to-r from-blue-600 to-indigo-600">
+    <div class="container mx-auto text-center max-w-3xl">
+      <h2 class="text-3xl font-bold text-white mb-6">
+        Dołącz do naszej społeczności
+      </h2>
+      <p class="text-xl text-blue-100 mb-8">
+        Razem możemy stworzyć najlepsze miejsce dla rowerzystów na świecie.
+        Dołącz do nas już dziś!
+      </p>
+      <Button
+        size="lg"
+        variant="secondary"
+        className="text-lg px-8 py-3"
+        onClick={() => window.location.href='/auth'}
+      >
+        Rozpocznij przygodę
+      </Button>
+    </div>
+  </section>
+
+</Layout>

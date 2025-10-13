@@ -50,11 +50,15 @@ async function resolveLocationId(
     return providedLocationId;
   } else {
     // Get user's default location from profile service
+    // This will automatically create a profile if it doesn't exist
     const profileService = new ProfileService();
     const defaultLocationId = await profileService.getDefaultLocationId(userId);
 
+    // If no default location is set, return null (dashboard will handle this)
+    // Don't throw error for missing default location
     if (!defaultLocationId) {
-      throw new LocationNotFoundError();
+      console.log(`No default location set for user: ${userId}`);
+      return null;
     }
 
     return defaultLocationId;

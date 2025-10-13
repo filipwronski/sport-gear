@@ -2,10 +2,13 @@
 import Layout from "../../layouts/Layout.astro";
 import BikeDetailsView from "../../components/bikes/BikeDetailsView";
 
+// userId is guaranteed to be set by middleware for protected routes
+const userId = Astro.locals.userId as string;
+
 const { bikeId } = Astro.params;
 
 if (!bikeId) {
-  return Astro.redirect("/");
+  return Astro.redirect("/bikes");
 }
 ---
 

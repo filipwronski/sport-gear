@@ -158,6 +158,7 @@ export interface UpdateProfileCommand {
   thermal_preferences?: ThermalPreferences;
   share_with_community?: boolean;
   units?: UnitsEnum;
+  default_location_id?: string | null;
 }
 
 /**
@@ -882,3 +883,75 @@ export const SORT_OPTIONS: SortOption[] = [
   { value: "created_at", label: "Według daty", icon: "Clock" },
   { value: "rating", label: "Według oceny", icon: "Star" },
 ];
+
+// ============================================================================
+// Recommendations ViewModels
+// ============================================================================
+
+/**
+ * Zone type for body parts in cyclist silhouette
+ */
+export type ZoneType = 'head' | 'torso' | 'arms' | 'hands' | 'legs' | 'feet' | 'neck';
+
+/**
+ * Recommendation filters view model
+ */
+export interface RecommendationFiltersViewModel {
+  locationId: string;
+  activityType: ActivityTypeEnum;
+  durationMinutes: number;
+  selectedDate: Date | null; // null = today
+}
+
+/**
+ * Recommendation view state
+ */
+export interface RecommendationViewState {
+  filters: RecommendationFiltersViewModel;
+  recommendation: RecommendationDTO | null;
+  aiTips: string[];
+  isLoadingRecommendation: boolean;
+  isLoadingAiTips: boolean;
+  error: ApiError | null;
+  rateLimitedUntil: Date | null;
+}
+
+/**
+ * Feedback form view model
+ */
+export interface FeedbackFormViewModel {
+  followedRecommendation: 'yes' | 'no';
+  actualOutfit: OutfitDTO;
+  overallRating: number; // 1-5
+  zoneRatings: ZoneRatings;
+  notes: string;
+  shareWithCommunity: boolean;
+}
+
+/**
+ * History filters view model
+ */
+export interface HistoryFiltersViewModel {
+  temperatureMin: number; // -10
+  temperatureMax: number; // 35
+  season?: 'spring' | 'summer' | 'autumn' | 'winter';
+  activityType?: ActivityTypeEnum;
+  sort: 'created_at_desc' | 'created_at_asc' | 'rating_desc' | 'rating_asc';
+  limit: number; // 30
+  offset: number; // 0
+}
+
+// ============================================================================
+// API Error Types
+// ============================================================================
+
+/**
+ * Standard API error response
+ */
+export interface ApiError {
+  code: string; // 'VALIDATION_ERROR', 'LOCATION_NOT_FOUND', etc.
+  message: string;
+  statusCode: number;
+  details?: Array<{ field?: string; message: string }>;
+  retryAfter?: number; // for 503, 429
+}

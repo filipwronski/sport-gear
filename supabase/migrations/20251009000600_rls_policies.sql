@@ -22,7 +22,11 @@ create policy profiles_update_own on profiles
   using (id = auth.uid())
   with check (id = auth.uid());
 
--- note: insert blocked (handled by trigger on auth.users)
+-- insert: allow trigger to create profiles for authenticated users
+create policy profiles_insert_own on profiles
+  for insert
+  to authenticated
+  with check (id = auth.uid());
 -- note: delete blocked (use delete_user_data() function for gdpr)
 
 -- ============================================================================

@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { BikeListView } from '../components/gear/BikeListView';
+
+// Server-side auth check
+const session = Astro.locals.session;
+if (!session) {
+  return Astro.redirect('/login');
+}
+---
+
+<Layout title="Moje rowery - CycleGear">
+  <BikeListView client:load userId={session.userId} />
+</Layout>

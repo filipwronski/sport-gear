@@ -3,10 +3,8 @@ import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/navigation/Navbar";
 import DashboardContainer from "../components/dashboard/DashboardContainer";
 
-const userId = Astro.locals.userId;
-if (!userId) {
-  return Astro.redirect("/");
-}
+// userId is guaranteed to be set by middleware for protected routes
+const userId = Astro.locals.userId as string;
 
 const url = new URL(Astro.request.url);
 const locationId = url.searchParams.get("location_id") || undefined;

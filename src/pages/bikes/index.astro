@@ -1,0 +1,11 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import BikesListView from "../../components/bikes/BikesListView";
+
+// userId is guaranteed to be set by middleware for protected routes
+const userId = Astro.locals.userId as string;
+---
+
+<Layout title="Sprzęt - CycleGear">
+  <BikesListView client:load />
+</Layout>

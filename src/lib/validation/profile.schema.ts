@@ -46,6 +46,11 @@ export const updateProfileSchema = z
         errorMap: () => ({ message: "Must be either metric or imperial" }),
       })
       .optional(),
+    default_location_id: z
+      .string()
+      .uuid("Invalid location ID format")
+      .nullable()
+      .optional(),
   })
   .strict(); // Reject unknown fields
 

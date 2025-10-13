@@ -228,13 +228,21 @@ export async function getCommunityOutfits(
  * @throws CommunityServiceError if queries fail
  */
 export async function getCommunityActivity(
-  locationId: string,
+  locationId: string | null,
   userId: string,
 ): Promise<{
   recent_outfits_count: number;
   similar_conditions_count: number;
 }> {
   try {
+    if (!locationId) {
+      // No location set - return zero activity
+      return {
+        recent_outfits_count: 0,
+        similar_conditions_count: 0,
+      };
+    }
+
     // Get user location coordinates
     const location = await getUserLocation(userId, locationId);
 

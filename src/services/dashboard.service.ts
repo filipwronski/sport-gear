@@ -47,7 +47,7 @@ export class DashboardService {
    */
   async getDashboard(
     userId: string,
-    locationId: string,
+    locationId: string | null,
   ): Promise<DashboardDTO> {
     try {
       // Execute all service calls in parallel for optimal performance
@@ -81,9 +81,21 @@ export class DashboardService {
    * Falls back to default values if weather service fails
    */
   private async getWeatherSummary(
-    locationId: string,
+    locationId: string | null,
   ): Promise<WeatherSummaryDTO> {
     try {
+      if (!locationId) {
+        // No location set - return placeholder data
+        console.log("No location set for weather data");
+        return {
+          location_id: "",
+          current_temperature: 15,
+          feels_like: 15,
+          description: "Set your location to see weather data",
+          quick_recommendation: "Configure your location in profile settings",
+        };
+      }
+
       return await this.weatherService.getWeatherSummary(locationId);
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -91,7 +103,7 @@ export class DashboardService {
 
       // Provide fallback weather data to prevent dashboard failure
       return {
-        location_id: locationId,
+        location_id: locationId || "",
         current_temperature: 15, // Default temperature
         feels_like: 13,
         description: "Weather data unavailable",
@@ -121,10 +133,19 @@ export class DashboardService {
    * Returns zero counts if service fails
    */
   private async getCommunityActivity(
-    locationId: string,
+    locationId: string | null,
     userId: string,
   ): Promise<CommunityActivityDTO> {
     try {
+      if (!locationId) {
+        // No location set - return zero community activity
+        console.log("No location set for community activity");
+        return {
+          recent_outfits_count: 0,
+          similar_conditions_count: 0,
+        };
+      }
+
       return await getCommunityActivity(locationId, userId);
     } catch (error) {
       // eslint-disable-next-line no-console

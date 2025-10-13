@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import CommunityViewContainer from "../components/community/CommunityViewContainer";
+
+// userId is guaranteed to be set by middleware for protected routes
+const userId = Astro.locals.userId as string;
 ---
 
 <Layout title="Społeczność - CycleGear">

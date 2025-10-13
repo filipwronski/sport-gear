@@ -1,4 +1,5 @@
 import { supabaseClient } from "../db/supabase.client";
+import { supabaseServiceClient } from "../db/supabase.admin.client";
 import type {
   Database,
   ProfileDTO,
@@ -160,6 +161,10 @@ export class ProfileService {
 
     if (command.units !== undefined) {
       updateData.units = command.units;
+    }
+
+    if (command.default_location_id !== undefined) {
+      updateData.default_location_id = command.default_location_id;
     }
 
     // Handle share_with_community change (may need pseudonym generation)
@@ -501,13 +506,17 @@ export class ProfileService {
    */
   async getDefaultLocationId(userId: string): Promise<string | null> {
     try {
-      const { data, error } = await supabaseClient
+      // First ensure profile exists
+      await this.ensureProfileExists(userId);
+
+      // Use service client to bypass RLS for reading profile data
+      const { data, error } = await supabaseServiceClient
         .from("profiles")
         .select("default_location_id")
         .eq("id", userId)
         .single();
 
-      if (error) {
+      if (error && error.code !== "PGRST116") {
         console.error("Get default location error:", error);
         throw new InternalServerError("Failed to fetch default location");
       }
@@ -516,6 +525,71 @@ export class ProfileService {
     } catch (error) {
       console.error("Get default location error:", error);
       throw new InternalServerError("Failed to fetch default location");
+    }
+  }
+
+  /**
+   * Ensures a profile exists for the user, creating one if necessary
+   */
+  private async ensureProfileExists(userId: string): Promise<void> {
+    try {
+      // Use service client to bypass RLS for profile operations
+      const serviceClient = supabaseServiceClient;
+
+      // Check if profile exists
+      const { data: existingProfile, error: checkError } = await serviceClient
+        .from("profiles")
+        .select("id")
+        .eq("id", userId)
+        .single();
+
+      if (checkError && checkError.code !== "PGRST116") {
+        // PGRST116 = not found
+        console.error("Error checking profile existence:", checkError);
+        return; // Don't throw, just continue
+      }
+
+      if (existingProfile) {
+        console.log(`Profile already exists for user: ${userId}`);
+        return; // Profile exists
+      }
+
+      // Profile doesn't exist, create it
+      console.log(`Creating profile for user: ${userId}`);
+
+      // Create profile with default values (service role can create without RLS restrictions)
+      const { error: createError } = await serviceClient
+        .from("profiles")
+        .insert({
+          id: userId,
+          display_name: `Użytkownik ${userId.slice(0, 8)}`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (createError) {
+        console.error("Error creating profile with service client:", createError);
+        // Try with regular client as fallback (might fail due to RLS)
+        const { error: fallbackError } = await supabaseClient
+          .from("profiles")
+          .insert({
+            id: userId,
+            display_name: `Użytkownik ${userId.slice(0, 8)}`,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+
+        if (fallbackError) {
+          console.error("Error creating profile with fallback client:", fallbackError);
+        } else {
+          console.log(`Profile created successfully for user: ${userId} (fallback)`);
+        }
+      } else {
+        console.log(`Profile created successfully for user: ${userId}`);
+      }
+    } catch (error) {
+      console.error("Error in ensureProfileExists:", error);
+      // Don't throw - we don't want to break the dashboard if profile creation fails
     }
   }
 

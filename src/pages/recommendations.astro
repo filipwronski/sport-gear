@@ -1,0 +1,64 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import RecommendationView from '../components/RecommendationView';
+import WeeklyForecast from '../components/WeeklyForecast';
+import OutfitHistory from '../components/OutfitHistory';
+
+// userId is guaranteed to be set by middleware for protected routes
+const userId = Astro.locals.userId as string;
+
+const title = "Rekomendacje ubioru - CycleGear";
+const description = "Spersonalizowane rekomendacje ubioru rowerowego na podstawie warunków pogodowych, typu aktywności i Twojej historii treningów.";
+
+// Get default location ID from user session/context
+// For now, we'll let the components handle location selection
+const defaultLocationId: string | undefined = undefined; // TODO: Get from user profile
+---
+
+<Layout title={title} description={description}>
+  <div class="container mx-auto py-8 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold mb-2">Rekomendacje ubioru</h1>
+        <p class="text-muted-foreground">
+          Spersonalizowane rekomendacje ubioru rowerowego na podstawie aktualnych warunków pogodowych
+        </p>
+      </div>
+
+      <Tabs defaultValue="current" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="current">Aktualna rekomendacja</TabsTrigger>
+          <TabsTrigger value="forecast">Prognoza tygodniowa</TabsTrigger>
+          <TabsTrigger value="history">Historia treningów</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="current" className="space-y-6">
+          <RecommendationView defaultLocationId={defaultLocationId} client:load />
+        </TabsContent>
+
+        <TabsContent value="forecast" className="space-y-6">
+          <WeeklyForecast
+            locationId={defaultLocationId}
+            onDaySelect={(date) => {
+              // Switch to current tab with selected date
+              // This would need URL state management for full implementation
+              console.log('Selected date:', date);
+            }}
+            client:load
+          />
+        </TabsContent>
+
+        <TabsContent value="history" className="space-y-6">
+          <OutfitHistory
+            onOutfitClick={(outfit) => {
+              // Handle outfit click - could open detailed view
+              console.log('Clicked outfit:', outfit);
+            }}
+            client:load
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  </div>
+</Layout>

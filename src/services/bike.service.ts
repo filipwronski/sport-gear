@@ -41,14 +41,14 @@ export class BikeService {
       .select(
         `
         *,
-        service_records!bikes_id_fkey (
+        service_records!service_records_bike_id_fkey (
           cost
         ),
-        service_reminders!bikes_id_fkey (
+        service_reminders!service_reminders_bike_id_fkey (
           id,
           service_type,
           target_mileage,
-          status,
+          completed_at,
           triggered_at_mileage,
           interval_km
         )
@@ -94,14 +94,14 @@ export class BikeService {
       .select(
         `
         *,
-        service_records!bikes_id_fkey (
+        service_records!service_records_bike_id_fkey (
           cost
         ),
-        service_reminders!bikes_id_fkey (
+        service_reminders!service_reminders_bike_id_fkey (
           id,
           service_type,
           target_mileage,
-          status,
+          completed_at,
           triggered_at_mileage,
           interval_km
         )
@@ -151,14 +151,14 @@ export class BikeService {
       .select(
         `
         *,
-        service_records!bikes_id_fkey (
+        service_records!service_records_bike_id_fkey (
           cost
         ),
-        service_reminders!bikes_id_fkey (
+        service_reminders!service_reminders_bike_id_fkey (
           id,
           service_type,
           target_mileage,
-          status,
+          completed_at,
           triggered_at_mileage,
           interval_km
         )
@@ -208,14 +208,14 @@ export class BikeService {
       .select(
         `
         *,
-        service_records!bikes_id_fkey (
+        service_records!service_records_bike_id_fkey (
           cost
         ),
-        service_reminders!bikes_id_fkey (
+        service_reminders!service_reminders_bike_id_fkey (
           id,
           service_type,
           target_mileage,
-          status,
+          completed_at,
           triggered_at_mileage,
           interval_km
         )
@@ -322,7 +322,7 @@ export class BikeService {
   private transformToDTO(bikeRow: any): BikeDTO {
     // Calculate next_service from service_reminders
     const activeReminders =
-      bikeRow.service_reminders?.filter((r: any) => r.status === "active") ||
+      bikeRow.service_reminders?.filter((r: any) => r.completed_at === null) ||
       [];
     const nextService = this.findNextService(
       activeReminders,

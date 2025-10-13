@@ -1,0 +1,11 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ProfileView } from '../components/profile/ProfileView.tsx';
+
+// userId is guaranteed to be set by middleware for protected routes
+const userId = Astro.locals.userId as string;
+---
+
+<Layout title="Profil użytkownika">
+  <ProfileView client:load userId={userId} />
+</Layout>
