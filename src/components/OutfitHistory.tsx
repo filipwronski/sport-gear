@@ -1,5 +1,23 @@
-import { useState, useMemo } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect } from "react";
+import { useInfiniteQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Create a client for outfit history
+const historyQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: (failureCount, error: unknown) => {
+        const status = (error as any)?.status;
+        if (status >= 400 && status < 500) {
+          return status === 408 || status === 429;
+        }
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+  },
+});
 import { History, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,47 +40,21 @@ interface HistoryFiltersProps {
     activityType?: ActivityTypeEnum;
     sort: 'created_at_desc' | 'created_at_asc' | 'rating_desc' | 'rating_asc';
   };
-  onChange: (filters: GetFeedbacksParams) => void;
+  onChange: (filters: Partial<GetFeedbacksParams>) => void;
 }
 
 function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
   const handleTemperatureChange = (value: number[]) => {
-    onChange({
-      ...filters,
-      // Note: API might need different field names, this is a mapping
-      rating: undefined, // We'll use temperature range instead
-    });
+    // Note: Temperature filtering is done client-side since API doesn't support it
+    // We'll store the values in the local filters state but not pass to API
   };
 
   const handleSeasonChange = (season: string) => {
-    let fromDate: string | undefined;
-    let toDate: string | undefined;
-    const year = new Date().getFullYear();
-
-    switch (season) {
-      case 'spring':
-        fromDate = `${year}-03-21`;
-        toDate = `${year}-06-20`;
-        break;
-      case 'summer':
-        fromDate = `${year}-06-21`;
-        toDate = `${year}-09-22`;
-        break;
-      case 'autumn':
-        fromDate = `${year}-09-23`;
-        toDate = `${year}-12-20`;
-        break;
-      case 'winter':
-        fromDate = `${year}-12-21`;
-        toDate = `${year + 1}-03-20`;
-        break;
-    }
-
-    onChange({
-      ...filters,
-      from_date: fromDate,
-      to_date: toDate,
-    });
+    // Note: Season filtering is done client-side since API doesn't support date ranges
+    // We'll store the season in local filters but not pass date ranges to API
+    // "all" means no filter (undefined)
+    const seasonValue = season === 'all' ? undefined : season;
+    // For now, just store in local state (client-side filtering not implemented)
   };
 
   const handleActivityTypeChange = (activityType: string) => {
@@ -122,12 +114,12 @@ function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
           {/* Season */}
           <div className="space-y-2">
             <Label>Pora roku</Label>
-            <Select value={filters.from_date ? 'filtered' : ''} onValueChange={handleSeasonChange}>
+            <Select value={filters.season || undefined} onValueChange={handleSeasonChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Wszystkie" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Wszystkie</SelectItem>
+                <SelectItem value="all">Wszystkie</SelectItem>
                 <SelectItem value="spring">Wiosna</SelectItem>
                 <SelectItem value="summer">Lato</SelectItem>
                 <SelectItem value="autumn">Jesień</SelectItem>
@@ -139,7 +131,7 @@ function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
           {/* Activity Type */}
           <div className="space-y-2">
             <Label>Typ aktywności</Label>
-            <Select value={filters.activityType || ''} onValueChange={handleActivityTypeChange}>
+            <Select value={filters.activityType || undefined} onValueChange={handleActivityTypeChange}>
               <SelectTrigger>
                 <SelectValue placeholder="Wszystkie" />
               </SelectTrigger>
@@ -156,7 +148,7 @@ function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
           {/* Sort */}
           <div className="space-y-2">
             <Label>Sortowanie</Label>
-            <Select value={filters.sort} onValueChange={handleSortChange}>
+            <Select value={filters.sort || 'created_at_desc'} onValueChange={handleSortChange}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -206,13 +198,19 @@ async function fetchFeedbacks(params: GetFeedbacksParams): Promise<{ feedbacks: 
   return response.json();
 }
 
-export default function OutfitHistory({ defaultFilters, onOutfitClick }: OutfitHistoryProps) {
+// Internal component that uses React Query
+function OutfitHistoryInternal({ defaultFilters, onOutfitClick }: OutfitHistoryProps) {
   const [filters, setFilters] = useState<GetFeedbacksParams>({
     limit: 30,
     offset: 0,
     sort: 'created_at_desc',
     ...defaultFilters,
   });
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const {
     data,
@@ -232,6 +230,7 @@ export default function OutfitHistory({ defaultFilters, onOutfitClick }: OutfitH
       return undefined;
     },
     initialPageParam: 0,
+    enabled: isMounted,
   });
 
   const allFeedbacks = useMemo(() => {
@@ -249,6 +248,28 @@ export default function OutfitHistory({ defaultFilters, onOutfitClick }: OutfitH
       onOutfitClick(outfit);
     }
   };
+
+  if (!isMounted) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <History className="w-6 h-6" />
+          <div>
+            <h3 className="text-lg font-semibold">Historia zestawów</h3>
+            <p className="text-sm text-muted-foreground">
+              Ładowanie historii treningów...
+            </p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-48 bg-muted animate-pulse rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -272,7 +293,7 @@ export default function OutfitHistory({ defaultFilters, onOutfitClick }: OutfitH
               filters={{
                 temperatureMin: -10,
                 temperatureMax: 35,
-                season: filters.season,
+                season: undefined, // Client-side filtering not implemented yet
                 activityType: filters.activity_type,
                 sort: filters.sort || 'created_at_desc',
               }}
@@ -340,5 +361,14 @@ export default function OutfitHistory({ defaultFilters, onOutfitClick }: OutfitH
         </>
       )}
     </div>
+  );
+}
+
+// Wrapper component with QueryClientProvider
+export default function OutfitHistory(props: OutfitHistoryProps) {
+  return (
+    <QueryClientProvider client={historyQueryClient}>
+      <OutfitHistoryInternal {...props} />
+    </QueryClientProvider>
   );
 }

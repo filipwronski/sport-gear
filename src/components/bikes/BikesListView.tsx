@@ -3,12 +3,16 @@ import { Plus, Bike } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "../auth/useToast";
-import type { BikeDTO } from "../../types";
+import { AddBikeDialog } from "../gear/AddBikeDialog";
+import { createBike } from "../../lib/api/bikes";
+import type { BikeDTO, CreateBikeCommand } from "../../types";
 
 export default function BikesListView() {
   const [bikes, setBikes] = useState<BikeDTO[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -46,16 +50,41 @@ export default function BikesListView() {
   };
 
   const handleAddBike = () => {
-    // TODO: Implement add bike functionality
-    showToast({
-      type: "info",
-      title: "Funkcja w trakcie implementacji",
-      description: "Dodawanie rowerów będzie dostępne wkrótce",
-    });
+    setIsAddDialogOpen(true);
   };
 
   const handleBikeClick = (bikeId: string) => {
     window.location.href = `/bikes/${bikeId}`;
+  };
+
+  const handleAddBikeSuccess = async (data: CreateBikeCommand) => {
+    try {
+      setIsSubmitting(true);
+      const newBike = await createBike(data);
+
+      // Optimistic update
+      setBikes((prev) => [newBike, ...prev]);
+
+      showToast({
+        type: "success",
+        title: "Sukces",
+        description: `Rower "${newBike.name}" został dodany`,
+      });
+
+      setIsAddDialogOpen(false);
+
+      // Refetch to ensure consistency
+      await fetchBikes();
+    } catch (err) {
+      showToast({
+        type: "error",
+        title: "Błąd",
+        description: "Nie udało się dodać roweru",
+      });
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -155,6 +184,13 @@ export default function BikesListView() {
           </div>
         )}
       </div>
+
+      <AddBikeDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSuccess={handleAddBikeSuccess}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 }

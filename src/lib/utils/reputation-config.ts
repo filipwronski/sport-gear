@@ -1,4 +1,4 @@
-import { ReputationBadgeEnum, ReputationBadgeConfig } from "../../types";
+import type { ReputationBadgeEnum, ReputationBadgeConfig } from "../../types";
 
 /**
  * Reputation badge configuration

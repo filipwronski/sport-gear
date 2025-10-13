@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { CommunityViewState, LocationDTO, CommunityOutfitDTO } from "../../types";
+import type {
+  CommunityViewState,
+  LocationDTO,
+  CommunityOutfitDTO,
+} from "../../types";
 import { useCommunityView } from "../../hooks/useCommunityView";
 import CommunityHeader from "./CommunityHeader";
 import CommunityFiltersPanel from "./CommunityFiltersPanel";

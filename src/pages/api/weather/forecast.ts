@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { WeatherService } from "../../../services/weather.service";
+import { supabaseServiceClient } from "../../../db/supabase.admin.client";
 import { validateForecastParams } from "../../../lib/validation/weather.schemas";
 import {
   ValidationError,
@@ -45,19 +46,12 @@ export const GET: APIRoute = async ({ url, locals }) => {
     }
 
     // Step 2: Validate query parameters
-    const locationId = url.searchParams.get("location_id");
-    if (!locationId) {
-      return createErrorResponse(
-        "VALIDATION_ERROR",
-        "Missing required parameter: location_id",
-        400,
-        [{ field: "location_id", message: "location_id is required" }],
-      );
-    }
+    const lat = url.searchParams.get("lat");
+    const lng = url.searchParams.get("lng");
 
     let validatedParams;
     try {
-      validatedParams = validateForecastParams({ location_id: locationId });
+      validatedParams = validateForecastParams({ lat, lng });
     } catch (error) {
       if (error instanceof ValidationError) {
         return createErrorResponse(
@@ -82,10 +76,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
     }
 
     // Step 4: Initialize WeatherService and get forecast
-    const weatherService = new WeatherService(locals.supabase, apiKey);
-    const forecast = await weatherService.getForecastByLocation(
-      validatedParams.location_id,
-      userId,
+    const weatherService = new WeatherService(locals.supabase, supabaseServiceClient, apiKey);
+    const forecast = await weatherService.getForecastByCoordinates(
+      validatedParams.lat,
+      validatedParams.lng,
     );
 
     // Step 5: Return successful response

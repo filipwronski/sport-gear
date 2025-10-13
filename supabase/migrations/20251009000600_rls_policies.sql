@@ -208,10 +208,10 @@ create policy weather_cache_select_all on weather_cache
   to authenticated
   using (true);
 
--- insert/update/delete: only service_role (edge functions)
-create policy weather_cache_service_role on weather_cache
+-- insert/update/delete: all authenticated users (for caching weather data)
+create policy weather_cache_authenticated_all on weather_cache
   for all
-  to service_role
+  to authenticated
   using (true)
   with check (true);
 

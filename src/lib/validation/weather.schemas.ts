@@ -8,10 +8,17 @@ import { ValidationError } from "../errors";
 
 /**
  * Schema for GET /api/weather/forecast query parameters
- * Validates location_id as valid UUID v4
+ * Validates latitude and longitude coordinates
  */
 export const GetForecastParamsSchema = z.object({
-  location_id: z.string().uuid({ message: "location_id must be valid UUID" }),
+  lat: z.coerce
+    .number()
+    .min(-90, "Latitude must be between -90 and 90")
+    .max(90, "Latitude must be between -90 and 90"),
+  lng: z.coerce
+    .number()
+    .min(-180, "Longitude must be between -180 and 180")
+    .max(180, "Longitude must be between -180 and 180"),
 });
 
 /**

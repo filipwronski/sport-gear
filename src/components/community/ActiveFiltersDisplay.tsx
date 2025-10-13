@@ -2,7 +2,8 @@ import React from "react";
 import { X } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { CommunityFiltersState, DEFAULT_COMMUNITY_FILTERS } from "../../types";
+import type { CommunityFiltersState } from "../../types";
+import { DEFAULT_COMMUNITY_FILTERS } from "../../types";
 import { ACTIVITY_TYPE_LABELS } from "../../constants/community.constants";
 
 interface ActiveFiltersDisplayProps {

@@ -12,14 +12,19 @@ import {
  * OpenWeather API response structure for 7-day forecast
  */
 interface OpenWeatherForecastResponse {
-  daily: {
+  list: {
     dt: number; // Unix timestamp
-    temp: {
-      min: number;
-      max: number;
+    main: {
+      temp_min: number;
+      temp_max: number;
+      humidity: number;
     };
-    wind_speed: number;
-    rain?: number; // Optional, may not exist
+    wind: {
+      speed: number;
+    };
+    rain?: {
+      "3h": number;
+    };
     weather: {
       description: string;
     }[];
@@ -62,10 +67,11 @@ export class WeatherService {
   private static readonly CACHE_TTL_HOURS = 6;
   private static readonly API_TIMEOUT_MS = 5000;
   private static readonly OPENWEATHER_BASE_URL =
-    "https://api.openweathermap.org/data/2.5/forecast/daily";
+    "https://api.openweathermap.org/data/2.5/forecast";
 
   constructor(
     private supabase: SupabaseClient,
+    private serviceClient: SupabaseClient,
     private apiKey: string,
   ) {}
 
@@ -171,7 +177,7 @@ export class WeatherService {
     locationKey: string,
   ): Promise<ForecastDTO | null> {
     try {
-      const { data, error } = await this.supabase
+      const { data, error } = await this.serviceClient
         .from("weather_cache")
         .select("forecast_data, expires_at")
         .eq("location_key", locationKey)
@@ -204,7 +210,7 @@ export class WeatherService {
     );
 
     try {
-      const url = `${WeatherService.OPENWEATHER_BASE_URL}?lat=${lat}&lon=${lon}&cnt=7&units=metric&appid=${this.apiKey}`;
+      const url = `${WeatherService.OPENWEATHER_BASE_URL}?lat=${lat}&lon=${lon}&units=metric&appid=${this.apiKey}`;
 
       const response = await fetch(url, {
         signal: controller.signal,
@@ -248,29 +254,43 @@ export class WeatherService {
   private transformOpenWeatherResponse(
     apiData: OpenWeatherForecastResponse,
   ): ForecastDTO {
-    const forecast: ForecastDayDTO[] = apiData.daily.map((day) => {
-      const date = new Date(day.dt * 1000).toISOString().split("T")[0]; // YYYY-MM-DD
-      const tempMin = Math.round(day.temp.min);
-      const tempMax = Math.round(day.temp.max);
-      const windSpeed = Math.round(day.wind_speed * 3.6); // m/s to km/h
-      const rainMm = day.rain || 0;
-      const description = day.weather[0]?.description || "clear";
+    // Group forecast data by day
+    const dailyData: { [date: string]: any[] } = {};
 
-      return {
-        date,
-        temperature_min: tempMin,
-        temperature_max: tempMax,
-        wind_speed: windSpeed,
-        rain_mm: rainMm,
-        description,
-        quick_recommendation: this.generateQuickRecommendation(
-          tempMin,
-          tempMax,
-          rainMm,
-          windSpeed,
-        ),
-      };
+    apiData.list.forEach((item) => {
+      const date = new Date(item.dt * 1000).toISOString().split("T")[0];
+      if (!dailyData[date]) {
+        dailyData[date] = [];
+      }
+      dailyData[date].push(item);
     });
+
+    // Convert to forecast format - take first 5 days
+    const forecast: ForecastDayDTO[] = Object.keys(dailyData)
+      .slice(0, 5)
+      .map((date) => {
+        const dayData = dailyData[date];
+        const tempMin = Math.min(...dayData.map(d => d.main.temp_min));
+        const tempMax = Math.max(...dayData.map(d => d.main.temp_max));
+        const windSpeed = Math.round(dayData[0].wind.speed * 3.6); // m/s to km/h
+        const rainMm = dayData.reduce((sum, d) => sum + (d.rain?.["3h"] || 0), 0);
+        const description = dayData[0].weather[0]?.description || "clear";
+
+        return {
+          date,
+          temperature_min: Math.round(tempMin),
+          temperature_max: Math.round(tempMax),
+          wind_speed: windSpeed,
+          rain_mm: Math.round(rainMm * 100) / 100, // Round to 2 decimal places
+          description,
+          quick_recommendation: this.generateQuickRecommendation(
+            Math.round(tempMin),
+            Math.round(tempMax),
+            rainMm,
+            windSpeed,
+          ),
+        };
+      });
 
     return { forecast };
   }
@@ -333,7 +353,7 @@ export class WeatherService {
         Date.now() + WeatherService.CACHE_TTL_HOURS * 60 * 60 * 1000,
       );
 
-      const { error } = await this.supabase.from("weather_cache").upsert(
+      const { error } = await this.serviceClient.from("weather_cache").upsert(
         {
           location_key: locationKey,
           forecast_data: forecast,
@@ -369,61 +389,57 @@ export class WeatherService {
    * @throws NotFoundError if location doesn't exist
    * @throws ServiceUnavailableError if weather API fails
    */
-  async getWeatherSummary(locationId: string): Promise<{
+  async getForecastByCoordinates(
+    lat: number,
+    lng: number,
+  ): Promise<ForecastDTO> {
+    // Generate cache key based on coordinates
+    const locationKey = `forecast_${lat}_${lng}`;
+
+    // Step 3: Check cache first
+    const cachedForecast = await this.getCachedForecast(locationKey);
+    if (cachedForecast) {
+      return cachedForecast;
+    }
+
+    // Step 4: Cache miss - fetch from API
+    const forecast = await this.fetchForecastFromAPI(lat, lng);
+
+    // Step 5: Cache the result
+    await this.cacheForecast(locationKey, forecast);
+
+    return forecast;
+  }
+
+  async getWeatherSummaryByCoordinates(
+    lat: number,
+    lng: number,
+  ): Promise<{
     location_id: string;
     current_temperature: number;
     feels_like: number;
+    wind_speed: number;
+    humidity: number;
     description: string;
     quick_recommendation: string;
   }> {
     try {
-      // Get location data
-      const location = await this.getLocationData(locationId);
-
-      // Try to get current weather from cache first
-      const cacheKey = `weather_current_${location.latitude}_${location.longitude}`;
-      const cached = await this.getCachedWeather(cacheKey);
-
-      let weatherData;
-
-      if (cached && this.isCacheValid(cached.updated_at, 3600)) {
-        // 1 hour cache
-        // Use cached data - extract current weather from forecast
-        const forecast = cached.forecast_data;
-        if (forecast && forecast.forecast.length > 0) {
-          const today = forecast.forecast[0];
-          weatherData = {
-            temperature: (today.temperature_min + today.temperature_max) / 2,
-            feels_like: today.temperature_min, // Approximation
-            description: today.description,
-          };
-        } else {
-          throw new ServiceUnavailableError("Invalid cached weather data");
-        }
-      } else {
-        // Fetch fresh data from API
-        weatherData = await this.fetchCurrentWeatherFromAPI(
-          location.latitude,
-          location.longitude,
-        );
-      }
+      // Fetch fresh data from API using provided coordinates
+      const weatherData = await this.fetchCurrentWeatherFromAPI(lat, lng);
 
       return {
-        location_id: locationId,
+        location_id: "", // No location ID when using coordinates directly
         current_temperature: weatherData.temperature,
         feels_like: weatherData.feels_like,
+        wind_speed: weatherData.wind_speed,
+        humidity: weatherData.humidity,
         description: weatherData.description,
         quick_recommendation: this.generateQuickRecommendationSingle(
           weatherData.temperature,
         ),
       };
     } catch (error) {
-      console.error("Weather summary error:", error);
-
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
-
+      console.error("Weather summary by coordinates error:", error);
       throw new ServiceUnavailableError("Failed to fetch weather summary");
     }
   }
@@ -451,21 +467,18 @@ export class WeatherService {
   ): Promise<{
     temperature: number;
     feels_like: number;
+    wind_speed: number;
+    humidity: number;
     description: string;
   }> {
-    const apiKey = import.meta.env.OPENWEATHER_API_KEY;
-    if (!apiKey) {
-      throw new ServiceUnavailableError("Weather API key not configured");
-    }
-
-    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${this.apiKey}&units=metric`;
 
     try {
       const response = await fetch(url);
 
       if (!response.ok) {
         if (response.status === 429) {
-          throw new RateLimitError("Weather API rate limit exceeded");
+          throw new RateLimitError(3600); // 1 hour retry
         }
         throw new ServiceUnavailableError(
           `Weather API error: ${response.status}`,
@@ -477,6 +490,8 @@ export class WeatherService {
       return {
         temperature: data.main.temp,
         feels_like: data.main.feels_like,
+        wind_speed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
+        humidity: data.main.humidity,
         description: data.weather[0].description,
       };
     } catch (error) {

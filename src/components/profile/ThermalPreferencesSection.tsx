@@ -141,7 +141,7 @@ export function ThermalPreferencesSection({
               <div className="space-y-2">
                 <Label htmlFor="cap-threshold">Próg temperatury dla czapki (°C)</Label>
                 <Select
-                  value={localPreferences.cap_threshold_temp.toString()}
+                  value={(localPreferences.cap_threshold_temp ?? 20).toString()}
                   onValueChange={(value) =>
                     setLocalPreferences(prev => ({ ...prev, cap_threshold_temp: parseInt(value) }))
                   }

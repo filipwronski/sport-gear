@@ -1,17 +1,17 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { ServiceRecordService } from "../../../../../../services/service-record.service";
+import { ServiceRecordService } from "../../../../../services/service-record.service";
 import {
   updateServiceSchema,
   bikeServiceParamsSchema,
   type UpdateServiceCommand,
-} from "../../../../../../lib/validation/service.schemas";
-import { handleError } from "../../../../../../lib/error-handler";
+} from "../../../../../lib/validation/service.schemas";
+import { handleError } from "../../../../../lib/error-handler";
 import {
   InvalidUuidError,
   ServiceNotFoundError,
   UnauthorizedErrorWithStatus,
-} from "../../../../../../lib/errors/index";
+} from "../../../../../lib/errors/index";
 
 /**
  * PUT /api/bikes/{bikeId}/services/{id}

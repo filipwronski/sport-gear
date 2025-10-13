@@ -611,16 +611,17 @@ export class ProfileService {
       const { data, error } = await supabaseClient
         .from("profiles")
         .select("feedback_count, thermal_adjustment")
-        .eq("id", userId)
-        .single();
+        .eq("id", userId);
 
       if (error) {
         console.error("Get personalization status error:", error);
         throw new InternalServerError("Failed to fetch personalization status");
       }
 
-      const feedbackCount = data?.feedback_count || 0;
-      const thermalAdjustment = data?.thermal_adjustment || 0;
+      // Handle case where profile doesn't exist yet
+      const profileData = data && data.length > 0 ? data[0] : null;
+      const feedbackCount = profileData?.feedback_count || 0;
+      const thermalAdjustment = profileData?.thermal_adjustment || 0;
 
       return {
         feedback_count: feedbackCount,

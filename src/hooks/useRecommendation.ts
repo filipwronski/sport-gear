@@ -1,11 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { formatISO } from "date-fns";
 import { useDebouncedCallback } from "use-debounce";
 import type {
   RecommendationFiltersViewModel,
   RecommendationViewState,
   RecommendationDTO,
-  GetRecommendationParams,
   ApiError,
 } from "../types";
 
@@ -30,25 +29,59 @@ export function useRecommendation(defaultLocationId?: string) {
   });
 
   // Fetch recommendation (debounced 500ms)
-  const fetchRecommendation = useDebouncedCallback(async (filters: RecommendationFiltersViewModel) => {
-    setState((prev) => ({
-      ...prev,
-      isLoadingRecommendation: true,
-      error: null,
-    }));
+  const fetchRecommendation = useDebouncedCallback(
+    async (filters: RecommendationFiltersViewModel) => {
+      console.log(
+        "useRecommendation: fetchRecommendation called with filters:",
+        filters,
+      );
+      setState((prev) => ({
+        ...prev,
+        isLoadingRecommendation: true,
+        error: null,
+      }));
 
     try {
       const params: Record<string, string> = {
-        location_id: filters.locationId,
         activity_type: filters.activityType,
         duration_minutes: filters.durationMinutes.toString(),
       };
+
+      // Get coordinates for weather data
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 300000, // 5 minutes
+            });
+          });
+
+          params.lat = position.coords.latitude.toString();
+          params.lng = position.coords.longitude.toString();
+          console.log("useRecommendation: Got coordinates from geolocation:", params.lat, params.lng);
+        } catch (geoError) {
+          console.warn("Geolocation not available, using default location (Warsaw)");
+          // Fallback to Warsaw coordinates
+          params.lat = "52.237049";
+          params.lng = "21.017532";
+          console.log("useRecommendation: Using fallback coordinates:", params.lat, params.lng);
+        }
+      } else {
+        console.warn("Geolocation not supported, using default location (Warsaw)");
+        // Fallback to Warsaw coordinates
+        params.lat = "52.237049";
+        params.lng = "21.017532";
+        console.log("useRecommendation: Using fallback coordinates:", params.lat, params.lng);
+      }
 
       if (filters.selectedDate) {
         params.date = formatISO(filters.selectedDate, { representation: "date" });
       }
 
       const queryString = new URLSearchParams(params).toString();
+      console.log("useRecommendation: Calling API with params:", params);
       const response = await fetch(`/api/recommendations?${queryString}`);
 
       if (!response.ok) {
@@ -140,18 +173,25 @@ export function useRecommendation(defaultLocationId?: string) {
       setState((prev) => ({ ...prev, filters: newFilters }));
       fetchRecommendation(newFilters);
     },
-    [state.filters, fetchRecommendation]
+    [state.filters] // Remove fetchRecommendation from dependencies to avoid infinite loop
   );
+
+  // Initialize recommendation (for direct calling without filters)
+  const initializeRecommendation = useCallback(() => {
+    console.log("initializeRecommendation: Calling fetchRecommendation with default filters");
+    fetchRecommendation(state.filters);
+  }, [state.filters]);
 
   // Refetch current recommendation
   const refetch = useCallback(() => {
     fetchRecommendation(state.filters);
-  }, [state.filters, fetchRecommendation]);
+  }, [state.filters]); // Remove fetchRecommendation from dependencies to avoid infinite loop
 
   return {
     ...state,
     setFilters,
     fetchAiTips,
     refetch,
+    initializeRecommendation,
   };
 }

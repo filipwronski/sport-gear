@@ -31,21 +31,18 @@ export class RecommendationWeatherService {
   }
 
   /**
-   * Get weather data for recommendations
+   * Get weather data for recommendations using coordinates
    * Supports both current weather and forecast
    */
-  async getWeather(
-    locationId: string,
-    userId: string,
+  async getWeatherByCoordinates(
+    lat: number,
+    lng: number,
     date?: string,
   ): Promise<WeatherDTO> {
-    // Get location coordinates
-    const coords = await this.getLocationCoordinates(locationId, userId);
-
     // Generate cache key
     const cacheKey = date
-      ? `forecast_${coords.latitude}_${coords.longitude}_${date}`
-      : `current_${coords.latitude}_${coords.longitude}`;
+      ? `forecast_${lat}_${lng}_${date}`
+      : `current_${lat}_${lng}`;
 
     // Check cache
     const cached = await this.getCachedWeather(cacheKey);
@@ -55,15 +52,8 @@ export class RecommendationWeatherService {
 
     // Fetch from API
     const weather = date
-      ? await this.openWeatherClient.getForecast(
-          coords.latitude,
-          coords.longitude,
-          date,
-        )
-      : await this.openWeatherClient.getCurrentWeather(
-          coords.latitude,
-          coords.longitude,
-        );
+      ? await this.openWeatherClient.getForecast(lat, lng, date)
+      : await this.openWeatherClient.getCurrentWeather(lat, lng);
 
     // Update cache
     const ttl = date ? CACHE_TTL.FORECAST : CACHE_TTL.CURRENT;

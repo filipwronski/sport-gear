@@ -17,8 +17,31 @@ export function useDashboardData(
 
     try {
       const url = new URL("/api/dashboard", window.location.origin);
-      if (locationId) {
-        url.searchParams.set("location_id", locationId);
+
+      // Try to get user's current location for weather data
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 300000, // 5 minutes
+            });
+          });
+
+          url.searchParams.set("lat", position.coords.latitude.toString());
+          url.searchParams.set("lng", position.coords.longitude.toString());
+        } catch (geoError) {
+          console.warn("Geolocation not available or denied, using default location (Warsaw)");
+          // Fallback to Warsaw coordinates for demo purposes
+          url.searchParams.set("lat", "52.237049");
+          url.searchParams.set("lng", "21.017532");
+        }
+      } else {
+        console.warn("Geolocation not supported, using default location (Warsaw)");
+        // Fallback to Warsaw coordinates for demo purposes
+        url.searchParams.set("lat", "52.237049");
+        url.searchParams.set("lng", "21.017532");
       }
 
       const response = await fetch(url.toString(), {

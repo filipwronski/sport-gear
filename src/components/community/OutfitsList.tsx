@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import OutfitCard from "./OutfitCard";
 import LoadingState from "./LoadingState";
 import EmptyState from "./EmptyState";
-import { CommunityOutfitDTO } from "../../types";
+import type { CommunityOutfitDTO } from "../../types";
 
 interface OutfitsListProps {
   outfits: CommunityOutfitDTO[];

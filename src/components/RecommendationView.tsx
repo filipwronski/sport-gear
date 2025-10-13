@@ -1,51 +1,90 @@
-import { useState } from "react";
-import { AlertCircle, Loader2 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useRecommendation } from "../hooks/useRecommendation";
-import RecommendationFilters from "./RecommendationFilters";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WeatherSummary from "./WeatherSummary";
 import CyclistSVG from "./CyclistSVG";
 import OutfitDetailsList from "./OutfitDetailsList";
 import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
-import type { ZoneType, GetRecommendationParams, FeedbackDTO } from "../types";
+import type { ZoneType, FeedbackDTO, RecommendationDTO, ApiError } from "../types";
 
 /**
- * RecommendationView - Main recommendation view component
- * Orchestrates all sub-components and manages recommendation state
+ * Simplified RecommendationView - Shows current weather-based outfit recommendation
  */
-interface RecommendationViewProps {
-  defaultLocationId?: string;
-}
-
-export default function RecommendationView({ defaultLocationId }: RecommendationViewProps) {
+export default function RecommendationView() {
   const [selectedZone, setSelectedZone] = useState<ZoneType | undefined>();
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
-  const [feedbackCount, setFeedbackCount] = useState(0); // TODO: Get from user profile
+  const [feedbackCount, setFeedbackCount] = useState(0);
+  const [recommendation, setRecommendation] = useState<RecommendationDTO | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<ApiError | null>(null);
 
-  const {
-    filters,
-    recommendation,
-    aiTips,
-    isLoadingRecommendation,
-    isLoadingAiTips,
-    error,
-    rateLimitedUntil,
-    setFilters,
-    fetchAiTips,
-    refetch,
-  } = useRecommendation(defaultLocationId);
+  // Fetch recommendation on mount
+  useEffect(() => {
+    fetchRecommendation();
+  }, []);
 
-  const handleFiltersChange = (params: GetRecommendationParams) => {
-    setFilters({
-      locationId: params.location_id,
-      activityType: params.activity_type || 'spokojna',
-      durationMinutes: params.duration_minutes || 90,
-      selectedDate: params.date ? new Date(params.date) : null,
-    });
+  const fetchRecommendation = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Get coordinates
+      let params: Record<string, string> = {};
+
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 300000,
+            });
+          });
+          params.lat = position.coords.latitude.toString();
+          params.lng = position.coords.longitude.toString();
+        } catch (geoError) {
+          // Fallback to Warsaw coordinates
+          params.lat = "52.237049";
+          params.lng = "21.017532";
+        }
+      } else {
+        // Fallback to Warsaw coordinates
+        params.lat = "52.237049";
+        params.lng = "21.017532";
+      }
+
+      params.activity_type = "spokojna";
+      params.duration_minutes = "90";
+
+      const queryString = new URLSearchParams(params).toString();
+      const response = await fetch(`/api/recommendations?${queryString}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        const apiError: ApiError = {
+          code: errorData.error?.code || "UNKNOWN_ERROR",
+          message: errorData.error?.message || "Wystąpił błąd podczas pobierania rekomendacji",
+          statusCode: response.status,
+          details: errorData.error?.details,
+          retryAfter: response.headers.get("Retry-After")
+            ? parseInt(response.headers.get("Retry-After")!)
+            : undefined,
+        };
+        throw apiError;
+      }
+
+      const data: RecommendationDTO = await response.json();
+      setRecommendation(data);
+    } catch (err) {
+      setError(err as ApiError);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleZoneClick = (zone: ZoneType) => {
@@ -53,55 +92,60 @@ export default function RecommendationView({ defaultLocationId }: Recommendation
   };
 
   const handleFeedbackSubmitted = (feedback: FeedbackDTO) => {
-    // Update feedback count and potentially refetch personalization data
     setFeedbackCount(prev => prev + 1);
-    // TODO: Invalidate recommendation to get updated personalization
   };
 
-  if (!recommendation && !isLoadingRecommendation && !error) {
+  if (isLoading) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground mb-4">
-          Wybierz lokalizację aby zobaczyć rekomendację ubioru
-        </p>
-      </div>
+      <Card>
+        <CardContent className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin mr-3" />
+          <span>Generuję rekomendację...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="py-6">
+          <Alert variant="destructive">
+            <AlertCircle className="w-4 h-4" />
+            <AlertTitle>Błąd</AlertTitle>
+            <AlertDescription className="flex items-center justify-between">
+              <span>{error.message}</span>
+              <Button variant="outline" size="sm" onClick={fetchRecommendation}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Spróbuj ponownie
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!recommendation) {
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <p className="text-muted-foreground mb-4">
+            Nie udało się pobrać rekomendacji
+          </p>
+          <Button onClick={fetchRecommendation}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Spróbuj ponownie
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Filters */}
-      <RecommendationFilters
-        defaultLocationId={defaultLocationId}
-        onFiltersChange={handleFiltersChange}
-        isLoading={isLoadingRecommendation}
-      />
-
-      {/* Loading state */}
-      {isLoadingRecommendation && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin mr-3" />
-          <span>Generuję rekomendację...</span>
-        </div>
-      )}
-
-      {/* Error state */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="w-4 h-4" />
-          <AlertTitle>Błąd</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
-            <span>{error.message}</span>
-            <Button variant="outline" size="sm" onClick={refetch}>
-              Spróbuj ponownie
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Main content */}
-      {recommendation && !isLoadingRecommendation && (
-        <>
+    <Card>
+      <CardContent className="p-6">
+        <div className="space-y-6">
           {/* Weather Summary */}
           <WeatherSummary weather={recommendation.weather} />
 
@@ -166,18 +210,16 @@ export default function RecommendationView({ defaultLocationId }: Recommendation
             onFeedbackClick={() => setFeedbackDialogOpen(true)}
             feedbackCount={feedbackCount}
           />
-        </>
-      )}
+        </div>
 
-      {/* Feedback Dialog */}
-      {recommendation && (
+        {/* Feedback Dialog */}
         <FeedbackDialog
           isOpen={feedbackDialogOpen}
           onClose={() => setFeedbackDialogOpen(false)}
           recommendation={recommendation}
           onSubmitted={handleFeedbackSubmitted}
         />
-      )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

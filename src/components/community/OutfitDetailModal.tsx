@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import ReputationBadge from "./ReputationBadge";
-import { CommunityOutfitDTO } from "../../types";
+import type { CommunityOutfitDTO } from "../../types";
 import { getOutfitItemConfig } from "../../lib/utils/outfit-icons";
 import { getReputationLevel } from "../../lib/utils/reputation-config";
 import { ACTIVITY_TYPE_LABELS } from "../../constants/community.constants";

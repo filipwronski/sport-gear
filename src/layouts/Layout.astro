@@ -29,7 +29,7 @@ const {
     <title>{title}</title>
   </head>
   <body class="min-h-screen flex flex-col">
-    <QueryProvider client:load>
+    <QueryProvider>
       <Header client:load />
       <main class="flex-grow">
         <slot />

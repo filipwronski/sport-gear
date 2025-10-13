@@ -275,7 +275,8 @@ export interface ForecastDTO {
  * Query parameters for GET /api/weather/forecast
  */
 export interface GetForecastParams {
-  location_id: string;
+  lat: number;
+  lng: number;
 }
 
 // ============================================================================
@@ -631,6 +632,8 @@ export interface WeatherSummaryDTO {
   current_temperature: number;
   feels_like: number;
   description: string;
+  wind_speed: number;
+  humidity: number;
   quick_recommendation: string;
 }
 

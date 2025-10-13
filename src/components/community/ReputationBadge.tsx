@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { Badge } from "../ui/badge";
-import { ReputationBadgeEnum } from "../../types";
+import type { ReputationBadgeEnum } from "../../types";
 import { getReputationConfig } from "../../lib/utils/reputation-config";
 import { Star, Award } from "lucide-react";
 

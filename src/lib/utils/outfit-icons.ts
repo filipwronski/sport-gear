@@ -1,4 +1,4 @@
-import { OutfitItemConfig } from "../../types";
+import type { OutfitItemConfig } from "../../types";
 
 /**
  * Head outfit items configuration

@@ -16,23 +16,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User } from "lucide-react";
+import { User, MapPin } from "lucide-react";
+import { POLISH_CITIES, getPolishCityByName } from "../../constants/location.constants";
 import type {
   ProfileDTO,
   LocationDTO,
   UpdateProfileCommand,
+  CreateLocationCommand,
 } from "../../types";
 
 interface PersonalInfoSectionProps {
   profile: ProfileDTO;
   locations: LocationDTO[];
   onUpdate: (command: Partial<UpdateProfileCommand>) => Promise<void>;
+  onCreateLocation: (command: CreateLocationCommand) => Promise<LocationDTO>;
+  onUpdateLocation: (locationId: string, command: UpdateLocationCommand) => Promise<LocationDTO>;
 }
 
 export function PersonalInfoSection({
   profile,
   locations,
   onUpdate,
+  onCreateLocation,
+  onUpdateLocation,
 }: PersonalInfoSectionProps) {
   const [displayName, setDisplayName] = useState(profile.display_name || "");
   const [defaultLocationId, setDefaultLocationId] = useState(
@@ -55,14 +61,55 @@ export function PersonalInfoSection({
     setHasChanges(nameChanged || locationChanged);
   }, [displayName, defaultLocationId, profile]);
 
+  const handleDefaultLocationChange = (value: string) => {
+    setDefaultLocationId(value);
+    // Location creation will happen in handleSave when user clicks "Zapisz zmiany"
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      let actualLocationId = defaultLocationId;
+
+      // If user selected a Polish city, create it as a location if it doesn't exist
+      if (defaultLocationId.startsWith("polish-city-")) {
+        const cityName = defaultLocationId.replace("polish-city-", "");
+        const cityData = getPolishCityByName(cityName);
+
+        if (cityData) {
+          // Check if this city already exists in user's locations
+          const existingLocation = locations.find(
+            loc => loc.city.toLowerCase() === cityName.toLowerCase() && loc.country_code === "PL"
+          );
+
+          if (existingLocation) {
+            // City already exists, use its ID
+            actualLocationId = existingLocation.id;
+          } else {
+            // Create new location (without setting as default)
+            const newLocation = await onCreateLocation({
+              latitude: cityData.latitude,
+              longitude: cityData.longitude,
+              city: cityData.name,
+              country_code: cityData.country_code,
+              is_default: false, // Don't set as default here, will be set via profile update
+            });
+            actualLocationId = newLocation.id;
+          }
+        }
+      }
+
       await onUpdate({
         display_name: displayName.trim() || null,
         default_location_id:
-          defaultLocationId === "none" ? null : defaultLocationId,
+          actualLocationId === "none" ? null : actualLocationId,
       });
+
+      // If we set a default location, update its is_default flag
+      if (actualLocationId !== "none") {
+        await onUpdateLocation(actualLocationId, { is_default: true });
+      }
+
       setHasChanges(false);
     } finally {
       setIsSaving(false);
@@ -101,31 +148,63 @@ export function PersonalInfoSection({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="default-location">Domyślna lokalizacja</Label>
+          <Label htmlFor="default-location" className="flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            Domyślna lokalizacja
+          </Label>
           <Select
             value={defaultLocationId}
-            onValueChange={setDefaultLocationId}
+            onValueChange={handleDefaultLocationChange}
+            disabled={isSaving}
           >
             <SelectTrigger>
               <SelectValue placeholder="Wybierz domyślną lokalizację">
                 {defaultLocation
                   ? `${defaultLocation.city}, ${defaultLocation.country_code}`
+                  : defaultLocationId.startsWith("polish-city-")
+                  ? getPolishCityByName(defaultLocationId.replace("polish-city-", ""))?.name + ", PL"
                   : "Brak wybranej lokalizacji"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Brak domyślnej lokalizacji</SelectItem>
-              {locations.map((location) => (
-                <SelectItem key={location.id} value={location.id}>
-                  {location.label ||
-                    `${location.city}, ${location.country_code}`}
-                  {location.is_default && " (domyślna)"}
-                </SelectItem>
-              ))}
+
+              {/* Polish Cities Section */}
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Największe miasta Polski
+              </div>
+              {POLISH_CITIES.map((city) => {
+                const cityValue = `polish-city-${city.name}`;
+                const existingLocation = locations.find(
+                  loc => loc.city.toLowerCase() === city.name.toLowerCase() && loc.country_code === "PL"
+                );
+                return (
+                  <SelectItem key={cityValue} value={cityValue}>
+                    {city.name}, {city.country_code}
+                    {existingLocation && " ✓"}
+                  </SelectItem>
+                );
+              })}
+
+              {/* User Locations Section */}
+              {locations.length > 0 && (
+                <>
+                  <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-t mt-1 pt-2">
+                    Moje lokalizacje
+                  </div>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.label ||
+                        `${location.city}, ${location.country_code}`}
+                      {location.is_default && " (domyślna)"}
+                    </SelectItem>
+                  ))}
+                </>
+              )}
             </SelectContent>
           </Select>
           <p className="text-sm text-muted-foreground">
-            Ta lokalizacja będzie używana domyślnie dla rekomendacji pogody
+            Ta lokalizacja będzie używana domyślnie dla rekomendacji pogody i outfitów
           </p>
         </div>
 

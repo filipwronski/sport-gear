@@ -1,10 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RefreshCw, Calendar } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ForecastDayCard from "./ForecastDayCard";
 import type { ForecastDTO, GetForecastParams } from "../types";
+
+// Create a client for forecast
+const forecastQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 15 * 60 * 1000, // 15 minutes
+      retry: (failureCount, error: unknown) => {
+        const status = (error as any)?.status;
+        if (status >= 400 && status < 500) {
+          return status === 408 || status === 429;
+        }
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+  },
+});
 
 /**
  * WeeklyForecast - 7-day weather forecast component
@@ -17,18 +35,28 @@ interface WeeklyForecastProps {
 
 async function fetchForecast(params: GetForecastParams): Promise<ForecastDTO> {
   const queryString = new URLSearchParams({
-    location_id: params.location_id,
+    lat: params.lat.toString(),
+    lng: params.lng.toString(),
   }).toString();
 
   const response = await fetch(`/api/weather/forecast?${queryString}`);
   if (!response.ok) {
-    throw new Error('Failed to fetch forecast');
+    throw new Error("Failed to fetch forecast");
   }
   return response.json();
 }
 
-export default function WeeklyForecast({ locationId, onDaySelect }: WeeklyForecastProps) {
+// Internal component that uses React Query
+function WeeklyForecastInternal({
+  locationId,
+  onDaySelect,
+}: WeeklyForecastProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const {
     data: forecast,
@@ -37,10 +65,48 @@ export default function WeeklyForecast({ locationId, onDaySelect }: WeeklyForeca
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ['forecast', locationId],
-    queryFn: () => locationId ? fetchForecast({ location_id: locationId }) : Promise.reject('No location'),
+    queryKey: ["forecast", "coordinates"],
+    queryFn: async () => {
+      // Get coordinates for weather data
+      if (navigator.geolocation) {
+        try {
+          const position = await new Promise<GeolocationPosition>(
+            (resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 300000, // 5 minutes
+              });
+            },
+          );
+
+          return fetchForecast({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        } catch {
+          console.warn(
+            "Geolocation not available, using default location (Warsaw)",
+          );
+          // Fallback to Warsaw coordinates
+          return fetchForecast({
+            lat: 52.237049,
+            lng: 21.017532,
+          });
+        }
+      } else {
+        console.warn(
+          "Geolocation not supported, using default location (Warsaw)",
+        );
+        // Fallback to Warsaw coordinates
+        return fetchForecast({
+          lat: 52.237049,
+          lng: 21.017532,
+        });
+      }
+    },
     staleTime: 6 * 60 * 60 * 1000, // 6 hours
-    enabled: !!locationId,
+    enabled: isMounted,
   });
 
   const handleDayClick = (date: string) => {
@@ -53,6 +119,15 @@ export default function WeeklyForecast({ locationId, onDaySelect }: WeeklyForeca
   const handleRefresh = () => {
     refetch();
   };
+
+  if (!isMounted) {
+    return (
+      <div className="text-center py-8">
+        <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+        <p className="text-muted-foreground">Ładowanie prognozy pogody...</p>
+      </div>
+    );
+  }
 
   if (!locationId) {
     return (
@@ -81,7 +156,9 @@ export default function WeeklyForecast({ locationId, onDaySelect }: WeeklyForeca
           variant="outline"
           size="sm"
         >
-          <RefreshCw className={`w-4 h-4 mr-2 ${isRefetching ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`w-4 h-4 mr-2 ${isRefetching ? "animate-spin" : ""}`}
+          />
           Odśwież
         </Button>
       </div>
@@ -90,10 +167,7 @@ export default function WeeklyForecast({ locationId, onDaySelect }: WeeklyForeca
       {isLoading && !forecast && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
           {Array.from({ length: 7 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-32 bg-muted animate-pulse rounded-lg"
-            />
+            <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
           ))}
         </div>
       )}
@@ -131,5 +205,14 @@ export default function WeeklyForecast({ locationId, onDaySelect }: WeeklyForeca
         </div>
       )}
     </div>
+  );
+}
+
+// Wrapper component with QueryClientProvider
+export default function WeeklyForecast(props: WeeklyForecastProps) {
+  return (
+    <QueryClientProvider client={forecastQueryClient}>
+      <WeeklyForecastInternal {...props} />
+    </QueryClientProvider>
   );
 }

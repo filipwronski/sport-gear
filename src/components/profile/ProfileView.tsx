@@ -29,6 +29,8 @@ export function ProfileView({ userId }: { userId?: string }) {
   const {
     locations,
     fetchLocations,
+    createLocation,
+    updateLocation,
   } = useLocations();
 
   const { exportData } = useExport();
@@ -231,6 +233,8 @@ export function ProfileView({ userId }: { userId?: string }) {
           profile={profile}
           locations={locations}
           onUpdate={handleProfileUpdate}
+          onCreateLocation={createLocation}
+          onUpdateLocation={updateLocation}
         />
 
         {/* Thermal Preferences */}

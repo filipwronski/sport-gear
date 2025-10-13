@@ -1,6 +1,5 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import RecommendationView from '../components/RecommendationView';
 import WeeklyForecast from '../components/WeeklyForecast';
 import OutfitHistory from '../components/OutfitHistory';
@@ -10,10 +9,6 @@ const userId = Astro.locals.userId as string;
 
 const title = "Rekomendacje ubioru - CycleGear";
 const description = "Spersonalizowane rekomendacje ubioru rowerowego na podstawie warunków pogodowych, typu aktywności i Twojej historii treningów.";
-
-// Get default location ID from user session/context
-// For now, we'll let the components handle location selection
-const defaultLocationId: string | undefined = undefined; // TODO: Get from user profile
 ---
 
 <Layout title={title} description={description}>
@@ -26,39 +21,34 @@ const defaultLocationId: string | undefined = undefined; // TODO: Get from user 
         </p>
       </div>
 
-      <Tabs defaultValue="current" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="current">Aktualna rekomendacja</TabsTrigger>
-          <TabsTrigger value="forecast">Prognoza tygodniowa</TabsTrigger>
-          <TabsTrigger value="history">Historia treningów</TabsTrigger>
-        </TabsList>
+      <div class="space-y-12">
+        <!-- Aktualna rekomendacja -->
+        <section class="space-y-6">
+          <div class="border-b pb-4">
+            <h2 class="text-2xl font-semibold mb-2">Aktualna rekomendacja</h2>
+            <p class="text-muted-foreground">Rekomendacja ubioru na podstawie aktualnych warunków pogodowych</p>
+          </div>
+          <RecommendationView client:load />
+        </section>
 
-        <TabsContent value="current" className="space-y-6">
-          <RecommendationView defaultLocationId={defaultLocationId} client:load />
-        </TabsContent>
+        <!-- Prognoza tygodniowa -->
+        <section class="space-y-6">
+          <div class="border-b pb-4">
+            <h2 class="text-2xl font-semibold mb-2">Prognoza tygodniowa</h2>
+            <p class="text-muted-foreground">Zobacz rekomendacje ubioru na najbliższe dni</p>
+          </div>
+          <WeeklyForecast client:load />
+        </section>
 
-        <TabsContent value="forecast" className="space-y-6">
-          <WeeklyForecast
-            locationId={defaultLocationId}
-            onDaySelect={(date) => {
-              // Switch to current tab with selected date
-              // This would need URL state management for full implementation
-              console.log('Selected date:', date);
-            }}
-            client:load
-          />
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-6">
-          <OutfitHistory
-            onOutfitClick={(outfit) => {
-              // Handle outfit click - could open detailed view
-              console.log('Clicked outfit:', outfit);
-            }}
-            client:load
-          />
-        </TabsContent>
-      </Tabs>
+        <!-- Historia treningów -->
+        <section class="space-y-6">
+          <div class="border-b pb-4">
+            <h2 class="text-2xl font-semibold mb-2">Historia treningów</h2>
+            <p class="text-muted-foreground">Przejrzyj swoje poprzednie treningi i rekomendacje</p>
+          </div>
+          <OutfitHistory client:load />
+        </section>
+      </div>
     </div>
   </div>
 </Layout>

@@ -26,12 +26,20 @@ export function isValidUUID(value: string): boolean {
 export function validateDashboardQuery(query: any): string[] {
   const errors: string[] = [];
 
-  // location_id (optional)
-  if (query.location_id !== undefined) {
-    if (typeof query.location_id !== "string") {
-      errors.push("location_id must be a string");
-    } else if (!isValidUUID(query.location_id)) {
-      errors.push("location_id must be a valid UUID");
+  // lat/lng coordinates (optional - both must be provided if any coordinate is given)
+  if (query.lat !== undefined || query.lng !== undefined) {
+    if (query.lat === undefined || query.lng === undefined) {
+      errors.push("Both lat and lng parameters must be provided together");
+    } else {
+      const lat = parseFloat(query.lat);
+      const lng = parseFloat(query.lng);
+
+      if (isNaN(lat) || lat < -90 || lat > 90) {
+        errors.push("lat must be a valid latitude between -90 and 90");
+      }
+      if (isNaN(lng) || lng < -180 || lng > 180) {
+        errors.push("lng must be a valid longitude between -180 and 180");
+      }
     }
   }
 

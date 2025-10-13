@@ -1,7 +1,7 @@
 import React from "react";
 import { Search, Users, RotateCcw, Expand } from "lucide-react";
 import { Button } from "../ui/button";
-import { CommunityFiltersState } from "../../types";
+import type { CommunityFiltersState } from "../../types";
 
 interface EmptyStateProps {
   currentFilters: Partial<CommunityFiltersState>;

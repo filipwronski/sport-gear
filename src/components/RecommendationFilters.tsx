@@ -11,7 +11,6 @@ import {
 import { Label } from "@/components/ui/label";
 import type {
   GetRecommendationParams,
-  LocationDTO,
   ActivityTypeEnum
 } from "../types";
 
@@ -20,7 +19,6 @@ import type {
  * Handles location, activity, duration, and date selection with debounced API calls
  */
 interface RecommendationFiltersProps {
-  defaultLocationId?: string;
   onFiltersChange: (params: GetRecommendationParams) => void;
   isLoading?: boolean;
 }
@@ -44,60 +42,18 @@ export default function RecommendationFilters({
   onFiltersChange,
   isLoading = false
 }: RecommendationFiltersProps) {
-  const [locationId, setLocationId] = useState(defaultLocationId || "");
   const [activityType, setActivityType] = useState<ActivityTypeEnum>("spokojna");
   const [durationMinutes, setDurationMinutes] = useState(90);
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [locations, setLocations] = useState<LocationDTO[]>([]);
-  const [locationsLoading, setLocationsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Load user locations
+  // Initialize filters on mount and call API immediately
   useEffect(() => {
-    const loadLocations = async () => {
-      setLocationsLoading(true);
-      try {
-        const response = await fetch('/api/locations');
-        if (response.ok) {
-          const data: LocationDTO[] = await response.json();
-          setLocations(data);
+    if (!isInitialized) {
+      setIsInitialized(true);
 
-          // Set default location if not set and locations available
-          if (!locationId && data.length > 0) {
-            const defaultLoc = data.find(loc => loc.is_default) || data[0];
-            setLocationId(defaultLoc.id);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load locations:', error);
-      } finally {
-        setLocationsLoading(false);
-      }
-    };
-
-    loadLocations();
-  }, []);
-
-  // Debounced filter change effect
-  useEffect(() => {
-    if (!locationId) return;
-
-    const params: GetRecommendationParams = {
-      location_id: locationId,
-      activity_type: activityType,
-      duration_minutes: durationMinutes,
-    };
-
-    if (selectedDate) {
-      params.date = selectedDate;
-    }
-
-    onFiltersChange(params);
-  }, [locationId, activityType, durationMinutes, selectedDate, onFiltersChange]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleRefresh = () => {
-    if (locationId) {
       const params: GetRecommendationParams = {
-        location_id: locationId,
+        location_id: "coordinates", // Placeholder - coordinates are handled by useRecommendation hook
         activity_type: activityType,
         duration_minutes: durationMinutes,
       };
@@ -108,6 +64,37 @@ export default function RecommendationFilters({
 
       onFiltersChange(params);
     }
+  }, [isInitialized, activityType, durationMinutes, onFiltersChange, selectedDate]);
+
+  // Update filters when they change
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const params: GetRecommendationParams = {
+      location_id: "coordinates", // Placeholder - coordinates are handled by useRecommendation hook
+      activity_type: activityType,
+      duration_minutes: durationMinutes,
+    };
+
+    if (selectedDate) {
+      params.date = selectedDate;
+    }
+
+    onFiltersChange(params);
+  }, [activityType, durationMinutes, selectedDate, onFiltersChange, isInitialized]);
+
+  const handleRefresh = () => {
+    const params: GetRecommendationParams = {
+      location_id: "coordinates", // Placeholder - coordinates are handled by useRecommendation hook
+      activity_type: activityType,
+      duration_minutes: durationMinutes,
+    };
+
+    if (selectedDate) {
+      params.date = selectedDate;
+    }
+
+    onFiltersChange(params);
   };
 
   const formatDateForInput = (dateString: string) => {
@@ -132,7 +119,7 @@ export default function RecommendationFilters({
         <h3 className="text-lg font-semibold">Parametry rekomendacji</h3>
         <Button
           onClick={handleRefresh}
-          disabled={!locationId || isLoading}
+          disabled={isLoading}
           variant="outline"
           size="sm"
         >
@@ -142,26 +129,15 @@ export default function RecommendationFilters({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Location Selector */}
+        {/* Location Info */}
         <div className="space-y-2">
-          <Label htmlFor="location">Lokalizacja</Label>
-          <Select
-            value={locationId}
-            onValueChange={setLocationId}
-            disabled={locationsLoading}
-          >
-            <SelectTrigger id="location">
-              <SelectValue placeholder="Wybierz lokalizację" />
-            </SelectTrigger>
-            <SelectContent>
-              {locations.map((location) => (
-                <SelectItem key={location.id} value={location.id}>
-                  {location.label || location.city}
-                  {location.is_default && " (domyślna)"}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>Lokalizacja</Label>
+          <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm text-muted-foreground">
+              Lokalizacja pobierana automatycznie
+            </span>
+          </div>
         </div>
 
         {/* Activity Type Selector */}

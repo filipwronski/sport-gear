@@ -39,7 +39,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
     // 2. Parse and validate query parameters
     const url = new URL(request.url);
     const queryParams = {
-      location_id: url.searchParams.get("location_id"),
+      lat: url.searchParams.get("lat"),
+      lng: url.searchParams.get("lng"),
       activity_type: url.searchParams.get("activity_type") || "spokojna",
       duration_minutes: url.searchParams.get("duration_minutes") || "90",
       date: url.searchParams.get("date") || undefined,
@@ -62,29 +63,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     const params = validated.data;
 
-    // 3. Verify location ownership
-    const locationExists = await verifyLocationOwnership(
-      params.location_id,
-      userId,
-    );
-    if (!locationExists) {
-      return createErrorResponse({
-        code: "LOCATION_NOT_FOUND",
-        message: "Location not found or does not belong to user",
-        details: [
-          {
-            field: "location_id",
-            message: `Location ${params.location_id} not found`,
-          },
-        ],
-        statusCode: 404,
-      });
-    }
-
-    // 4. Fetch data in parallel
+    // 3. Fetch data in parallel (coordinates-based, no location ownership check needed)
     const weatherService = new RecommendationWeatherService();
     const [weather, profile] = await Promise.all([
-      weatherService.getWeather(params.location_id, userId, params.date),
+      weatherService.getWeatherByCoordinates(params.lat, params.lng, params.date),
       getUserProfile(userId),
     ]);
 
