@@ -110,8 +110,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     // Create location using service layer
-    const newLocation = await locationService.createLocationWithClient(
-      locals.supabase,
+    const newLocation = await locationService.createLocation(
       userId,
       command,
     );

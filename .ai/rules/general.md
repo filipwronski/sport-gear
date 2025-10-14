@@ -32,24 +32,6 @@
 - Include business rule testing (conflicts, validation errors)
 - Use consistent test script structure with colored output and counters
 
-#### MOCK_TEST_DATA
-
-- **Mock User ID**: `550e8400-e29b-41d4-a716-446655440000`
-- **Mock Email**: `mockuser@test.com`
-- **Mock Display Name**: `Mock Test User`
-- **Mock Password**: `mockpassword123`
-- Use this mock user for testing location endpoints and other API functionality
-- Mock user created in Supabase Cloud with complete auth.users and profiles records
-- Available for curl testing with authentication headers
-
-#### RLS_TESTING_HELPERS
-
-- **Admin Endpoints**: Create endpoints prefixed with `admin-` for test data setup (bypass middleware auth)
-- **Service Client**: Use `supabaseServiceClient` in admin endpoints to bypass RLS
-- **Test Location Creation**: Use `admin-create-mock-location.ts` to create test locations
-- **Hardcoded Coordinates**: For demo purposes, use Warsaw coords (52.2297, 21.0122) in development
-- **RLS Bypass Pattern**: Check `import.meta.env.DEV` before using service client
-- **Mock Data Cleanup**: Create helper scripts to clean up test data between test runs
 
 ## BACKEND
 
@@ -68,49 +50,8 @@
 
 - Use `supabaseClient` from `src/db/supabase.client.ts` for all database operations
 - Authentication handled via middleware in `src/middleware/index.ts`
-- Mock tokens (`test-token`, `mock-jwt-token`, `dev-token`) work in development mode
 - User ID available in `locals.userId` after authentication
 - Use TypeScript types from `src/db/database.types.ts` for type safety
-
-#### SUPABASE_RLS_TESTING
-
-- **Problem**: RLS (Row Level Security) policies use `auth.uid()` which requires real Supabase authentication
-- **Challenge**: Mock tokens in middleware set `locals.userId` but don't authenticate through Supabase auth system
-- **Solutions for Development/Testing**:
-
-**Option 1: Service Client Bypass (Recommended for Development)**
-```typescript
-// Use service client in development to bypass RLS
-const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;
-
-const { data, error } = await client
-  .from('user_locations')
-  .select('*')
-  .eq('user_id', userId);
-```
-
-**Option 2: Temporary RLS Disable (Use with Caution)**
-```sql
--- Execute in Supabase Dashboard SQL Editor (DEV ONLY!)
-ALTER TABLE user_locations DISABLE ROW LEVEL SECURITY;
-ALTER TABLE profiles DISABLE ROW LEVEL SECURITY;
-
--- Re-enable after testing
-ALTER TABLE user_locations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-```
-
-**Option 3: Create Test Policies**
-```sql
--- Add permissive policy for development
-CREATE POLICY "dev_bypass_all" ON user_locations
-  FOR ALL TO authenticated
-  USING (true)
-  WITH CHECK (true);
-
--- Drop after testing
-DROP POLICY "dev_bypass_all" ON user_locations;
-```
 
 **Best Practices**:
 - Always use service client bypass in development (`import.meta.env.DEV`)

@@ -41,10 +41,10 @@ export class BikeService {
       .select(
         `
         *,
-        service_records!service_records_bike_id_fkey (
+        service_records (
           cost
         ),
-        service_reminders!service_reminders_bike_id_fkey (
+        service_reminders (
           id,
           service_type,
           target_mileage,
@@ -94,10 +94,10 @@ export class BikeService {
       .select(
         `
         *,
-        service_records!service_records_bike_id_fkey (
+        service_records (
           cost
         ),
-        service_reminders!service_reminders_bike_id_fkey (
+        service_reminders (
           id,
           service_type,
           target_mileage,
@@ -145,33 +145,20 @@ export class BikeService {
       notes: command.notes || null,
     };
 
-    const { data: bike, error } = await supabaseClient
+    // Insert the bike first
+    const { data: insertedBike, error: insertError } = await supabaseClient
       .from("bikes")
       .insert(bikeData)
-      .select(
-        `
-        *,
-        service_records!service_records_bike_id_fkey (
-          cost
-        ),
-        service_reminders!service_reminders_bike_id_fkey (
-          id,
-          service_type,
-          target_mileage,
-          completed_at,
-          triggered_at_mileage,
-          interval_km
-        )
-      `,
-      )
+      .select("*")
       .single();
 
-    if (error) {
-      console.error("[BikeService] Error creating bike:", error);
-      throw new Error(`Failed to create bike: ${error.message}`);
+    if (insertError) {
+      console.error("[BikeService] Error creating bike:", insertError);
+      throw new Error(`Failed to create bike: ${insertError.message}`);
     }
 
-    return this.transformToDTO(bike);
+    // Then fetch the complete bike data with relationships
+    return await this.getBikeById(insertedBike.user_id, insertedBike.id);
   }
 
   /**
@@ -208,10 +195,10 @@ export class BikeService {
       .select(
         `
         *,
-        service_records!service_records_bike_id_fkey (
+        service_records (
           cost
         ),
-        service_reminders!service_reminders_bike_id_fkey (
+        service_reminders (
           id,
           service_type,
           target_mileage,

@@ -14,6 +14,56 @@ import {
 const bikeService = new BikeService();
 
 /**
+ * GET /api/bikes/{id}
+ * Fetches a single bike by ID for authenticated user
+ *
+ * Path params:
+ * - id: UUID of the bike
+ *
+ * Returns: BikeDTO
+ */
+export const GET: APIRoute = async ({ params, locals }) => {
+  try {
+    const userId = locals.userId!;
+    const bikeId = params.id!;
+
+    // Validate bike ID format
+    const bikeIdValidation = BikeIdSchema.safeParse(bikeId);
+    if (!bikeIdValidation.success) {
+      return new Response(
+        JSON.stringify({
+          error: "Bad request",
+          message: "Invalid bike ID format",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    // Fetch bike using service layer
+    const bike = await bikeService.getBikeById(userId, bikeId);
+
+    if (!bike) {
+      return createNotFoundResponse(
+        "Bike not found or you don't have permission to access it",
+      );
+    }
+
+    return new Response(JSON.stringify(bike), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "private, max-age=60", // 1 minute cache
+      },
+    });
+  } catch (error) {
+    return handleError(error);
+  }
+};
+
+/**
  * PUT /api/bikes/{id}
  * Updates an existing bike for authenticated user
  *
@@ -70,7 +120,7 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     const bike = await bikeService.updateBike(
       userId,
       bikeId,
-      validated.data as UpdateBikeInput,
+      validated.data as any, // TODO: Fix type mismatch between schema and interface
     );
 
     if (!bike) {

@@ -120,12 +120,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
   }
 
-  // Development mode: accept mock tokens for testing
-  const isDevelopment =
-    import.meta.env.MODE === "development" || import.meta.env.DEV;
+  // Check if we're using local Supabase (development) or Cloud Supabase
+  const isLocalSupabase = supabaseClient.supabaseUrl?.includes('localhost') ||
+                          supabaseClient.supabaseUrl?.includes('127.0.0.1');
 
-  if (isDevelopment) {
-    // Accept specific mock tokens for testing
+  // Only use mock tokens for local development
+  if (isLocalSupabase) {
     const mockTokens = [
       "test-token",
       "mock-jwt-token",
@@ -134,7 +134,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     ];
 
     if (mockTokens.includes(token)) {
-      // Use mock user ID for testing (valid UUID format)
+      // Use mock user ID for local testing
       locals.userId = "550e8400-e29b-41d4-a716-446655440000";
       console.log(`[Middleware] Mock auth successful for token: ${token}`);
       return next();
