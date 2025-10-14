@@ -6,3 +6,4 @@ export type Database = {
     Enums: Record<string, any>;
   };
 };
+

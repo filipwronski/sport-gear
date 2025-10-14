@@ -31,6 +31,7 @@ export function useProfile(): UseProfileReturn {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -59,6 +60,7 @@ export function useProfile(): UseProfileReturn {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(command),
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -87,6 +89,7 @@ export function useProfile(): UseProfileReturn {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       if (!response.ok) {

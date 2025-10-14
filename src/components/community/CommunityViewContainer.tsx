@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type {
   CommunityViewState,
+  CommunityFiltersState,
   LocationDTO,
   CommunityOutfitDTO,
 } from "../../types";
@@ -49,6 +50,9 @@ export default function CommunityViewContainer() {
       setIsLoadingShared(true);
       const response = await fetch(
         "/api/feedbacks?shared_with_community=true&limit=50&sort=created_at_desc",
+        {
+          credentials: "include",
+        },
       );
 
       if (!response.ok) {
@@ -74,7 +78,9 @@ export default function CommunityViewContainer() {
       setIsLoadingLocations(true);
       setLocationError(null);
 
-      const response = await fetch("/api/locations");
+      const response = await fetch("/api/locations", {
+        credentials: "include",
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -86,7 +92,7 @@ export default function CommunityViewContainer() {
       }
 
       const data = await response.json();
-      setUserLocations(data.locations || []);
+      setUserLocations(data || []);
     } catch (error) {
       console.error("Error fetching user locations:", error);
       setLocationError("Failed to load locations");
@@ -171,7 +177,8 @@ export default function CommunityViewContainer() {
   const currentOutfits = activeTab === "shared" ? sharedOutfits : state.outfits;
   const currentLoading =
     activeTab === "shared" ? isLoadingShared : state.isLoading;
-  const currentError = activeTab === "shared" ? null : state.error; // Shared outfits don't have complex filtering errors
+  const currentError =
+    activeTab === "shared" ? undefined : state.error || undefined; // Shared outfits don't have complex filtering errors
   const currentHasMore = activeTab === "shared" ? false : state.hasMore; // No pagination for shared outfits for now
 
   return (
@@ -201,7 +208,7 @@ export default function CommunityViewContainer() {
               filters={state.filters}
               onRemoveFilter={(key) => {
                 // Reset specific filter to default value
-                const defaultValues: Record<string, any> = {
+                const defaultValues: Partial<CommunityFiltersState> = {
                   location_id: state.filters.location_id, // Keep location
                   radius_km: 50,
                   temperature: undefined,

@@ -29,6 +29,7 @@ export function useLocations(): UseLocationsReturn {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -56,6 +57,7 @@ export function useLocations(): UseLocationsReturn {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(command),
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -86,6 +88,7 @@ export function useLocations(): UseLocationsReturn {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(command),
+        credentials: "include",
       });
 
       if (!response.ok) {

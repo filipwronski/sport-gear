@@ -217,16 +217,16 @@ function ActivityTypeSelect({ value, onChange }: ActivityTypeSelectProps) {
         Typ aktywności
       </Label>
       <Select
-        value={value || ""}
+        value={value || "all"}
         onValueChange={(val) =>
-          onChange(val ? (val as ActivityTypeEnum) : undefined)
+          onChange(val === "all" ? undefined : (val as ActivityTypeEnum))
         }
       >
         <SelectTrigger>
           <SelectValue placeholder="Wszystkie aktywności" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Wszystkie aktywności</SelectItem>
+          <SelectItem value="all">Wszystkie aktywności</SelectItem>
           {Object.entries(ACTIVITY_TYPE_LABELS).map(([key, label]) => (
             <SelectItem key={key} value={key}>
               {label}
@@ -251,14 +251,14 @@ function MinRatingSelect({ value, onChange }: MinRatingSelectProps) {
         Minimalna ocena
       </Label>
       <Select
-        value={String(value || "")}
-        onValueChange={(val) => onChange(val ? parseInt(val) : undefined)}
+        value={value ? String(value) : "all"}
+        onValueChange={(val) => onChange(val === "all" ? undefined : parseInt(val))}
       >
         <SelectTrigger>
           <SelectValue placeholder="Wszystkie oceny" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Wszystkie oceny</SelectItem>
+          <SelectItem value="all">Wszystkie oceny</SelectItem>
           {MIN_RATING_OPTIONS.map((option) => (
             <SelectItem key={option.value} value={String(option.value)}>
               {option.label}
