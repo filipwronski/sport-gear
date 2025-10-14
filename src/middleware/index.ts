@@ -64,15 +64,17 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   // Define protected routes that require authentication
   const protectedRoutes = [
-    '/dashboard',
-    '/bikes',
-    '/community',
-    '/profile',
-    '/recommendations'
+    "/dashboard",
+    "/bikes",
+    "/community",
+    "/profile",
+    "/recommendations",
   ];
 
-  const isProtectedRoute = protectedRoutes.some(route => url.pathname.startsWith(route));
-  const isApiRoute = url.pathname.startsWith('/api/');
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    url.pathname.startsWith(route),
+  );
+  const isApiRoute = url.pathname.startsWith("/api/");
 
   // Skip authentication for non-protected routes
   if (!isApiRoute && !isProtectedRoute) {
@@ -121,8 +123,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   // Check if we're using local Supabase (development) or Cloud Supabase
-  const isLocalSupabase = supabaseClient.supabaseUrl?.includes('localhost') ||
-                          supabaseClient.supabaseUrl?.includes('127.0.0.1');
+  const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
+  const isLocalSupabase =
+    supabaseUrl?.includes("localhost") || supabaseUrl?.includes("127.0.0.1");
 
   // Only use mock tokens for local development
   if (isLocalSupabase) {
@@ -143,7 +146,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   try {
     // First try to verify the access token
-    let userResult = await supabaseClient.auth.getUser(token);
+    const userResult = await supabaseClient.auth.getUser(token);
 
     // If access token is expired, try to refresh using refresh token
     if (userResult.error && userResult.error.message.includes("expired")) {
@@ -153,15 +156,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
       if (refreshToken) {
         console.log("[Middleware] Access token expired, attempting refresh");
-        const { data: refreshData, error: refreshError } = await supabaseClient.auth.refreshSession({
-          refresh_token: refreshToken,
-        });
+        const { data: refreshData, error: refreshError } =
+          await supabaseClient.auth.refreshSession({
+            refresh_token: refreshToken,
+          });
 
         if (!refreshError && refreshData.session) {
           // For page routes, we need to redirect to refresh cookies
           if (!isApiRoute) {
-            const isLocalhost = url.hostname === 'localhost';
-            const cookieOptions = `max-age=${60 * 60 * 24 * 30}; path=/; samesite=${isLocalhost ? 'lax' : 'strict'}; HttpOnly${isLocalhost ? '' : '; secure'}`;
+            const isLocalhost = url.hostname === "localhost";
+            const cookieOptions = `max-age=${60 * 60 * 24 * 30}; path=/; samesite=${isLocalhost ? "lax" : "strict"}; HttpOnly${isLocalhost ? "" : "; secure"}`;
 
             return new Response(null, {
               status: 302,
@@ -169,26 +173,26 @@ export const onRequest = defineMiddleware(async (context, next) => {
                 Location: url.pathname + url.search,
                 "Set-Cookie": [
                   `sb-access-token=${refreshData.session.access_token}; ${cookieOptions}`,
-                  `sb-refresh-token=${refreshData.session.refresh_token}; ${cookieOptions}`
-                ].join(", ")
+                  `sb-refresh-token=${refreshData.session.refresh_token}; ${cookieOptions}`,
+                ].join(", "),
               },
             });
           }
 
           // For API routes, update cookies in response
           const response = await next();
-          const isLocalhost = url.hostname === 'localhost';
+          const isLocalhost = url.hostname === "localhost";
           const maxAge = 60 * 60 * 24 * 30;
-          const cookieOptions = `max-age=${maxAge}; path=/; samesite=${isLocalhost ? 'lax' : 'strict'}; HttpOnly${isLocalhost ? '' : '; secure'}`;
+          const cookieOptions = `max-age=${maxAge}; path=/; samesite=${isLocalhost ? "lax" : "strict"}; HttpOnly${isLocalhost ? "" : "; secure"}`;
 
           // Set new cookies in response
           response.headers.set(
             "Set-Cookie",
-            `sb-access-token=${refreshData.session.access_token}; ${cookieOptions}`
+            `sb-access-token=${refreshData.session.access_token}; ${cookieOptions}`,
           );
           response.headers.append(
             "Set-Cookie",
-            `sb-refresh-token=${refreshData.session.refresh_token}; ${cookieOptions}`
+            `sb-refresh-token=${refreshData.session.refresh_token}; ${cookieOptions}`,
           );
 
           locals.userId = refreshData.user?.id;
@@ -210,10 +214,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
           },
         );
       } else {
-        // For protected page routes, redirect to login
+        // For protected page routes, clear invalid cookies and redirect to login
+        const isLocalhost = url.hostname === "localhost";
+        const cookieOptions = `max-age=0; path=/; samesite=${isLocalhost ? "lax" : "strict"}; HttpOnly${isLocalhost ? "" : "; secure"}`;
+
         return new Response(null, {
           status: 302,
-          headers: { Location: "/auth/login" },
+          headers: {
+            Location: "/auth/login",
+            "Set-Cookie": [
+              `sb-access-token=; ${cookieOptions}`,
+              `sb-refresh-token=; ${cookieOptions}`,
+            ].join(", "),
+          },
         });
       }
     }
@@ -236,10 +249,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
         },
       );
     } else {
-      // For protected page routes, redirect to login
+      // For protected page routes, clear cookies and redirect to login
+      const isLocalhost = url.hostname === "localhost";
+      const cookieOptions = `max-age=0; path=/; samesite=${isLocalhost ? "lax" : "strict"}; HttpOnly${isLocalhost ? "" : "; secure"}`;
+
       return new Response(null, {
         status: 302,
-        headers: { Location: "/auth/login" },
+        headers: {
+          Location: "/auth/login",
+          "Set-Cookie": [
+            `sb-access-token=; ${cookieOptions}`,
+            `sb-refresh-token=; ${cookieOptions}`,
+          ].join(", "),
+        },
       });
     }
   }
