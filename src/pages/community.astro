@@ -1,11 +1,13 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/navigation/Navbar";
 import CommunityViewContainer from "../components/community/CommunityViewContainer";
 
 // userId is guaranteed to be set by middleware for protected routes
 const userId = Astro.locals.userId as string;
 ---
 
-<Layout title="Społeczność - CycleGear">
+<Layout title="Społeczność - CycleGear" showHeader={false}>
+  <Navbar client:load userId={userId} />
   <CommunityViewContainer client:load />
 </Layout>

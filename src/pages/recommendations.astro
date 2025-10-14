@@ -1,23 +1,27 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import RecommendationView from '../components/RecommendationView';
-import WeeklyForecast from '../components/WeeklyForecast';
-import OutfitHistory from '../components/OutfitHistory';
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/navigation/Navbar";
+import RecommendationView from "../components/RecommendationView";
+import WeeklyForecast from "../components/WeeklyForecast";
+import OutfitHistory from "../components/OutfitHistory";
 
 // userId is guaranteed to be set by middleware for protected routes
 const userId = Astro.locals.userId as string;
 
 const title = "Rekomendacje ubioru - CycleGear";
-const description = "Spersonalizowane rekomendacje ubioru rowerowego na podstawie warunków pogodowych, typu aktywności i Twojej historii treningów.";
+const description =
+  "Spersonalizowane rekomendacje ubioru rowerowego na podstawie warunków pogodowych, typu aktywności i Twojej historii treningów.";
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} showHeader={false}>
+  <Navbar client:load userId={userId} />
   <div class="container mx-auto py-8 px-4">
     <div class="max-w-7xl mx-auto">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold mb-2">Rekomendacje ubioru</h1>
         <p class="text-muted-foreground">
-          Spersonalizowane rekomendacje ubioru rowerowego na podstawie aktualnych warunków pogodowych
+          Spersonalizowane rekomendacje ubioru rowerowego na podstawie
+          aktualnych warunków pogodowych
         </p>
       </div>
 
@@ -26,7 +30,9 @@ const description = "Spersonalizowane rekomendacje ubioru rowerowego na podstawi
         <section class="space-y-6">
           <div class="border-b pb-4">
             <h2 class="text-2xl font-semibold mb-2">Aktualna rekomendacja</h2>
-            <p class="text-muted-foreground">Rekomendacja ubioru na podstawie aktualnych warunków pogodowych</p>
+            <p class="text-muted-foreground">
+              Rekomendacja ubioru na podstawie aktualnych warunków pogodowych
+            </p>
           </div>
           <RecommendationView client:load />
         </section>
@@ -35,7 +41,9 @@ const description = "Spersonalizowane rekomendacje ubioru rowerowego na podstawi
         <section class="space-y-6">
           <div class="border-b pb-4">
             <h2 class="text-2xl font-semibold mb-2">Prognoza tygodniowa</h2>
-            <p class="text-muted-foreground">Zobacz rekomendacje ubioru na najbliższe dni</p>
+            <p class="text-muted-foreground">
+              Zobacz rekomendacje ubioru na najbliższe dni
+            </p>
           </div>
           <WeeklyForecast client:load />
         </section>
@@ -44,7 +52,9 @@ const description = "Spersonalizowane rekomendacje ubioru rowerowego na podstawi
         <section class="space-y-6">
           <div class="border-b pb-4">
             <h2 class="text-2xl font-semibold mb-2">Historia treningów</h2>
-            <p class="text-muted-foreground">Przejrzyj swoje poprzednie treningi i rekomendacje</p>
+            <p class="text-muted-foreground">
+              Przejrzyj swoje poprzednie treningi i rekomendacje
+            </p>
           </div>
           <OutfitHistory client:load />
         </section>

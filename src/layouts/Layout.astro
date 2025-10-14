@@ -7,11 +7,13 @@ import QueryProvider from "../components/QueryProvider.tsx";
 interface Props {
   title?: string;
   description?: string;
+  showHeader?: boolean;
 }
 
 const {
   title = "CycleGear - Zarządzanie rowerami i sprzętem sportowym",
   description = "Profesjonalna aplikacja do zarządzania rowerami, serwisowaniem i społecznością rowerową. Śledź swoje rowery, planuj serwis i dziel się doświadczeniami.",
+  showHeader = true,
 } = Astro.props;
 ---
 
@@ -30,7 +32,7 @@ const {
   </head>
   <body class="min-h-screen flex flex-col">
     <QueryProvider>
-      <Header client:load />
+      {showHeader && <Header client:load />}
       <main class="flex-grow">
         <slot />
       </main>

@@ -1,14 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/navigation/Navbar';
 import { BikeListView } from '../components/gear/BikeListView';
 
-// Server-side auth check
-const session = Astro.locals.session;
-if (!session) {
-  return Astro.redirect('/login');
-}
+// userId is guaranteed to be set by middleware for protected routes
+const userId = Astro.locals.userId as string;
+
 ---
 
-<Layout title="Moje rowery - CycleGear">
-  <BikeListView client:load userId={session.userId} />
+<Layout title="Moje rowery - CycleGear" showHeader={false}>
+  <Navbar client:load userId={userId} />
+  <BikeListView client:load userId={userId} />
 </Layout>

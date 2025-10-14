@@ -69,6 +69,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/community",
     "/profile",
     "/recommendations",
+    "/gear",
   ];
 
   const isProtectedRoute = protectedRoutes.some((route) =>

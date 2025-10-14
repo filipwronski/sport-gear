@@ -10,7 +10,7 @@ const url = new URL(Astro.request.url);
 const locationId = url.searchParams.get("location_id") || undefined;
 ---
 
-<Layout title="Dashboard - CycleGear">
+<Layout title="Dashboard - CycleGear" showHeader={false}>
   <Navbar client:load userId={userId} />
   <main class="min-h-screen bg-gray-50 pb-20 md:pb-0">
     <DashboardContainer

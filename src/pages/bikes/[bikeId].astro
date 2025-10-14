@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/navigation/Navbar";
 import BikeDetailsView from "../../components/bikes/BikeDetailsView";
 
 // userId is guaranteed to be set by middleware for protected routes
@@ -12,6 +13,7 @@ if (!bikeId) {
 }
 ---
 
-<Layout title="Bike Details - CycleGear">
+<Layout title="Bike Details - CycleGear" showHeader={false}>
+  <Navbar client:load userId={userId} />
   <BikeDetailsView bikeId={bikeId} client:load />
 </Layout>

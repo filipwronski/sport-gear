@@ -1,11 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/navigation/Navbar';
 import { ProfileView } from '../components/profile/ProfileView.tsx';
 
 // userId is guaranteed to be set by middleware for protected routes
 const userId = Astro.locals.userId as string;
 ---
 
-<Layout title="Profil użytkownika">
+<Layout title="Profil użytkownika" showHeader={false}>
+  <Navbar client:load userId={userId} />
   <ProfileView client:load userId={userId} />
 </Layout>
