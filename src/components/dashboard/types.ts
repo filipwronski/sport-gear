@@ -132,5 +132,4 @@ export const NAVIGATION_ITEMS: Omit<NavigationItem, "isActive">[] = [
   { label: "Rekomendacje", href: "/recommendations", icon: undefined },
   { label: "Społeczność", href: "/community", icon: undefined },
   { label: "Sprzęt", href: "/bikes", icon: undefined },
-  { label: "Profil", href: "/profile", icon: undefined },
 ];

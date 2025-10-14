@@ -1,4 +1,6 @@
 import type { APIRoute } from "astro";
+import { createClient } from "@supabase/supabase-js";
+import { supabaseClient } from "../../../../../db/supabase.client";
 import { z } from "zod";
 import { ServiceRecordService } from "../../../../../services/service-record-working.service";
 import {
@@ -6,6 +8,28 @@ import {
   createServiceSchema,
   bikeIdParamSchema,
 } from "../../../../../lib/validation/service.schemas";
+
+/**
+ * Helper function to extract JWT token from request
+ */
+function extractToken(request: Request): string | null {
+  // Check Authorization header first
+  const authHeader = request.headers.get("Authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.replace("Bearer ", "");
+  }
+
+  // Check for session cookie
+  const cookies = request.headers.get("cookie");
+  if (cookies) {
+    const cookieMatch = cookies.match(/sb-access-token=([^;]+)/);
+    if (cookieMatch) {
+      return cookieMatch[1];
+    }
+  }
+
+  return null;
+}
 
 /**
  * GET /api/bikes/{bikeId}/services
@@ -65,8 +89,26 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
     // Validate query parameters with Zod
     const validatedParams = getServicesParamsSchema.parse(queryParams);
 
+    // Create authenticated Supabase client
+    const token = extractToken(request);
+    let authenticatedClient = supabaseClient;
+
+    if (token) {
+      authenticatedClient = createClient(
+        import.meta.env.PUBLIC_SUPABASE_URL,
+        import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        }
+      );
+    }
+
     // Execute business logic
-    const serviceRecordService = new ServiceRecordService();
+    const serviceRecordService = new ServiceRecordService(authenticatedClient);
     const result = await serviceRecordService.getServicesByBikeId(
       locals.userId,
       bikeId,
@@ -180,8 +222,26 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
 
     const validatedBody = validationResult.data;
 
+    // Create authenticated Supabase client
+    const token = extractToken(request);
+    let authenticatedClient = supabaseClient;
+
+    if (token) {
+      authenticatedClient = createClient(
+        import.meta.env.PUBLIC_SUPABASE_URL,
+        import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        }
+      );
+    }
+
     // Execute business logic
-    const serviceRecordService = new ServiceRecordService();
+    const serviceRecordService = new ServiceRecordService(authenticatedClient);
     const result = await serviceRecordService.createService(
       locals.userId,
       bikeId,

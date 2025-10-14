@@ -54,7 +54,7 @@ export default function Header() {
               className="hidden sm:inline-flex"
               size="sm"
             >
-              Zarejestruj się
+              Konto użytkownika
             </Button>
           </div>
 

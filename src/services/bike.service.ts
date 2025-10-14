@@ -1,4 +1,5 @@
-import { supabaseClient } from "../db/supabase.client";
+import { supabaseServiceClient } from "../db/supabase.admin.client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   BikeDTO,
   BikesListDTO,
@@ -23,6 +24,12 @@ import type {
  * - Data transformation between DB rows and DTOs
  */
 export class BikeService {
+  private client: SupabaseClient;
+
+  constructor(client?: SupabaseClient) {
+    this.client = client || supabaseServiceClient;
+  }
+
   /**
    * Fetches all bikes for a user with optional filtering
    * Includes computed fields via JOINs to avoid N+1 queries
@@ -36,7 +43,7 @@ export class BikeService {
     userId: string,
     params: GetBikesParams,
   ): Promise<BikesListDTO> {
-    let query = supabaseClient
+    let query = this.client
       .from("bikes")
       .select(
         `
@@ -89,7 +96,7 @@ export class BikeService {
    * @returns BikeDTO or null if not found/not owned by user
    */
   async getBikeById(userId: string, bikeId: string): Promise<BikeDTO | null> {
-    const { data: bike, error } = await supabaseClient
+    const { data: bike, error } = await this.client
       .from("bikes")
       .select(
         `
@@ -146,7 +153,7 @@ export class BikeService {
     };
 
     // Insert the bike first
-    const { data: insertedBike, error: insertError } = await supabaseClient
+    const { data: insertedBike, error: insertError } = await this.client
       .from("bikes")
       .insert(bikeData)
       .select("*")
@@ -158,7 +165,11 @@ export class BikeService {
     }
 
     // Then fetch the complete bike data with relationships
-    return await this.getBikeById(insertedBike.user_id, insertedBike.id);
+    const bike = await this.getBikeById(insertedBike.user_id, insertedBike.id);
+    if (!bike) {
+      throw new Error("Failed to retrieve created bike");
+    }
+    return bike;
   }
 
   /**
@@ -187,7 +198,7 @@ export class BikeService {
     if (command.status !== undefined) updateData.status = command.status;
     if (command.notes !== undefined) updateData.notes = command.notes;
 
-    const { data: bike, error } = await supabaseClient
+    const { data: bike, error } = await this.client
       .from("bikes")
       .update(updateData)
       .eq("user_id", userId)
@@ -254,7 +265,7 @@ export class BikeService {
     }
 
     // Update mileage
-    const { data: bike, error } = await supabaseClient
+    const { data: bike, error } = await this.client
       .from("bikes")
       .update({ current_mileage: newMileage })
       .eq("user_id", userId)
@@ -286,7 +297,7 @@ export class BikeService {
    * @throws Error if deletion fails
    */
   async deleteBike(userId: string, bikeId: string): Promise<boolean> {
-    const { error } = await supabaseClient
+    const { error } = await this.client
       .from("bikes")
       .delete()
       .eq("user_id", userId)
@@ -413,14 +424,14 @@ export class BikeService {
       // Get active bikes count and upcoming services in parallel
       const [activeBikesResult, remindersResult] = await Promise.all([
         // Count active bikes
-        supabaseClient
+        this.client
           .from("bikes")
           .select("id", { count: "exact", head: true })
           .eq("user_id", userId)
           .eq("status", "active"),
 
         // Get upcoming services with bike details
-        supabaseClient
+        this.client
           .from("service_reminders")
           .select(
             `

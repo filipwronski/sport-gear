@@ -1,4 +1,6 @@
 import type { APIRoute } from "astro";
+import { createClient } from "@supabase/supabase-js";
+import { supabaseClient } from "../../../db/supabase.client";
 import { BikeService } from "../../../services/bike.service";
 import {
   CreateBikeSchema,
@@ -74,6 +76,28 @@ export const GET: APIRoute = async ({ url, locals }) => {
 };
 
 /**
+ * Helper function to extract JWT token from request
+ */
+function extractToken(request: Request): string | null {
+  // Check Authorization header first
+  const authHeader = request.headers.get("Authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.replace("Bearer ", "");
+  }
+
+  // Check for session cookie
+  const cookies = request.headers.get("cookie");
+  if (cookies) {
+    const cookieMatch = cookies.match(/sb-access-token=([^;]+)/);
+    if (cookieMatch) {
+      return cookieMatch[1];
+    }
+  }
+
+  return null;
+}
+
+/**
  * POST /api/bikes
  * Creates a new bike for authenticated user
  *
@@ -119,8 +143,27 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return createValidationErrorResponse(validated.error);
     }
 
-    // Create bike using service layer
-    const bike = await bikeService.createBike(
+    // Create authenticated Supabase client
+    const token = extractToken(request);
+    let authenticatedClient = supabaseClient;
+
+    if (token) {
+      authenticatedClient = createClient(
+        import.meta.env.PUBLIC_SUPABASE_URL,
+        import.meta.env.PUBLIC_SUPABASE_ANON_KEY,
+        {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        }
+      );
+    }
+
+    // Create bike using service layer with authenticated client
+    const authenticatedBikeService = new BikeService(authenticatedClient);
+    const bike = await authenticatedBikeService.createBike(
       userId,
       validated.data as CreateBikeInput,
     );

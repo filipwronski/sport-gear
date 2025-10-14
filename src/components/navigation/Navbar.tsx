@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Home, Compass, Users, Bike, User, Menu, X } from "lucide-react";
+import { Home, Compass, Users, Bike, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NAVIGATION_ITEMS } from "../dashboard/types";
 import type { NavbarProps } from "../dashboard/types";
+import UserMenu from "./UserMenu";
 
 const NAV_ICONS = {
   Dashboard: Home,
   Rekomendacje: Compass,
   Społeczność: Users,
   Sprzęt: Bike,
-  Profil: User,
 };
 
 export default function Navbar({ userId }: NavbarProps) {
@@ -73,10 +73,8 @@ export default function Navbar({ userId }: NavbarProps) {
 
           {/* User Menu & Mobile Menu Button */}
           <div className="flex items-center space-x-4">
-            {/* User ID display for now - will be replaced with proper user menu */}
-            <span className="text-sm text-gray-600 hidden sm:inline">
-              User: {userId}
-            </span>
+            {/* User Menu */}
+            <UserMenu userId={userId} />
 
             {/* Mobile menu button */}
             <Button
@@ -101,9 +99,6 @@ export default function Navbar({ userId }: NavbarProps) {
             <nav className="px-2 pt-2 pb-3 space-y-1">
               {renderNavItems(true)}
             </nav>
-            <div className="px-2 py-3 border-t">
-              <div className="text-sm text-gray-600">User ID: {userId}</div>
-            </div>
           </div>
         )}
       </div>

@@ -1,4 +1,5 @@
-import { supabaseClient } from "../db/supabase.client";
+import { supabaseServiceClient } from "../db/supabase.admin.client";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   ServiceRecordDTO,
   ServicesListDTO,
@@ -17,6 +18,11 @@ import type {
  * Simplified version without complex imports that cause SSR issues
  */
 export class ServiceRecordService {
+  private client: SupabaseClient;
+
+  constructor(client?: SupabaseClient) {
+    this.client = client || supabaseServiceClient;
+  }
   /**
    * Fetches service records for a bike with filtering and pagination
    */
@@ -27,7 +33,7 @@ export class ServiceRecordService {
   ): Promise<ServicesListDTO> {
     try {
       // Build the query with filters
-      let query = supabaseClient
+      let query = this.client
         .from("service_records")
         .select("*", { count: "exact" })
         .eq("bike_id", bikeId);
@@ -116,7 +122,7 @@ export class ServiceRecordService {
     command: CreateServiceCommand,
   ): Promise<ServiceRecordDTO> {
     try {
-      const { data: serviceData, error: serviceError } = await supabaseClient
+      const { data: serviceData, error: serviceError } = await this.client
         .from("service_records")
         .insert({
           bike_id: bikeId,
@@ -180,7 +186,7 @@ export class ServiceRecordService {
         updateData.notes = command.notes;
       }
 
-      const { data, error } = await supabaseClient
+      const { data, error } = await this.client
         .from("service_records")
         .update(updateData)
         .eq("id", serviceId)
@@ -209,7 +215,7 @@ export class ServiceRecordService {
     serviceId: string,
   ): Promise<void> {
     try {
-      const { error } = await supabaseClient
+      const { error } = await this.client
         .from("service_records")
         .delete()
         .eq("id", serviceId)
@@ -264,7 +270,7 @@ export class ServiceRecordService {
       }
 
       // Get basic stats
-      const { data, error } = await supabaseClient
+      const { data, error } = await this.client
         .from("service_records")
         .select(
           "cost, mileage_at_service, service_type, service_location, service_date",
