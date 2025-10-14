@@ -10,6 +10,7 @@ import {
 import { ServiceFilters } from "./ServiceFilters";
 import { ServiceTable } from "./ServiceTable";
 import { ServiceCards } from "./ServiceCards";
+import { AddServiceModal } from "./AddServiceModal";
 import { useServiceHistory } from "./hooks/useServiceHistory";
 import { toast } from "sonner";
 import type { GetServicesParams, ServiceRecordDTO } from "../../types";
@@ -18,13 +19,19 @@ interface ServiceHistoryTabProps {
   bikeId: string;
 }
 
-export function ServiceHistoryTab({ bikeId }: ServiceHistoryTabProps) {
+interface ServiceHistoryTabProps {
+  bikeId: string;
+  currentMileage?: number;
+}
+
+export function ServiceHistoryTab({ bikeId, currentMileage }: ServiceHistoryTabProps) {
   const [filters, setFilters] = useState<GetServicesParams>({
     limit: 20,
     offset: 0,
     sort: "service_date_desc",
   });
   const [isMobile, setIsMobile] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const { services, total, hasMore, isLoading, error, refetch } =
     useServiceHistory(bikeId, filters);
@@ -106,6 +113,10 @@ export function ServiceHistoryTab({ bikeId }: ServiceHistoryTabProps) {
     toast.info("Edit functionality will be implemented");
   };
 
+  const handleAddServiceSuccess = () => {
+    refetch();
+  };
+
   const handleLoadMore = () => {
     setFilters({
       ...filters,
@@ -148,11 +159,7 @@ export function ServiceHistoryTab({ bikeId }: ServiceHistoryTabProps) {
               >
                 Export CSV
               </Button>
-              <Button
-                onClick={() =>
-                  toast.info("Add service functionality will be implemented")
-                }
-              >
+              <Button onClick={() => setIsAddModalOpen(true)}>
                 Add Service
               </Button>
             </div>
@@ -197,9 +204,7 @@ export function ServiceHistoryTab({ bikeId }: ServiceHistoryTabProps) {
               </p>
               <Button
                 className="mt-4"
-                onClick={() =>
-                  toast.info("Add service functionality will be implemented")
-                }
+                onClick={() => setIsAddModalOpen(true)}
               >
                 Add First Service
               </Button>
@@ -236,6 +241,14 @@ export function ServiceHistoryTab({ bikeId }: ServiceHistoryTabProps) {
           </CardContent>
         </Card>
       )}
+
+      <AddServiceModal
+        bikeId={bikeId}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddServiceSuccess}
+        currentMileage={currentMileage}
+      />
     </div>
   );
 }

@@ -26,20 +26,67 @@ export class ServiceRecordService {
     params: any,
   ): Promise<ServicesListDTO> {
     try {
-      // Simple query without complex joins for now
+      // Build the query with filters
+      let query = supabaseClient
+        .from("service_records")
+        .select("*", { count: "exact" })
+        .eq("bike_id", bikeId);
+
+      // Apply filters
+      if (params.service_type) {
+        query = query.eq("service_type", params.service_type);
+      }
+
+      if (params.service_location) {
+        query = query.eq("service_location", params.service_location);
+      }
+
+      if (params.from_date) {
+        query = query.gte("service_date", params.from_date);
+      }
+
+      if (params.to_date) {
+        query = query.lte("service_date", params.to_date);
+      }
+
+      // Apply sorting
+      if (params.sort) {
+        switch (params.sort) {
+          case "service_date_desc":
+            query = query.order("service_date", { ascending: false });
+            break;
+          case "service_date_asc":
+            query = query.order("service_date", { ascending: true });
+            break;
+          case "mileage_desc":
+            query = query.order("mileage_at_service", { ascending: false });
+            break;
+          case "mileage_asc":
+            query = query.order("mileage_at_service", { ascending: true });
+            break;
+          case "cost_desc":
+            query = query.order("cost", { ascending: false, nullsFirst: false });
+            break;
+          case "cost_asc":
+            query = query.order("cost", { ascending: true, nullsFirst: true });
+            break;
+          default:
+            query = query.order("service_date", { ascending: false });
+        }
+      } else {
+        query = query.order("service_date", { ascending: false });
+      }
+
+      // Apply pagination
+      const limit = params.limit || 50;
+      const offset = params.offset || 0;
+      query = query.range(offset, offset + limit - 1);
+
       const {
         data: services,
         error,
         count,
-      } = await supabaseClient
-        .from("service_records")
-        .select("*", { count: "exact" })
-        .eq("bike_id", bikeId)
-        .limit(params.limit || 50)
-        .range(
-          params.offset || 0,
-          (params.offset || 0) + (params.limit || 50) - 1,
-        );
+      } = await query;
 
       if (error) {
         console.error("[ServiceRecordService] Error fetching services:", error);
@@ -47,7 +94,7 @@ export class ServiceRecordService {
       }
 
       const total = count || 0;
-      const has_more = total > (params.offset || 0) + (params.limit || 50);
+      const has_more = total > offset + limit;
 
       return {
         services: services?.map(this.mapToDTO) || [],
