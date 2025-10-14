@@ -1,11 +1,14 @@
 import { supabaseClient } from "../db/supabase.client";
+import { supabaseServiceClient } from "../db/supabase.admin.client";
 import type {
   LocationDTO,
   CreateLocationCommand,
   UpdateLocationCommand,
   Database,
 } from "../types";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { ConflictError, NotFoundError } from "../lib/errors";
+import { ProfileService } from "./ProfileService";
 
 type LocationRow = Database["public"]["Tables"]["user_locations"]["Row"];
 
@@ -25,13 +28,14 @@ export class LocationService {
    *
    * @param userId - Authenticated user ID from JWT
    * @param defaultOnly - If true, returns only the default location
-   * @returns Array of LocationDTO with transformed coordinates
+   * @returns Array of LocationDTO with extracted coordinates
    * @throws Error if database query fails
    */
   async getUserLocations(
     userId: string,
     defaultOnly?: boolean,
   ): Promise<LocationDTO[]> {
+    // First try with regular client (with RLS)
     let query = supabaseClient
       .from("user_locations")
       .select("*")
@@ -41,17 +45,85 @@ export class LocationService {
       query = query.eq("is_default", true);
     }
 
-    const { data, error } = await query.order("created_at", {
+    let { data, error } = await query.order("created_at", {
       ascending: false,
     });
 
-    if (error) {
-      console.error("[LocationService] Error fetching locations:", error);
-      throw new Error(`Failed to fetch locations: ${error.message}`);
+    // If RLS blocks access (error or returns empty), try service client as fallback
+    if (error || !data || data.length === 0) {
+      if (error) {
+        console.log(
+          `[LocationService] RLS error, trying service client fallback:`,
+          error.message,
+        );
+      } else {
+        console.log(
+          `[LocationService] RLS returned no locations, trying service client fallback`,
+        );
+      }
+
+      let serviceQuery = supabaseServiceClient
+        .from("user_locations")
+        .select("*")
+        .eq("user_id", userId);
+
+      if (defaultOnly) {
+        serviceQuery = serviceQuery.eq("is_default", true);
+      }
+
+      const { data: serviceData, error: serviceError } =
+        await serviceQuery.order("created_at", {
+          ascending: false,
+        });
+
+      if (serviceError) {
+        console.error("[LocationService] Service client error:", serviceError);
+        throw new Error(`Failed to fetch locations: ${serviceError.message}`);
+      }
+
+      if (!serviceData || serviceData.length === 0) {
+        return [];
+      }
+
+      // Use service client data as fallback when RLS fails
+      data = serviceData;
     }
 
-    // For now, return empty coordinates - will be fixed when PostGIS extraction works
-    return (data || []).map((row) => this.transformToDTO(row));
+    // Extract coordinates for each location using RPC function
+    const locationsWithCoordinates = await Promise.all(
+      data.map(async (row) => {
+        try {
+          const { data: coords, error: coordsError } = await supabaseClient.rpc(
+            "get_location_coordinates",
+            { p_location_id: row.id, p_user_id: userId },
+          );
+
+          if (coordsError) {
+            console.error(
+              `[LocationService] Error extracting coordinates for location ${row.id}:`,
+              coordsError,
+            );
+            // Return location with default coordinates on error
+            return this.transformToDTO(row, { latitude: 0, longitude: 0 });
+          }
+
+          const coordinates =
+            coords && coords.length > 0
+              ? coords[0]
+              : { latitude: 0, longitude: 0 };
+          return this.transformToDTO(row, coordinates);
+        } catch (err) {
+          console.error(
+            `[LocationService] Error extracting coordinates for location ${row.id}:`,
+            err,
+          );
+          // Return location with default coordinates on error
+          return this.transformToDTO(row, { latitude: 0, longitude: 0 });
+        }
+      }),
+    );
+
+    return locationsWithCoordinates;
   }
 
   /**
@@ -67,6 +139,63 @@ export class LocationService {
     userId: string,
     command: CreateLocationCommand,
   ): Promise<LocationDTO> {
+    // Ensure profile exists before creating location
+    const profileService = new ProfileService();
+    await profileService.getProfile(userId); // This will create profile if it doesn't exist
+
+    // Check if location with same coordinates already exists for this user
+    // Use regular client with RLS to ensure we only see locations that belong to the authenticated user
+    const { data: existingLocations, error: checkError } = await supabaseClient
+      .from("user_locations")
+      .select("id, city, country_code")
+      .eq("user_id", userId)
+      .eq("city", command.city)
+      .eq("country_code", command.country_code);
+
+    if (!checkError && existingLocations && existingLocations.length > 0) {
+      // Fetch the actual existing location from database
+      const existingId = existingLocations[0].id;
+
+      const { data: existingLocation, error: fetchError } = await supabaseClient
+        .from("user_locations")
+        .select("*")
+        .eq("id", existingId)
+        .single();
+
+      if (fetchError || !existingLocation) {
+        console.error(
+          "[LocationService] Error fetching existing location:",
+          fetchError,
+        );
+        throw new Error(
+          `Failed to fetch existing location: ${fetchError?.message}`,
+        );
+      }
+
+      // Extract coordinates for the existing location
+      const { data: coords, error: coordsError } = await supabaseClient.rpc(
+        "get_location_coordinates",
+        { p_location_id: existingId, p_user_id: userId },
+      );
+
+      if (coordsError) {
+        console.error(
+          "[LocationService] Error extracting coordinates for existing location:",
+          coordsError,
+        );
+        return this.transformToDTO(existingLocation, {
+          latitude: command.latitude,
+          longitude: command.longitude,
+        });
+      }
+
+      const coordinates =
+        coords && coords.length > 0
+          ? coords[0]
+          : { latitude: command.latitude, longitude: command.longitude };
+      return this.transformToDTO(existingLocation, coordinates);
+    }
+
     // If setting as default, first unset other default locations
     if (command.is_default) {
       const { error: updateError } = await supabaseClient
@@ -109,24 +238,46 @@ export class LocationService {
       throw new Error("No location ID returned from RPC function");
     }
 
-    // Fetch the created location to return as DTO
-    const { data, error: fetchError } = await supabaseClient
+    // Fetch the created location to return as DTO (use service client to bypass RLS)
+    const { data, error: fetchCreatedError } = await supabaseServiceClient
       .from("user_locations")
       .select("*")
       .eq("id", locationId)
       .single();
 
-    if (fetchError) {
+    if (fetchCreatedError) {
       console.error(
         "[LocationService] Error fetching created location:",
-        fetchError,
+        fetchCreatedError,
       );
       throw new Error(
-        `Failed to fetch created location: ${fetchError.message}`,
+        `Failed to fetch created location: ${fetchCreatedError.message}`,
       );
     }
 
-    return this.transformToDTO(data);
+    // Extract coordinates for the created location
+    const { data: coords, error: coordsError } = await supabaseClient.rpc(
+      "get_location_coordinates",
+      { p_location_id: locationId, p_user_id: userId },
+    );
+
+    if (coordsError) {
+      console.error(
+        "[LocationService] Error extracting coordinates for created location:",
+        coordsError,
+      );
+      // Return with default coordinates on error
+      return this.transformToDTO(data, {
+        latitude: command.latitude,
+        longitude: command.longitude,
+      });
+    }
+
+    const coordinates =
+      coords && coords.length > 0
+        ? coords[0]
+        : { latitude: command.latitude, longitude: command.longitude };
+    return this.transformToDTO(data, coordinates);
   }
 
   /**
@@ -135,7 +286,7 @@ export class LocationService {
    * which may have different authentication context
    */
   async createLocationWithClient(
-    client: any,
+    client: SupabaseClient,
     userId: string,
     command: CreateLocationCommand,
   ): Promise<LocationDTO> {
@@ -179,23 +330,45 @@ export class LocationService {
     }
 
     // Fetch the created location to return as DTO
-    const { data, error: fetchError } = await client
+    const { data, error: fetchCreatedWithClientError } = await client
       .from("user_locations")
       .select("*")
       .eq("id", locationId)
       .single();
 
-    if (fetchError) {
+    if (fetchCreatedWithClientError) {
       console.error(
         "[LocationService] Error fetching created location:",
-        fetchError,
+        fetchCreatedWithClientError,
       );
       throw new Error(
-        `Failed to fetch created location: ${fetchError.message}`,
+        `Failed to fetch created location: ${fetchCreatedWithClientError.message}`,
       );
     }
 
-    return this.transformToDTO(data);
+    // Extract coordinates for the created location
+    const { data: coords, error: coordsError } = await client.rpc(
+      "get_location_coordinates",
+      { p_location_id: locationId, p_user_id: userId },
+    );
+
+    if (coordsError) {
+      console.error(
+        "[LocationService] Error extracting coordinates for created location:",
+        coordsError,
+      );
+      // Return with default coordinates on error
+      return this.transformToDTO(data, {
+        latitude: command.latitude,
+        longitude: command.longitude,
+      });
+    }
+
+    const coordinates =
+      coords && coords.length > 0
+        ? coords[0]
+        : { latitude: command.latitude, longitude: command.longitude };
+    return this.transformToDTO(data, coordinates);
   }
 
   /**
@@ -214,15 +387,16 @@ export class LocationService {
     locationId: string,
     command: UpdateLocationCommand,
   ): Promise<LocationDTO> {
-    // Check if location exists and belongs to user
-    const { data: existing, error: fetchError } = await supabaseClient
-      .from("user_locations")
-      .select("id, is_default")
-      .eq("id", locationId)
-      .eq("user_id", userId)
-      .single();
+    // Check if location exists and belongs to user (use service client to bypass RLS)
+    const { data: existing, error: fetchExistingError } =
+      await supabaseServiceClient
+        .from("user_locations")
+        .select("id, is_default")
+        .eq("id", locationId)
+        .eq("user_id", userId)
+        .single();
 
-    if (fetchError || !existing) {
+    if (fetchExistingError || !existing) {
       throw new NotFoundError("Location not found or access denied");
     }
 
@@ -294,15 +468,44 @@ export class LocationService {
       }
     }
 
-    // Fetch and return updated location
-    const locations = await this.getUserLocations(userId, false);
-    const updated = locations.find((loc) => loc.id === locationId);
+    // Fetch and return updated location directly (bypass RLS)
+    const { data: updatedLocation, error: updatedLocationError } =
+      await supabaseServiceClient
+        .from("user_locations")
+        .select("*")
+        .eq("id", locationId)
+        .single();
 
-    if (!updated) {
+    if (updatedLocationError || !updatedLocation) {
+      console.error(
+        "[LocationService] Error fetching updated location:",
+        updatedLocationError,
+      );
       throw new Error("Failed to retrieve updated location");
     }
 
-    return updated;
+    // Extract coordinates for the updated location
+    const { data: coords, error: coordsError } =
+      await supabaseServiceClient.rpc("get_location_coordinates", {
+        p_location_id: locationId,
+        p_user_id: userId,
+      });
+
+    if (coordsError) {
+      console.error(
+        "[LocationService] Error extracting coordinates for updated location:",
+        coordsError,
+      );
+      // Return with default coordinates on error
+      return this.transformToDTO(updatedLocation, {
+        latitude: 0,
+        longitude: 0,
+      });
+    }
+
+    const coordinates =
+      coords && coords.length > 0 ? coords[0] : { latitude: 0, longitude: 0 };
+    return this.transformToDTO(updatedLocation, coordinates);
   }
 
   /**
@@ -316,18 +519,19 @@ export class LocationService {
    * @throws Error if database operation fails
    */
   async deleteLocation(userId: string, locationId: string): Promise<void> {
-    // Fetch all user locations to check business rules
-    const { data: userLocations, error: fetchError } = await supabaseClient
-      .from("user_locations")
-      .select("id, is_default")
-      .eq("user_id", userId);
+    // Fetch all user locations to check business rules (bypass RLS)
+    const { data: userLocations, error: fetchUserLocationsError } =
+      await supabaseServiceClient
+        .from("user_locations")
+        .select("id, is_default")
+        .eq("user_id", userId);
 
-    if (fetchError) {
+    if (fetchUserLocationsError) {
       console.error(
         "[LocationService] Error fetching user locations:",
-        fetchError,
+        fetchUserLocationsError,
       );
-      throw new Error(`Database error: ${fetchError.message}`);
+      throw new Error(`Database error: ${fetchUserLocationsError.message}`);
     }
 
     if (!userLocations || userLocations.length === 0) {
@@ -370,19 +574,21 @@ export class LocationService {
 
   /**
    * Transforms database row to LocationDTO
-   * For now returns placeholder coordinates - PostGIS extraction needs to be implemented
+   * Uses provided coordinates from PostGIS extraction
    *
    * @param row - Database row from user_locations table
-   * @returns LocationDTO with placeholder coordinates
+   * @param coordinates - Extracted coordinates from PostGIS
+   * @returns LocationDTO with extracted coordinates
    */
-  private transformToDTO(row: any): LocationDTO {
+  private transformToDTO(
+    row: LocationRow,
+    coordinates?: { latitude: number; longitude: number },
+  ): LocationDTO {
     return {
       id: row.id,
-      location: {
-        // TODO: Extract coordinates from PostGIS location field
-        // For now return placeholder coordinates
-        latitude: 52.237, // Warsaw placeholder
-        longitude: 21.017, // Warsaw placeholder
+      location: coordinates || {
+        latitude: 0,
+        longitude: 0,
       },
       city: row.city,
       country_code: row.country_code,

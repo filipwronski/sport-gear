@@ -14,8 +14,8 @@ export interface UseLocationsReturn {
  * Custom hook for managing user locations
  * Handles fetching user locations for profile management
  */
-export function useLocations(): UseLocationsReturn {
-  const [locations, setLocations] = useState<LocationDTO[]>([]);
+export function useLocations(initialLocations?: LocationDTO[]): UseLocationsReturn {
+  const [locations, setLocations] = useState<LocationDTO[]>(initialLocations || []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 

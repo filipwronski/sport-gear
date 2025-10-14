@@ -10,9 +10,17 @@ import { useProfile } from "./hooks/useProfile";
 import { useLocations } from "./hooks/useLocations";
 import { useExport } from "./hooks/useExport";
 import { useToast } from "../auth/useToast";
-import type { UpdateProfileCommand, ThermalPreferences, UnitsEnum } from "../../types";
+import type { UpdateProfileCommand, ThermalPreferences, UnitsEnum, ProfileDTO, LocationDTO } from "../../types";
 
-export function ProfileView({ userId }: { userId?: string }) {
+export function ProfileView({
+  userId,
+  initialProfile,
+  initialLocations
+}: {
+  userId?: string;
+  initialProfile?: ProfileDTO | null;
+  initialLocations?: LocationDTO[];
+}) {
   const { showToast } = useToast();
 
   // Custom hooks for data management
@@ -24,29 +32,35 @@ export function ProfileView({ userId }: { userId?: string }) {
     fetchProfile,
     updateProfile,
     deleteAccount,
-  } = useProfile();
+  } = useProfile(initialProfile);
 
   const {
     locations,
+    isLoading: isLoadingLocations,
     fetchLocations,
     createLocation,
     updateLocation,
-  } = useLocations();
+  } = useLocations(initialLocations);
 
   const { exportData } = useExport();
 
-  // Load initial data
+  // Load initial data only if we don't have initial data
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        await Promise.all([fetchProfile(), fetchLocations()]);
-      } catch (error) {
-        // Error will be handled by individual hooks
-      }
-    };
+    const shouldLoadData = !initialProfile || !initialLocations;
 
-    loadData();
-  }, [fetchProfile, fetchLocations]);
+    if (shouldLoadData) {
+      const loadData = async () => {
+        try {
+          await Promise.all([fetchProfile(), fetchLocations()]);
+        } catch (error) {
+          console.error(`[ProfileView] Error loading data:`, error);
+          // Error will be handled by individual hooks
+        }
+      };
+
+      loadData();
+    }
+  }, [fetchProfile, fetchLocations, userId, initialProfile, initialLocations]);
 
   // Handle profile updates
   const handleProfileUpdate = async (command: Partial<UpdateProfileCommand>) => {
@@ -232,6 +246,7 @@ export function ProfileView({ userId }: { userId?: string }) {
         <PersonalInfoSection
           profile={profile}
           locations={locations}
+          isLoadingLocations={isLoadingLocations}
           onUpdate={handleProfileUpdate}
           onCreateLocation={createLocation}
           onUpdateLocation={updateLocation}

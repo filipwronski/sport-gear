@@ -13,6 +13,7 @@ import type {
   ReminderStatusEnum,
   BikeStatusEnum,
 } from "../types";
+import { ProfileService } from "./ProfileService";
 
 /**
  * BikeService - Business logic layer for bike management
@@ -142,6 +143,10 @@ export class BikeService {
     userId: string,
     command: CreateBikeCommand,
   ): Promise<BikeDTO> {
+    // Ensure profile exists before creating bike
+    const profileService = new ProfileService();
+    await profileService.getProfile(userId); // This will create profile if it doesn't exist
+
     const bikeData = {
       user_id: userId,
       name: command.name,

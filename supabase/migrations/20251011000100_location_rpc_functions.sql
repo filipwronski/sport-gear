@@ -87,9 +87,9 @@ CREATE OR REPLACE FUNCTION get_location_coordinates(
 ) RETURNS TABLE(latitude DECIMAL, longitude DECIMAL) AS $$
 BEGIN
   RETURN QUERY
-  SELECT 
-    ST_Y(location::geometry) as latitude,
-    ST_X(location::geometry) as longitude
+  SELECT
+    ST_Y(location::geometry)::DECIMAL as latitude,
+    ST_X(location::geometry)::DECIMAL as longitude
   FROM user_locations
   WHERE id = p_location_id AND user_id = p_user_id;
 END;

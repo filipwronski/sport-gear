@@ -23,11 +23,13 @@ import type {
   LocationDTO,
   UpdateProfileCommand,
   CreateLocationCommand,
+  UpdateLocationCommand,
 } from "../../types";
 
 interface PersonalInfoSectionProps {
   profile: ProfileDTO;
   locations: LocationDTO[];
+  isLoadingLocations?: boolean;
   onUpdate: (command: Partial<UpdateProfileCommand>) => Promise<void>;
   onCreateLocation: (command: CreateLocationCommand) => Promise<LocationDTO>;
   onUpdateLocation: (locationId: string, command: UpdateLocationCommand) => Promise<LocationDTO>;
@@ -36,6 +38,7 @@ interface PersonalInfoSectionProps {
 export function PersonalInfoSection({
   profile,
   locations,
+  isLoadingLocations = false,
   onUpdate,
   onCreateLocation,
   onUpdateLocation,
@@ -78,15 +81,22 @@ export function PersonalInfoSection({
 
         if (cityData) {
           // Check if this city already exists in user's locations
+          // Normalize city name for comparison (remove diacritics, lowercase)
+          const normalizedCityName = cityName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
           const existingLocation = locations.find(
-            loc => loc.city.toLowerCase() === cityName.toLowerCase() && loc.country_code === "PL"
+            loc => {
+              const locNormalized = loc.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+              return locNormalized === normalizedCityName && loc.country_code === "PL";
+            }
           );
 
           if (existingLocation) {
             // City already exists, use its ID
+            console.log(`Using existing location for ${cityName}:`, existingLocation.id);
             actualLocationId = existingLocation.id;
           } else {
             // Create new location (without setting as default)
+            console.log(`Creating new location for ${cityName}`);
             const newLocation = await onCreateLocation({
               latitude: cityData.latitude,
               longitude: cityData.longitude,
@@ -95,19 +105,26 @@ export function PersonalInfoSection({
               is_default: false, // Don't set as default here, will be set via profile update
             });
             actualLocationId = newLocation.id;
+            console.log(`Created new location with ID: ${actualLocationId}`);
           }
         }
       }
 
+
       await onUpdate({
-        display_name: displayName.trim() || null,
+        display_name: displayName.trim() || undefined,
         default_location_id:
           actualLocationId === "none" ? null : actualLocationId,
       });
 
       // If we set a default location, update its is_default flag
       if (actualLocationId !== "none") {
-        await onUpdateLocation(actualLocationId, { is_default: true });
+        try {
+          await onUpdateLocation(actualLocationId, { is_default: true });
+        } catch (error) {
+          console.warn("Failed to set location as default:", error);
+          // Continue anyway - the profile update already set the default_location_id
+        }
       }
 
       setHasChanges(false);
@@ -117,9 +134,29 @@ export function PersonalInfoSection({
   };
 
   const defaultLocation =
-    defaultLocationId !== "none"
+    defaultLocationId !== "none" && !isLoadingLocations
       ? locations.find((loc) => loc.id === defaultLocationId)
       : null;
+
+  // If we have a default location ID but can't find it in locations,
+  // it means the location was deleted or there's a data inconsistency
+  // In this case, we should reset the default location ID
+  // But don't do this during saving operations or if we're in the middle of creating a location
+  // Also, add a small delay to avoid race conditions during location updates
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (defaultLocationId !== "none" && defaultLocationId && !defaultLocation && locations.length > 0 && !isSaving && !isLoadingLocations) {
+        // Check if this is a Polish city that's in the process of being created
+        const isPendingPolishCity = defaultLocationId.startsWith("polish-city-");
+        if (!isPendingPolishCity) {
+          console.log("Default location not found, resetting to none");
+          onUpdate({ default_location_id: null });
+        }
+      }
+    }, 1000); // Wait 1 second to allow for location updates to complete
+
+    return () => clearTimeout(timeoutId);
+  }, [defaultLocationId, defaultLocation, locations.length, onUpdate, isSaving, isLoadingLocations]);
 
   return (
     <Card>
@@ -159,7 +196,9 @@ export function PersonalInfoSection({
           >
             <SelectTrigger>
               <SelectValue placeholder="Wybierz domyślną lokalizację">
-                {defaultLocation
+                {isLoadingLocations
+                  ? "Ładowanie lokalizacji..."
+                  : defaultLocation
                   ? `${defaultLocation.city}, ${defaultLocation.country_code}`
                   : defaultLocationId.startsWith("polish-city-")
                   ? getPolishCityByName(defaultLocationId.replace("polish-city-", ""))?.name + ", PL"

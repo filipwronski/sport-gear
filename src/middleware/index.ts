@@ -103,24 +103,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   if (!token) {
-    if (isApiRoute) {
-      return new Response(
-        JSON.stringify({
-          error: "Unauthorized",
-          message: "Authentication token required",
-        }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-    } else {
-      // For protected page routes, redirect to login
-      return new Response(null, {
-        status: 302,
-        headers: { Location: "/auth/login" },
-      });
-    }
+    // For protected page routes, redirect to login
+    return new Response(null, {
+      status: 302,
+      headers: { Location: "/auth/login" },
+    });
   }
 
   // Check if we're using local Supabase (development) or Cloud Supabase
@@ -140,7 +127,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     if (mockTokens.includes(token)) {
       // Use mock user ID for local testing
       locals.userId = "550e8400-e29b-41d4-a716-446655440000";
-      console.log(`[Middleware] Mock auth successful for token: ${token}`);
       return next();
     }
   }

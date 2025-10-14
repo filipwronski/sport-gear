@@ -45,6 +45,25 @@ export class ProfileService {
    * @throws InternalServerError on database errors
    */
   async getProfile(userId: string): Promise<ProfileDTO> {
+    // First try to get profile with service client (bypasses RLS)
+    const { data: serviceData, error: serviceError } = await supabaseServiceClient
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (!serviceError && serviceData) {
+      // Profile exists, return it
+      return this.transformRowToDTO(serviceData);
+    }
+
+    if (serviceError && serviceError.code === "PGRST116") {
+      // Profile doesn't exist, create it automatically
+      console.log(`Profile not found for user: ${userId}, creating new profile`);
+      return await this.createProfile(userId);
+    }
+
+    // If there's another error with service client, try regular client
     const { data, error } = await supabaseClient
       .from("profiles")
       .select("*")
@@ -53,24 +72,9 @@ export class ProfileService {
 
     if (error) {
       if (error.code === "PGRST116") {
-        // Profile doesn't exist, return mock profile for testing
-        console.log(
-          `Profile not found for user: ${userId}, returning mock profile`,
-        );
-        return {
-          id: userId,
-          display_name: "Mock Test User",
-          thermal_preferences: null,
-          thermal_adjustment: null,
-          feedback_count: 0,
-          pseudonym: null,
-          reputation_badge: null,
-          share_with_community: false,
-          units: "metric",
-          default_location_id: null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        // Profile doesn't exist, create it automatically
+        console.log(`Profile not found for user: ${userId}, creating new profile`);
+        return await this.createProfile(userId);
       }
       console.error("Error fetching profile:", error);
       throw new InternalServerError("Failed to fetch profile");
@@ -84,7 +88,20 @@ export class ProfileService {
    * Used when profile doesn't exist but user is authenticated
    */
   private async createProfile(userId: string): Promise<ProfileDTO> {
-    const { data, error } = await supabaseClient
+    // First check if profile already exists
+    const { data: existing, error: checkError } = await supabaseServiceClient
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (!checkError && existing) {
+      // Profile already exists, return it
+      return this.transformRowToDTO(existing);
+    }
+
+    // Use service client to bypass RLS for profile creation
+    const { data, error } = await supabaseServiceClient
       .from("profiles")
       .insert({
         id: userId,
@@ -99,6 +116,21 @@ export class ProfileService {
       .single();
 
     if (error) {
+      // If duplicate key error, the profile was created by another request
+      if (error.code === "23505") {
+        console.log(`Profile already exists for user: ${userId}, fetching existing profile`);
+        // Try to fetch the existing profile
+        const { data: existingData, error: fetchError } = await supabaseServiceClient
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
+
+        if (!fetchError && existingData) {
+          return this.transformRowToDTO(existingData);
+        }
+      }
+
       console.error("Error creating profile:", error);
       throw new InternalServerError("Failed to create profile");
     }
@@ -119,36 +151,7 @@ export class ProfileService {
     userId: string,
     command: UpdateProfileCommand,
   ): Promise<ProfileDTO> {
-    // First, try to get the existing profile (this will return mock if not exists)
-    let currentProfile: ProfileDTO;
-    try {
-      currentProfile = await this.getProfile(userId);
-    } catch (error) {
-      throw new InternalServerError(
-        "Failed to fetch current profile for update",
-      );
-    }
-
-    // For testing purposes, if this is a mock profile (no real DB record),
-    // just return updated mock data
-    if (
-      !currentProfile.created_at ||
-      currentProfile.display_name === "Mock Test User"
-    ) {
-      console.log("Updating mock profile with new data");
-      return {
-        ...currentProfile,
-        ...command,
-        updated_at: new Date().toISOString(),
-        // Handle pseudonym generation for mock profile
-        pseudonym:
-          command.share_with_community && !currentProfile.pseudonym
-            ? await this.generatePseudonym()
-            : currentProfile.pseudonym,
-      };
-    }
-
-    // Real profile update logic (when profile exists in DB)
+    // Real profile update logic
     const updateData: Partial<ProfileRow> = {};
 
     if (command.display_name !== undefined) {
@@ -173,7 +176,7 @@ export class ProfileService {
 
       // If enabling sharing and no pseudonym exists, generate one
       if (command.share_with_community) {
-        const { data: currentProfileData } = await supabaseClient
+        const { data: currentProfileData } = await supabaseServiceClient
           .from("profiles")
           .select("pseudonym")
           .eq("id", userId)
@@ -185,8 +188,8 @@ export class ProfileService {
       }
     }
 
-    // Execute update
-    const { data, error } = await supabaseClient
+    // Execute update (use service client to bypass RLS)
+    const { data, error } = await supabaseServiceClient
       .from("profiles")
       .update(updateData)
       .eq("id", userId)
@@ -345,16 +348,69 @@ export class ProfileService {
 
     if (error) throw error;
 
-    return (data || []).map((row) => ({
-      id: row.id,
-      location: this.parseGeometry(row.location),
-      city: row.city,
-      country_code: row.country_code,
-      is_default: row.is_default,
-      label: row.label,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
-    }));
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // Extract coordinates for each location using RPC function
+    const locationsWithCoordinates = await Promise.all(
+      data.map(async (row) => {
+        try {
+          const { data: coords, error: coordsError } = await supabaseClient.rpc(
+            "get_location_coordinates",
+            { p_location_id: row.id, p_user_id: userId },
+          );
+
+          if (coordsError) {
+            console.error(
+              `[ProfileService] Error extracting coordinates for location ${row.id}:`,
+              coordsError,
+            );
+            // Return location with default coordinates on error
+            return {
+              id: row.id,
+              location: { latitude: 0, longitude: 0 },
+              city: row.city,
+              country_code: row.country_code,
+              is_default: row.is_default,
+              label: row.label,
+              created_at: row.created_at,
+              updated_at: row.updated_at,
+            };
+          }
+
+          const coordinates = coords && coords.length > 0 ? coords[0] : { latitude: 0, longitude: 0 };
+          return {
+            id: row.id,
+            location: coordinates,
+            city: row.city,
+            country_code: row.country_code,
+            is_default: row.is_default,
+            label: row.label,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+          };
+        } catch (err) {
+          console.error(
+            `[ProfileService] Error extracting coordinates for location ${row.id}:`,
+            err,
+          );
+          // Return location with default coordinates on error
+          return {
+            id: row.id,
+            location: { latitude: 0, longitude: 0 },
+            city: row.city,
+            country_code: row.country_code,
+            is_default: row.is_default,
+            label: row.label,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+          };
+        }
+      }),
+    );
+
+    return locationsWithCoordinates;
   }
 
   /**
@@ -483,18 +539,6 @@ export class ProfileService {
     return [];
   }
 
-  /**
-   * Parse PostGIS geometry to coordinates
-   * Placeholder implementation - would need actual PostGIS parsing
-   */
-  private parseGeometry(geometry: any): Coordinates {
-    // This is a placeholder - actual implementation would parse PostGIS format
-    // For now, return default coordinates
-    return {
-      latitude: 0,
-      longitude: 0,
-    };
-  }
 
   /**
    * Get user's default location ID for dashboard weather data

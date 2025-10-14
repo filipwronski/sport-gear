@@ -7,6 +7,7 @@ import type {
   GetFeedbacksParams,
 } from "../types";
 import { DatabaseError, NotFoundError, ValidationError } from "../lib/errors";
+import { ProfileService } from "./ProfileService";
 
 /**
  * Service for managing outfit feedback operations
@@ -73,6 +74,10 @@ export class FeedbackService {
     command: CreateFeedbackCommand,
   ): Promise<FeedbackDTO> {
     try {
+      // Ensure profile exists before creating feedback
+      const profileService = new ProfileService();
+      await profileService.getProfile(userId); // This will create profile if it doesn't exist
+
       // Verify location belongs to user (only if location_id is provided)
       if (command.location_id) {
         const locationExists = await this.verifyLocationOwnership(

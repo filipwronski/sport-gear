@@ -15,8 +15,8 @@ export interface UseProfileReturn {
  * Custom hook for managing user profile data
  * Handles fetching, updating and deleting user profile
  */
-export function useProfile(): UseProfileReturn {
-  const [profile, setProfile] = useState<ProfileDTO | null>(null);
+export function useProfile(initialProfile?: ProfileDTO | null): UseProfileReturn {
+  const [profile, setProfile] = useState<ProfileDTO | null>(initialProfile || null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<Error | null>(null);
