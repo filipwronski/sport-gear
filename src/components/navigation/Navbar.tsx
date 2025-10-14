@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Home, Compass, Users, Bike, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NAVIGATION_ITEMS } from "../dashboard/types";
@@ -14,9 +14,11 @@ const NAV_ICONS = {
 
 export default function Navbar({ userId }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [currentPath, setCurrentPath] = useState("/dashboard");
 
-  const currentPath =
-    typeof window !== "undefined" ? window.location.pathname : "/dashboard";
+  useEffect(() => {
+    setCurrentPath(window.location.pathname);
+  }, []);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

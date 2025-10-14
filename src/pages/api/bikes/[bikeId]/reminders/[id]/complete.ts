@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
-import { BikeReminderService } from "../../../../../services/bike-reminder.service";
+import { BikeReminderService } from "@/services/bike-reminder.service";
 import {
   supabaseClient,
   supabaseServiceClient,
-} from "../../../../../db/supabase.admin.client";
-import { ReminderValidator } from "../../../../../lib/validation/reminder.validator";
-import type { CompleteReminderCommand } from "../../../../../types";
+} from "@/db/supabase.admin.client";
+import { ReminderValidator } from "@/lib/validation/reminder.validator";
+import type { CompleteReminderCommand } from "@/types";
 
 // Use service client in development to bypass RLS
 const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;

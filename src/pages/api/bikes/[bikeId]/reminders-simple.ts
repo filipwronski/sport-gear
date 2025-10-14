@@ -37,7 +37,7 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
 
     // Create service client directly (bypasses RLS in development)
     const supabaseServiceClient = createClient(
-      import.meta.env.SUPABASE_URL,
+      import.meta.env.PUBLIC_SUPABASE_URL,
       import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
     );
 
@@ -205,7 +205,7 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
 
     // Create service client directly (bypasses RLS in development)
     const supabaseServiceClient = createClient(
-      import.meta.env.SUPABASE_URL,
+      import.meta.env.PUBLIC_SUPABASE_URL,
       import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
     );
 
