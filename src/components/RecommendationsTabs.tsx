@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import RecommendationView from "./RecommendationView";
 import WeeklyForecast from "./WeeklyForecast";
 import OutfitHistory from "./OutfitHistory";
+import { useDefaultLocation } from "@/hooks/useLocationSelection";
 
 // Create a client for recommendations
 const queryClient = new QueryClient({
@@ -29,6 +30,7 @@ interface RecommendationsTabsProps {
 
 export default function RecommendationsTabs({ defaultLocationId }: RecommendationsTabsProps) {
   const [activeTab, setActiveTab] = useState("current");
+  const { defaultLocation } = useDefaultLocation();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -46,7 +48,7 @@ export default function RecommendationsTabs({ defaultLocationId }: Recommendatio
         {activeTab === "forecast" && (
           <TabsContent value="forecast" className="space-y-6">
             <WeeklyForecast
-              locationId={defaultLocationId}
+              location={defaultLocation?.location}
               onDaySelect={(date) => {
                 // Switch to current tab with selected date
                 // This would need URL state management for full implementation

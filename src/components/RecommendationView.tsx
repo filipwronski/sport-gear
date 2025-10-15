@@ -10,6 +10,7 @@ import OutfitDetailsList from "./OutfitDetailsList";
 import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
+import { useDefaultLocation } from "@/hooks/useLocationSelection";
 import type { ZoneType, FeedbackDTO, RecommendationDTO, ApiError } from "../types";
 
 /**
@@ -22,11 +23,12 @@ export default function RecommendationView() {
   const [recommendation, setRecommendation] = useState<RecommendationDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ApiError | null>(null);
+  const { defaultLocation } = useDefaultLocation();
 
-  // Fetch recommendation on mount
+  // Fetch recommendation on mount or when default location changes
   useEffect(() => {
     fetchRecommendation();
-  }, []);
+  }, [defaultLocation]);
 
   const fetchRecommendation = async () => {
     setIsLoading(true);
@@ -36,7 +38,11 @@ export default function RecommendationView() {
       // Get coordinates
       let params: Record<string, string> = {};
 
-      if (navigator.geolocation) {
+      // Use default location if available
+      if (defaultLocation) {
+        params.lat = defaultLocation.location.latitude.toString();
+        params.lng = defaultLocation.location.longitude.toString();
+      } else if (navigator.geolocation) {
         try {
           const position = await new Promise<GeolocationPosition>((resolve, reject) => {
             navigator.geolocation.getCurrentPosition(resolve, reject, {

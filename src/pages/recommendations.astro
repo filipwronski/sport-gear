@@ -1,9 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Navbar from "../components/navigation/Navbar";
-import RecommendationView from "../components/RecommendationView";
-import WeeklyForecast from "../components/WeeklyForecast";
-import OutfitHistory from "../components/OutfitHistory";
+import RecommendationsTabs from "../components/RecommendationsTabs";
 
 // userId is guaranteed to be set by middleware for protected routes
 const userId = Astro.locals.userId as string;
@@ -25,40 +23,7 @@ const description =
         </p>
       </div>
 
-      <div class="space-y-12">
-        <!-- Aktualna rekomendacja -->
-        <section class="space-y-6">
-          <div class="border-b pb-4">
-            <h2 class="text-2xl font-semibold mb-2">Aktualna rekomendacja</h2>
-            <p class="text-muted-foreground">
-              Rekomendacja ubioru na podstawie aktualnych warunków pogodowych
-            </p>
-          </div>
-          <RecommendationView client:load />
-        </section>
-
-        <!-- Prognoza tygodniowa -->
-        <section class="space-y-6">
-          <div class="border-b pb-4">
-            <h2 class="text-2xl font-semibold mb-2">Prognoza tygodniowa</h2>
-            <p class="text-muted-foreground">
-              Zobacz rekomendacje ubioru na najbliższe dni
-            </p>
-          </div>
-          <WeeklyForecast client:load />
-        </section>
-
-        <!-- Historia treningów -->
-        <section class="space-y-6">
-          <div class="border-b pb-4">
-            <h2 class="text-2xl font-semibold mb-2">Historia treningów</h2>
-            <p class="text-muted-foreground">
-              Przejrzyj swoje poprzednie treningi i rekomendacje
-            </p>
-          </div>
-          <OutfitHistory client:load />
-        </section>
-      </div>
+      <RecommendationsTabs client:load />
     </div>
   </div>
 </Layout>

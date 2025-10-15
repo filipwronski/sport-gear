@@ -4,7 +4,7 @@ import { useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-quer
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import ForecastDayCard from "./ForecastDayCard";
-import type { ForecastDTO, GetForecastParams } from "../types";
+import type { ForecastDTO, GetForecastParams, Coordinates } from "../types";
 
 // Create a client for forecast
 const forecastQueryClient = new QueryClient({
@@ -29,7 +29,7 @@ const forecastQueryClient = new QueryClient({
  * Displays forecast cards in responsive grid with click-to-navigate functionality
  */
 interface WeeklyForecastProps {
-  locationId?: string;
+  location?: Coordinates;
   onDaySelect?: (date: string) => void;
 }
 
@@ -48,7 +48,7 @@ async function fetchForecast(params: GetForecastParams): Promise<ForecastDTO> {
 
 // Internal component that uses React Query
 function WeeklyForecastInternal({
-  locationId,
+  location,
   onDaySelect,
 }: WeeklyForecastProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -65,9 +65,17 @@ function WeeklyForecastInternal({
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["forecast", "coordinates"],
+    queryKey: ["forecast", location ? location.latitude : "geolocation"],
     queryFn: async () => {
-      // Get coordinates for weather data
+      // Use provided location coordinates if available
+      if (location) {
+        return fetchForecast({
+          lat: location.latitude,
+          lng: location.longitude,
+        });
+      }
+
+      // Fallback to geolocation
       if (navigator.geolocation) {
         try {
           const position = await new Promise<GeolocationPosition>(
@@ -125,17 +133,6 @@ function WeeklyForecastInternal({
       <div className="text-center py-8">
         <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
         <p className="text-muted-foreground">Ładowanie prognozy pogody...</p>
-      </div>
-    );
-  }
-
-  if (!locationId) {
-    return (
-      <div className="text-center py-8">
-        <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-        <p className="text-muted-foreground">
-          Wybierz lokalizację aby zobaczyć prognozę
-        </p>
       </div>
     );
   }
