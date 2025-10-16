@@ -4,14 +4,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { OutfitDTO, OutfitTorso, OutfitFeet, ZoneType } from "../types";
+import type { ClothingRecommendationDTO, ZoneType, ClothingItem } from "../types";
 
 /**
  * HumanFigureSVG - Interactive human figure silhouette with clean contour lines and clickable zones
- * Shows 7 body zones with color coding based on thermal comfort
+ * Shows 7 body zones with color coding based on recommended clothing items
  */
 interface CyclistSVGProps {
-  outfit: OutfitDTO;
+  recommendation: ClothingRecommendationDTO;
   selectedZone?: ZoneType;
   onZoneClick?: (zone: ZoneType) => void;
 }
@@ -102,90 +102,75 @@ const ZONE_POSITIONS: Record<ZoneType, { x: number; y: number }[]> = {
 };
 
 export default function CyclistSVG({
-  outfit,
+  recommendation,
   selectedZone,
   onZoneClick,
 }: CyclistSVGProps) {
 
+  // Helper function to check if a zone has recommended items
+  const isZoneRecommended = (zone: ZoneType): boolean => {
+    // Arms are always covered in cycling clothing
+    if (zone === "arms") {
+      return true;
+    }
+
+    const zoneItems = getZoneItems(zone);
+    return zoneItems.length > 0;
+  };
+
+  // Get items for a specific zone
+  const getZoneItems = (zone: ZoneType): ClothingItem[] => {
+    return recommendation.items.filter(item => {
+      switch (zone) {
+        case "head":
+          return item === "czapka";
+        case "neck":
+          return item === "komin na szyję";
+        case "torso":
+          return item === "koszulka termoaktywna" || item === "bluza" || item === "kurtka" ||
+                 item === "kurtka przeciwwiatrowa" || item === "kurtka zimowa" || item === "kamizelka przeciwwiatrowa";
+        case "arms":
+          return item === "rękawki";
+        case "hands":
+          return item === "rękawiczki letnie" || item === "rękawiczki jesienne" || item === "rękawiczki zimowe";
+        case "legs":
+          return item === "nogawki" || item === "krótkie spodenki" || item === "długie spodnie";
+        case "feet":
+          return item === "noski na buty" || item === "ochraniacze na buty";
+        default:
+          return false;
+      }
+    });
+  };
+
   const getZoneColor = (zone: ZoneType): string => {
-    // Handle different zone types
-    let itemString = "";
-    if (zone === "head") {
-      itemString = outfit.head;
-    } else if (zone === "torso") {
-      itemString =
-        outfit.torso.outer || outfit.torso.mid || outfit.torso.base || "";
-    } else if (zone === "arms") {
-      itemString = outfit.arms;
-    } else if (zone === "hands") {
-      itemString = outfit.hands;
-    } else if (zone === "legs") {
-      itemString = outfit.legs;
-    } else if (zone === "feet") {
-      itemString = outfit.feet.socks || "";
-    } else if (zone === "neck") {
-      itemString = outfit.neck;
+    const isRecommended = isZoneRecommended(zone);
+
+    if (isRecommended) {
+      return "fill-green-400/80 hover:fill-green-500"; // Recommended zones - green highlight
     }
 
-    if (!itemString || itemString === "nic") {
-      return "fill-red-400/60 hover:fill-red-400/80"; // No protection - transparent
-    }
-
-    // Simple thermal comfort logic
-    if (
-      zone === "head" &&
-      (itemString.includes("czapka") || itemString.includes("kask"))
-    ) {
-      return "fill-blue-400/60 hover:fill-blue-400/80"; // Cold protection - transparent
-    }
-    if (zone === "hands" && itemString.includes("rękawiczki")) {
-      return "fill-blue-400/60 hover:fill-blue-400/80"; // Cold protection - transparent
-    }
-    if (zone === "feet" && itemString.includes("skarpetki")) {
-      return "fill-blue-400/60 hover:fill-blue-400/80"; // Cold protection - transparent
-    }
-    if (zone === "torso" && outfit.torso?.outer) {
-      return "fill-green-400/60 hover:fill-green-400/80"; // Good protection - transparent
-    }
-
-    return "fill-green-400/60 hover:fill-green-400/80"; // Default good protection - transparent
+    return "fill-gray-300/40 hover:fill-gray-400/60"; // Not recommended - neutral gray
   };
 
   const getZoneTooltip = (zone: ZoneType): string => {
-    let item: string | OutfitTorso | OutfitFeet | undefined;
-
-    if (zone === "head") {
-      item = outfit.head;
-    } else if (zone === "torso") {
-      item = outfit.torso;
-    } else if (zone === "arms") {
-      item = outfit.arms;
-    } else if (zone === "hands") {
-      item = outfit.hands;
-    } else if (zone === "legs") {
-      item = outfit.legs;
-    } else if (zone === "feet") {
-      item = outfit.feet;
-    } else if (zone === "neck") {
-      item = outfit.neck;
-    }
-
+    const zoneItems = getZoneItems(zone);
     const zoneDef = ZONE_DEFINITIONS.find((z) => z.id === zone);
 
-    if (!item || item === "nic") {
-      return `${zoneDef?.label}: Brak ochrony`;
+    // Special handling for arms - always covered, may have additional sleeves
+    if (zone === "arms") {
+      if (zoneItems.length > 0) {
+        return `${zoneDef?.label}: ${zoneItems.join(", ")} (ramiona zawsze zakryte)`;
+      } else {
+        return `${zoneDef?.label}: Ramiona zawsze zakryte przez ubranie`;
+      }
     }
 
-    if (zone === "torso") {
-      return `Tułów: ${outfit.torso.base} / ${outfit.torso.mid} / ${outfit.torso.outer}`;
-    }
-    if (zone === "feet") {
-      return `Stopy: ${outfit.feet.socks}${
-        outfit.feet.covers ? ` + ${outfit.feet.covers}` : ""
-      }`;
+    if (zoneItems.length === 0) {
+      return `${zoneDef?.label}: Brak rekomendacji`;
     }
 
-    return `${zoneDef?.label}: ${item}`;
+    return `${zoneDef?.label}: ${zoneItems.join(", ")}`;
   };
 
   const handleZoneClick = (zone: ZoneType) => {

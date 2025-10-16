@@ -42,6 +42,7 @@ export type ServiceTypeEnum =
   | "inne";
 export type ServiceLocationEnum = "warsztat" | "samodzielnie";
 export type ActivityTypeEnum = "recovery" | "spokojna" | "tempo" | "interwaly";
+export type WorkoutIntensity = "rekreacyjny" | "tempo" | "intensywny" | "długodystansowy";
 export type ThermalFeelingEnum = "marzlak" | "neutralnie" | "szybko_mi_goraco";
 export type ReputationBadgeEnum =
   | "nowicjusz"
@@ -87,6 +88,35 @@ export interface OutfitTorso {
 export interface OutfitFeet {
   socks: string;
   covers: string;
+}
+
+/**
+ * Individual clothing item for new recommendation system
+ */
+export type ClothingItem =
+  | "nogawki"
+  | "rękawki"
+  | "koszulka termoaktywna"
+  | "bluza"
+  | "kurtka"
+  | "krótkie spodenki"
+  | "długie spodnie"
+  | "czapka"
+  | "rękawiczki letnie"
+  | "rękawiczki jesienne"
+  | "rękawiczki zimowe"
+  | "noski na buty"
+  | "ochraniacze na buty"
+  | "komin na szyję"
+  | "kurtka przeciwwiatrowa"
+  | "kurtka zimowa"
+  | "kamizelka przeciwwiatrowa";
+
+/**
+ * New simple outfit recommendation as list of clothing items
+ */
+export interface ClothingRecommendationDTO {
+  items: ClothingItem[];
 }
 
 /**
@@ -245,6 +275,21 @@ export interface WeatherDTO {
 export interface RecommendationDTO {
   weather: WeatherDTO;
   recommendation: OutfitDTO;
+  additional_tips: string[];
+  personalized: boolean;
+  thermal_adjustment: number;
+  computation_time_ms: number;
+}
+
+/**
+ * New simplified outfit recommendation
+ * Combines weather data with list of clothing items
+ */
+export interface NewRecommendationDTO {
+  weather: WeatherDTO;
+  recommendation: ClothingRecommendationDTO;
+  workout_intensity: WorkoutIntensity;
+  workout_duration: number;
   additional_tips: string[];
   personalized: boolean;
   thermal_adjustment: number;

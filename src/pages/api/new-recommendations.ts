@@ -1,27 +1,21 @@
 /**
- * GET /api/recommendations
+ * GET /api/new-recommendations
  *
- * Returns personalized cycling outfit recommendations based on weather conditions,
- * user preferences, and activity type. Uses hybrid approach: fast rule-based algorithm
- * with optional AI enhancement for additional tips.
+ * Returns new simplified cycling outfit recommendations based on weather conditions,
+ * workout intensity and duration.
  */
 
 import type { APIRoute } from "astro";
-import { z } from "zod";
-import type { RecommendationDTO, NewRecommendationDTO, GetRecommendationParams } from "../../types";
-import { GetRecommendationsSchema } from "../../lib/validation/recommendations.schemas";
+import type { NewRecommendationDTO } from "../../types";
 import { GetNewRecommendationsSchema } from "../../lib/validation/recommendations.schemas";
 import { RecommendationWeatherService } from "../../services/weather/recommendation-weather.service";
-import { RecommendationService } from "../../services/recommendations/recommendation.service";
 import { NewRecommendationService } from "../../services/recommendations/new-recommendation.service";
-import { supabaseClient } from "../../db/supabase.client";
 import { supabaseServiceClient } from "../../db/supabase.admin.client";
 import { createErrorResponse } from "../../lib/error-handler";
 import {
   ValidationError,
   NotFoundError,
   ServiceUnavailableError,
-  InternalServerError,
 } from "../../lib/errors";
 
 export const GET: APIRoute = async ({ request, locals }) => {
@@ -43,12 +37,12 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const queryParams = {
       lat: url.searchParams.get("lat"),
       lng: url.searchParams.get("lng"),
-      activity_type: url.searchParams.get("activity_type") || "spokojna",
-      duration_minutes: url.searchParams.get("duration_minutes") || "90",
+      workout_intensity: url.searchParams.get("workout_intensity") || "rekreacyjny",
+      workout_duration: url.searchParams.get("workout_duration") || "60",
       date: url.searchParams.get("date") || undefined,
     };
 
-    const validated = GetRecommendationsSchema.safeParse(queryParams);
+    const validated = GetNewRecommendationsSchema.safeParse(queryParams);
     if (!validated.success) {
       const details = validated.error.errors.map((e) => ({
         field: e.path.join("."),
@@ -65,37 +59,36 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     const params = validated.data;
 
-    // 3. Fetch data in parallel (coordinates-based, no location ownership check needed)
+    // 3. Fetch weather data
     const weatherService = new RecommendationWeatherService();
-    const [weather, profile] = await Promise.all([
-      weatherService.getWeatherByCoordinates(params.lat, params.lng, params.date),
-      getUserProfile(userId),
-    ]);
+    const weather = await weatherService.getWeatherByCoordinates(params.lat, params.lng, params.date);
 
-    // 5. Generate outfit recommendation (rule-based, <10ms)
-    const recommendationService = new RecommendationService();
-    const outfit = recommendationService.generateOutfit({
+    // 4. Get user profile for thermal preferences
+    const profile = await getUserProfile(userId);
+
+    // 5. Generate new clothing recommendation
+    const recommendationService = new NewRecommendationService();
+    const recommendation = recommendationService.generateRecommendation({
       temperature: weather.temperature,
-      feelsLike: weather.feels_like,
-      windSpeed: weather.wind_speed,
-      rainMm: weather.rain_mm,
       humidity: weather.humidity,
-      activityType: params.activity_type,
-      durationMinutes: params.duration_minutes,
+      windSpeed: weather.wind_speed,
+      workoutIntensity: params.workout_intensity,
+      workoutDuration: params.workout_duration,
       thermalAdjustment: profile.thermal_adjustment || 0,
       userPreferences: profile.thermal_preferences,
     });
 
-    // 6. Generate AI tips (async, non-blocking, optional)
-    // For now, return empty array - AI service will be implemented in Phase 4
+    // 6. Generate AI tips (placeholder for now)
     const additionalTips: string[] = [];
 
     // 7. Assemble response
     const computationTime = performance.now() - startTime;
 
-    const response: RecommendationDTO = {
+    const response: NewRecommendationDTO = {
       weather,
-      recommendation: outfit,
+      recommendation,
+      workout_intensity: params.workout_intensity,
+      workout_duration: params.workout_duration,
       additional_tips: additionalTips,
       personalized: (profile.thermal_adjustment || 0) !== 0,
       thermal_adjustment: profile.thermal_adjustment || 0,
@@ -107,7 +100,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error in /api/recommendations:", error);
+    console.error("Error in /api/new-recommendations:", error);
 
     // Handle specific error types
     if (error instanceof ServiceUnavailableError) {
@@ -147,33 +140,10 @@ export const GET: APIRoute = async ({ request, locals }) => {
 };
 
 /**
- * Verify that location belongs to authenticated user
- * Uses service client for development/testing
- */
-async function verifyLocationOwnership(
-  locationId: string,
-  userId: string,
-): Promise<boolean> {
-  // Use service client in development to bypass RLS issues
-  const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;
-
-  const { data, error } = await client
-    .from("user_locations")
-    .select("id")
-    .eq("id", locationId)
-    .eq("user_id", userId)
-    .single();
-
-  return !error && !!data;
-}
-
-/**
  * Get user profile with thermal preferences
- * Uses service client for development/testing
  */
 async function getUserProfile(userId: string) {
-  // Use service client in development to bypass RLS issues
-  const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;
+  const client = import.meta.env.DEV ? supabaseServiceClient : supabaseServiceClient;
 
   const { data, error } = await client
     .from("profiles")

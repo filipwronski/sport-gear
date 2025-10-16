@@ -3,15 +3,15 @@ import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WeatherSummary from "./WeatherSummary";
+import WorkoutSelector, { type WorkoutIntensity, type WorkoutDuration } from "./WorkoutSelector";
 import CyclistSVG from "./CyclistSVG";
-import OutfitDetailsList from "./OutfitDetailsList";
+import OutfitRecommendationList from "./OutfitRecommendationList";
 import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
 import { useDefaultLocation } from "@/hooks/useLocationSelection";
-import type { ZoneType, FeedbackDTO, RecommendationDTO, ApiError } from "../types";
+import type { ZoneType, FeedbackDTO, NewRecommendationDTO, ApiError } from "../types";
 
 /**
  * Simplified RecommendationView - Shows current weather-based outfit recommendation
@@ -20,15 +20,25 @@ export default function RecommendationView() {
   const [selectedZone, setSelectedZone] = useState<ZoneType | undefined>();
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [feedbackCount, setFeedbackCount] = useState(0);
-  const [recommendation, setRecommendation] = useState<RecommendationDTO | null>(null);
+  const [recommendation, setRecommendation] = useState<NewRecommendationDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ApiError | null>(null);
+  const [workoutIntensity, setWorkoutIntensity] = useState<WorkoutIntensity>("rekreacyjny");
+  const [workoutDuration, setWorkoutDuration] = useState<WorkoutDuration>(60);
+
+  // Track original workout parameters to detect changes
+  const [originalWorkoutIntensity, setOriginalWorkoutIntensity] = useState<WorkoutIntensity>("rekreacyjny");
+  const [originalWorkoutDuration, setOriginalWorkoutDuration] = useState<WorkoutDuration>(60);
+
   const { defaultLocation } = useDefaultLocation();
 
-  // Fetch recommendation on mount or when default location changes
+  // Fetch recommendation on mount and location change only
   useEffect(() => {
     fetchRecommendation();
   }, [defaultLocation]);
+
+  // Track when workout parameters change
+  const hasWorkoutParamsChanged = workoutIntensity !== originalWorkoutIntensity || workoutDuration !== originalWorkoutDuration;
 
   const fetchRecommendation = async () => {
     setIsLoading(true);
@@ -64,11 +74,11 @@ export default function RecommendationView() {
         params.lng = "21.017532";
       }
 
-      params.activity_type = "spokojna";
-      params.duration_minutes = "90";
+      params.workout_intensity = workoutIntensity;
+      params.workout_duration = workoutDuration.toString();
 
       const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`/api/recommendations?${queryString}`);
+      const response = await fetch(`/api/new-recommendations?${queryString}`);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -84,8 +94,12 @@ export default function RecommendationView() {
         throw apiError;
       }
 
-      const data: RecommendationDTO = await response.json();
+      const data: NewRecommendationDTO = await response.json();
       setRecommendation(data);
+
+      // Update original parameters when recommendation is successfully fetched
+      setOriginalWorkoutIntensity(workoutIntensity);
+      setOriginalWorkoutDuration(workoutDuration);
     } catch (err) {
       setError(err as ApiError);
     } finally {
@@ -149,83 +163,76 @@ export default function RecommendationView() {
   }
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="space-y-6">
-          {/* Weather Summary */}
-          <WeatherSummary weather={recommendation.weather} />
+    <div className="space-y-6">
+      {/* Workout Parameters Selector */}
+      <div className="space-y-4">
+        <WorkoutSelector
+          intensity={workoutIntensity}
+          duration={workoutDuration}
+          onIntensityChange={setWorkoutIntensity}
+          onDurationChange={setWorkoutDuration}
+        />
 
-          {/* Main recommendation display */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
-            {/* Cyclist SVG */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Sylwetka kolarza</h3>
-              <div className="flex justify-center">
-                <CyclistSVG
-                  outfit={recommendation.recommendation}
-                  selectedZone={selectedZone}
-                  onZoneClick={handleZoneClick}
-                />
-              </div>
-            </div>
+        {/* Update Recommendations Button - always visible, disabled when no changes */}
+        <div className="flex justify-center">
+          <Button
+            onClick={fetchRecommendation}
+            disabled={isLoading || !hasWorkoutParamsChanged}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Zaktualizuj rekomendacje
+          </Button>
+        </div>
+      </div>
 
-            {/* Outfit Details */}
-            <div className="space-y-4">
-              <OutfitDetailsList
-                outfit={recommendation.recommendation}
-                expandedZone={selectedZone}
-              />
-            </div>
+      {/* Weather Summary */}
+      <WeatherSummary weather={recommendation.weather} />
+
+      {/* Main recommendation display */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
+        {/* Cyclist SVG */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Sylwetka kolarza</h3>
+          <div className="flex justify-center">
+            <CyclistSVG
+              recommendation={recommendation.recommendation}
+              selectedZone={selectedZone}
+              onZoneClick={handleZoneClick}
+            />
           </div>
-
-          {/* Mobile tabs version */}
-          <div className="lg:hidden">
-            <Tabs defaultValue="sylwetka" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="sylwetka">Sylwetka</TabsTrigger>
-                <TabsTrigger value="szczegoly">Szczegóły</TabsTrigger>
-              </TabsList>
-              <TabsContent value="sylwetka" className="mt-4">
-                <div className="flex justify-center">
-                  <CyclistSVG
-                    outfit={recommendation.recommendation}
-                    selectedZone={selectedZone}
-                    onZoneClick={handleZoneClick}
-                  />
-                </div>
-              </TabsContent>
-              <TabsContent value="szczegoly" className="mt-4">
-                <OutfitDetailsList
-                  outfit={recommendation.recommendation}
-                  expandedZone={selectedZone}
-                />
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* Additional AI Tips */}
-          <AdditionalTipsSection
-            weatherConditions={recommendation.weather}
-            onTipsLoad={(tips) => {
-              // Tips are managed by the hook
-            }}
-          />
-
-          {/* Feedback CTA */}
-          <AddFeedbackCTA
-            onFeedbackClick={() => setFeedbackDialogOpen(true)}
-            feedbackCount={feedbackCount}
-          />
         </div>
 
-        {/* Feedback Dialog */}
-        <FeedbackDialog
-          isOpen={feedbackDialogOpen}
-          onClose={() => setFeedbackDialogOpen(false)}
-          recommendation={recommendation}
-          onSubmitted={handleFeedbackSubmitted}
-        />
-      </CardContent>
-    </Card>
+        {/* Outfit Recommendation */}
+        <div className="space-y-4">
+          <OutfitRecommendationList
+            recommendation={recommendation.recommendation}
+            expandedZone={selectedZone}
+          />
+        </div>
+      </div>
+
+      {/* Additional AI Tips */}
+      <AdditionalTipsSection
+        weatherConditions={recommendation.weather}
+        onTipsLoad={(tips) => {
+          // Tips are managed by the hook
+        }}
+      />
+
+      {/* Feedback CTA */}
+      <AddFeedbackCTA
+        onFeedbackClick={() => setFeedbackDialogOpen(true)}
+        feedbackCount={feedbackCount}
+      />
+
+      {/* Feedback Dialog */}
+      <FeedbackDialog
+        isOpen={feedbackDialogOpen}
+        onClose={() => setFeedbackDialogOpen(false)}
+        recommendation={recommendation}
+        onSubmitted={handleFeedbackSubmitted}
+      />
+    </div>
   );
 }
