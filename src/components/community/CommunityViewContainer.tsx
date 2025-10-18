@@ -245,7 +245,7 @@ export default function CommunityViewContainer() {
         </div>
       ) : (
         // Shared tab - show user's shared outfits without filters
-        <div className="max-w-6xl mx-auto">
+        <div>
           <OutfitsList
             outfits={currentOutfits}
             isLoading={currentLoading}

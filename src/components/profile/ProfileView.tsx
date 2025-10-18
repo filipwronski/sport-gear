@@ -231,7 +231,7 @@ export function ProfileView({
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-6 sm:py-8">
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
           Profil użytkownika

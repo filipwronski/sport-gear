@@ -76,7 +76,7 @@ export default function BikeDetailsView({ bikeId }: BikeDetailsViewProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div className="container mx-auto px-4 py-6">
       <BikeHeader bike={bike} onMileageUpdate={handleMileageUpdate} />
 
       <Tabs defaultValue="history" className="mt-6">

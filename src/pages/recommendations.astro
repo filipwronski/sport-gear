@@ -14,7 +14,6 @@ const description =
 <Layout title={title} description={description} showHeader={false}>
   <Navbar client:load userId={userId} />
   <div class="container mx-auto py-8 px-4">
-    <div class="max-w-7xl mx-auto">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold mb-2">Rekomendacje ubioru</h1>
         <p class="text-muted-foreground">
@@ -24,6 +23,5 @@ const description =
       </div>
 
       <RecommendationsTabs client:load />
-    </div>
   </div>
 </Layout>
