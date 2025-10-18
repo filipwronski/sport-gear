@@ -68,10 +68,11 @@ export class NewRecommendationService {
       items.push("komin na szyję");
     }
 
-    // Feet protection
-    items.push("noski na buty");
+    // Feet protection - socks OR shoe covers, not both
     if (this.shouldWearShoeCovers(input)) {
       items.push("ochraniacze na buty");
+    } else {
+      items.push("noski na buty");
     }
 
     return { items };
@@ -145,8 +146,11 @@ export class NewRecommendationService {
   private shouldWearHat(input: NewRecommendationInput): boolean {
     const { temperature, windSpeed, workoutIntensity, workoutDuration } = input;
 
-    // Cold weather
+    // Cold weather - always recommend hat
     if (temperature <= 5) return true;
+
+    // Moderate cold with wind
+    if (temperature <= 10 && windSpeed >= 15) return true;
 
     // Windy conditions for longer rides
     if (windSpeed >= 20 && workoutDuration >= 120) return true;

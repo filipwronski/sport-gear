@@ -86,6 +86,8 @@ export default function OutfitRecommendationList({
     return acc;
   }, {} as Record<string, ClothingItem[]>);
 
+  // Define the logical order of body parts for display
+  const categoryOrder = ['head', 'neck', 'torso', 'arms', 'hands', 'legs', 'feet'];
 
   return (
     <Card>
@@ -97,7 +99,9 @@ export default function OutfitRecommendationList({
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {Object.entries(groupedItems).map(([category, items]) => (
+          {categoryOrder
+            .filter(category => groupedItems[category] && groupedItems[category].length > 0)
+            .map((category) => (
             <div key={category} className="space-y-2">
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
@@ -105,7 +109,7 @@ export default function OutfitRecommendationList({
                 </Badge>
               </div>
               <div className="ml-4 space-y-1">
-                {items.map((item, index) => (
+                {groupedItems[category].map((item, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm">
                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
                     <span>{getClothingLabel(item)}</span>
