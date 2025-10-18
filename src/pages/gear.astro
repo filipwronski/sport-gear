@@ -1,11 +1,10 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/navigation/Navbar';
-import { BikeListView } from '../components/gear/BikeListView';
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/navigation/Navbar";
+import { BikeListView } from "../components/gear/BikeListView";
 
 // userId is guaranteed to be set by middleware for protected routes
 const userId = Astro.locals.userId as string;
-
 ---
 
 <Layout title="Moje rowery - CycleGear" showHeader={false}>

@@ -46,11 +46,12 @@ export class ProfileService {
    */
   async getProfile(userId: string): Promise<ProfileDTO> {
     // First try to get profile with service client (bypasses RLS)
-    const { data: serviceData, error: serviceError } = await supabaseServiceClient
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    const { data: serviceData, error: serviceError } =
+      await supabaseServiceClient
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
     if (!serviceError && serviceData) {
       // Profile exists, return it
@@ -59,7 +60,9 @@ export class ProfileService {
 
     if (serviceError && serviceError.code === "PGRST116") {
       // Profile doesn't exist, create it automatically
-      console.log(`Profile not found for user: ${userId}, creating new profile`);
+      console.log(
+        `Profile not found for user: ${userId}, creating new profile`,
+      );
       return await this.createProfile(userId);
     }
 
@@ -73,7 +76,9 @@ export class ProfileService {
     if (error) {
       if (error.code === "PGRST116") {
         // Profile doesn't exist, create it automatically
-        console.log(`Profile not found for user: ${userId}, creating new profile`);
+        console.log(
+          `Profile not found for user: ${userId}, creating new profile`,
+        );
         return await this.createProfile(userId);
       }
       console.error("Error fetching profile:", error);
@@ -118,13 +123,16 @@ export class ProfileService {
     if (error) {
       // If duplicate key error, the profile was created by another request
       if (error.code === "23505") {
-        console.log(`Profile already exists for user: ${userId}, fetching existing profile`);
+        console.log(
+          `Profile already exists for user: ${userId}, fetching existing profile`,
+        );
         // Try to fetch the existing profile
-        const { data: existingData, error: fetchError } = await supabaseServiceClient
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
+        const { data: existingData, error: fetchError } =
+          await supabaseServiceClient
+            .from("profiles")
+            .select("*")
+            .eq("id", userId)
+            .single();
 
         if (!fetchError && existingData) {
           return this.transformRowToDTO(existingData);
@@ -379,7 +387,10 @@ export class ProfileService {
             };
           }
 
-          const coordinates = coords && coords.length > 0 ? coords[0] : { latitude: 0, longitude: 0 };
+          const coordinates =
+            coords && coords.length > 0
+              ? coords[0]
+              : { latitude: 0, longitude: 0 };
           return {
             id: row.id,
             location: coordinates,
@@ -539,7 +550,6 @@ export class ProfileService {
     return [];
   }
 
-
   /**
    * Get user's default location ID for dashboard weather data
    * Used by dashboard endpoint to resolve location when not provided
@@ -612,7 +622,10 @@ export class ProfileService {
         });
 
       if (createError) {
-        console.error("Error creating profile with service client:", createError);
+        console.error(
+          "Error creating profile with service client:",
+          createError,
+        );
         // Try with regular client as fallback (might fail due to RLS)
         const { error: fallbackError } = await supabaseClient
           .from("profiles")
@@ -624,9 +637,14 @@ export class ProfileService {
           });
 
         if (fallbackError) {
-          console.error("Error creating profile with fallback client:", fallbackError);
+          console.error(
+            "Error creating profile with fallback client:",
+            fallbackError,
+          );
         } else {
-          console.log(`Profile created successfully for user: ${userId} (fallback)`);
+          console.log(
+            `Profile created successfully for user: ${userId} (fallback)`,
+          );
         }
       } else {
         console.log(`Profile created successfully for user: ${userId}`);
