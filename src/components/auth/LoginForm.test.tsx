@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LoginForm from "./LoginForm";
-import { useAuth } from "./useAuth";
 
 // Mock the useAuth hook
 const mockLogin = vi.fn();
@@ -187,7 +186,9 @@ describe("LoginForm", () => {
 
   it("should disable submit button when form is valid and submitted", async () => {
     // Test that button gets disabled during form submission
-    mockLogin.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+    mockLogin.mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 100)),
+    );
 
     render(
       <LoginForm

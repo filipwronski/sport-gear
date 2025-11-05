@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RegisterForm from "./RegisterForm";
-import { useAuth } from "./useAuth";
 
 // Mock the useAuth hook
 const mockRegister = vi.fn();
@@ -64,9 +63,6 @@ describe("RegisterForm", () => {
     render(<RegisterForm onSuccess={mockOnSuccess} />);
 
     const emailInput = screen.getByLabelText(/adres email/i);
-    const submitButton = screen.getByRole("button", {
-      name: /zarejestruj się/i,
-    });
 
     await userEvent.type(emailInput, "invalid-email");
     fireEvent.submit(screen.getByRole("form"));
@@ -103,9 +99,6 @@ describe("RegisterForm", () => {
 
     const passwordInput = screen.getByLabelText("Hasło");
     const confirmPasswordInput = screen.getByLabelText(/potwierdź hasło/i);
-    const submitButton = screen.getByRole("button", {
-      name: /zarejestruj się/i,
-    });
 
     await userEvent.type(passwordInput, "Password123!");
     await userEvent.type(confirmPasswordInput, "DifferentPassword123!");
@@ -213,14 +206,18 @@ describe("RegisterForm", () => {
 
   it("should handle form submission with valid data", async () => {
     // Test that form submission works correctly
-    mockRegister.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+    mockRegister.mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 100)),
+    );
 
     render(<RegisterForm onSuccess={mockOnSuccess} />);
 
     const emailInput = screen.getByLabelText(/adres email/i);
     const passwordInput = screen.getByLabelText("Hasło");
     const confirmPasswordInput = screen.getByLabelText(/potwierdź hasło/i);
-    const submitButton = screen.getByRole("button", { name: /zarejestruj się/i });
+    const submitButton = screen.getByRole("button", {
+      name: /zarejestruj się/i,
+    });
 
     await userEvent.type(emailInput, "test@example.com");
     await userEvent.type(passwordInput, "Password123!");
