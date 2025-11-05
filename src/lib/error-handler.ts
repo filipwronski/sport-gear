@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { ApiError as CustomApiError } from "./errors/index.js";
 
 /**
