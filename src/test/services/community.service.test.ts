@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock Supabase client before imports
 vi.mock("../../db/supabase.client", () => ({
-  supabase: {
+  supabaseClient: {
     from: vi.fn(),
     rpc: vi.fn(),
   },
@@ -15,9 +15,9 @@ import {
   CommunityServiceError,
 } from "../../services/community.service";
 import type { GetCommunityOutfitsParams, Coordinates } from "../../types";
-import { supabase } from "../../db/supabase.client";
+import { supabaseClient } from "../../db/supabase.client";
 
-const mockSupabase = vi.mocked(supabase);
+const mockSupabase = vi.mocked(supabaseClient);
 
 describe("Community Service", () => {
   beforeEach(() => {

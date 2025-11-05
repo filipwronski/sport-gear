@@ -5,7 +5,16 @@ import { supabaseClient } from "../../db/supabase.client";
 import { useToast, authToastMessages } from "./useToast";
 
 // Mock the modules
-vi.mock("../../db/supabase.client");
+vi.mock("../../db/supabase.client", () => ({
+  supabaseClient: {
+    auth: {
+      signInWithPassword: vi.fn(),
+      signUp: vi.fn(),
+      resetPasswordForEmail: vi.fn(),
+      signInWithOAuth: vi.fn(),
+    },
+  },
+}));
 vi.mock("./useToast");
 
 describe("useAuth", () => {
