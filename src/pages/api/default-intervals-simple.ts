@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import {
   supabaseClient,
   supabaseServiceClient,
-} from "../../../db/supabase.admin.client";
+} from "../../db/supabase.admin.client";
 
 export const GET: APIRoute = async ({ locals }) => {
   try {
