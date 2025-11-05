@@ -39,7 +39,9 @@ async function fetchForecast(params: GetForecastParams): Promise<ForecastDTO> {
     lng: params.lng.toString(),
   }).toString();
 
-  const response = await fetch(`/api/weather/forecast?${queryString}`);
+  const response = await fetch(`/api/weather/forecast?${queryString}`, {
+    credentials: "include",
+  });
   if (!response.ok) {
     throw new Error("Failed to fetch forecast");
   }
@@ -162,7 +164,7 @@ function WeeklyForecastInternal({
 
       {/* Loading state */}
       {isLoading && !forecast && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
           ))}
@@ -180,15 +182,22 @@ function WeeklyForecastInternal({
 
       {/* Forecast grid */}
       {forecast && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-          {forecast.forecast.map((day) => (
-            <ForecastDayCard
-              key={day.date}
-              day={day}
-              isSelected={selectedDate === day.date}
-              onClick={() => handleDayClick(day.date)}
-            />
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+          {forecast.forecast
+            .filter((day) => {
+              // Filter out today's forecast since it's already shown above
+              const today = new Date();
+              const dayDate = new Date(day.date);
+              return dayDate.toDateString() !== today.toDateString();
+            })
+            .map((day) => (
+              <ForecastDayCard
+                key={day.date}
+                day={day}
+                isSelected={selectedDate === day.date}
+                onClick={() => handleDayClick(day.date)}
+              />
+            ))}
         </div>
       )}
 

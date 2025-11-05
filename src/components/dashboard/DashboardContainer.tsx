@@ -15,14 +15,10 @@ export default function DashboardContainer({
   userId,
   initialLocationId,
 }: DashboardContainerProps) {
-  const [currentLocationId] = useState<
-    string | undefined
-  >(initialLocationId);
+  const [currentLocationId] = useState<string | undefined>(initialLocationId);
 
-  const { data, isLoading, error, refetch, lastRefresh } = useDashboardData(
-    userId,
-    currentLocationId,
-  );
+  const { data, isLoading, error, refetch, lastRefresh, coordinates } =
+    useDashboardData(userId, currentLocationId);
 
   useAutoRefresh({
     enabled: !!data && !error,
@@ -36,7 +32,11 @@ export default function DashboardContainer({
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <WeatherSection data={data.weather_summary} lastRefresh={lastRefresh} />
+      <WeatherSection
+        data={data.weather_summary}
+        lastRefresh={lastRefresh}
+        coordinates={coordinates}
+      />
 
       <div className="grid gap-6 md:grid-cols-2 mb-6 md:mb-8">
         <div className="rounded-lg border bg-white p-6">

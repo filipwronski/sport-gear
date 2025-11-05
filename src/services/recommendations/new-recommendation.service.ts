@@ -146,17 +146,15 @@ export class NewRecommendationService {
   private shouldWearHat(input: NewRecommendationInput): boolean {
     const { temperature, windSpeed, workoutIntensity, workoutDuration } = input;
 
-    // Cold weather - always recommend hat
-    if (temperature <= 5) return true;
+    // Always recommend hat when temperature is below 13°C
+    if (temperature < 13) return true;
 
-    // Moderate cold with wind
-    if (temperature <= 10 && windSpeed >= 15) return true;
+    // Sun protection - recommend hat for longer rides in mild weather
+    // When it's not too cold but people are exposed to sun for extended periods
+    if (temperature >= 13 && workoutDuration >= 60) return true;
 
-    // Windy conditions for longer rides
-    if (windSpeed >= 20 && workoutDuration >= 120) return true;
-
-    // Very long rides in moderate cold
-    if (temperature <= 10 && workoutDuration >= 180) return true;
+    // Intensive workouts in warm temperatures - sun protection
+    if (temperature >= 15 && workoutIntensity === "intensywny") return true;
 
     return false;
   }

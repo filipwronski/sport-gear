@@ -85,6 +85,7 @@ export class DashboardService {
     }
   }
 
+
   /**
    * Get weather summary with error handling
    * Falls back to default values if weather service fails
@@ -107,10 +108,13 @@ export class DashboardService {
         };
       }
 
-      return await this.weatherService.getWeatherSummaryByCoordinates(
+      const weatherSummary = await this.weatherService.getWeatherSummaryByCoordinates(
         coordinates.lat,
         coordinates.lng,
       );
+
+      // Outfit recommendation will be fetched on client-side by the component
+      return weatherSummary;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error("Weather service error in dashboard:", error);

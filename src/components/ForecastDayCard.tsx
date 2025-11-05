@@ -11,7 +11,11 @@ interface ForecastDayCardProps {
   onClick?: () => void;
 }
 
-export default function ForecastDayCard({ day, isSelected = false, onClick }: ForecastDayCardProps) {
+export default function ForecastDayCard({
+  day,
+  isSelected = false,
+  onClick,
+}: ForecastDayCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
@@ -26,7 +30,7 @@ export default function ForecastDayCard({ day, isSelected = false, onClick }: Fo
       return date.toLocaleDateString("pl-PL", {
         weekday: "short",
         day: "numeric",
-        month: "short"
+        month: "short",
       });
     }
   };
@@ -49,12 +53,16 @@ export default function ForecastDayCard({ day, isSelected = false, onClick }: Fo
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick();
-        }
-      } : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
     >
       <CardContent className="p-4">
         <div className="text-center space-y-2">
@@ -62,23 +70,16 @@ export default function ForecastDayCard({ day, isSelected = false, onClick }: Fo
             {formatDate(day.date)}
           </div>
 
-          <div className="text-2xl">
-            {getWeatherIcon(day.description)}
-          </div>
+          <div className="text-2xl">{getWeatherIcon(day.description)}</div>
 
           <div className="text-sm font-semibold">
-            {Math.round(day.temperature_min)}° - {Math.round(day.temperature_max)}°
+            {Math.round(day.temperature_min)}° -{" "}
+            {Math.round(day.temperature_max)}°
           </div>
 
           <div className="text-xs text-muted-foreground space-y-1">
             <div>💨 {day.wind_speed} km/h</div>
-            {day.rain_mm > 0 && (
-              <div>🌧️ {day.rain_mm} mm</div>
-            )}
-          </div>
-
-          <div className="text-xs text-center leading-tight">
-            {day.quick_recommendation}
+            {day.rain_mm > 0 && <div>🌧️ {day.rain_mm} mm</div>}
           </div>
         </div>
       </CardContent>

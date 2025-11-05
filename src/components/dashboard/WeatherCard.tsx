@@ -1,13 +1,15 @@
 import { Cloud, Droplets, Wind, Thermometer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import WeeklyForecast from "../WeeklyForecast";
 import type { WeatherSummaryDTO } from "../../types";
 
 interface WeatherCardProps {
   weather: WeatherSummaryDTO;
   refreshedAt?: Date;
+  coordinates?: { lat: number; lng: number };
 }
 
-export function WeatherCard({ weather, refreshedAt }: WeatherCardProps) {
+export function WeatherCard({ weather, refreshedAt, coordinates }: WeatherCardProps) {
   const getWeatherIcon = (description: string) => {
     const lowerDesc = description.toLowerCase();
     if (lowerDesc.includes("clear") || lowerDesc.includes("sunny")) {
@@ -60,10 +62,10 @@ export function WeatherCard({ weather, refreshedAt }: WeatherCardProps) {
             <Thermometer className="h-5 w-5 text-red-500" />
             <div>
               <p className="text-2xl font-bold">
-                {weather.current_temperature}°C
+                {Math.round(weather.current_temperature)}°C
               </p>
               <p className="text-sm text-muted-foreground">
-                Odczuwalna: {weather.feels_like}°C
+                Odczuwalna: {Math.round(weather.feels_like)}°C
               </p>
             </div>
           </div>
@@ -88,10 +90,21 @@ export function WeatherCard({ weather, refreshedAt }: WeatherCardProps) {
           </div>
         </div>
 
-        {/* Description */}
-        <div className="pt-2 border-t">
-          <p className="text-sm capitalize">{weather.description}</p>
-        </div>
+        {/* Weekly Forecast */}
+        {coordinates && (
+          <div className="pt-4 border-t">
+            <WeeklyForecast
+              location={{
+                latitude: coordinates.lat,
+                longitude: coordinates.lng,
+              }}
+              onDaySelect={(date) => {
+                // Could navigate to recommendations with specific date
+                console.log('Selected forecast date:', date);
+              }}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
