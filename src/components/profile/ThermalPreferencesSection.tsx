@@ -22,11 +22,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Thermometer, ChevronDown, RotateCcw } from "lucide-react";
-import type {
-  ThermalPreferences,
-  ThermalFeelingEnum,
-  UpdateProfileCommand,
-} from "../../types";
+import type { ThermalPreferences, ThermalFeelingEnum } from "../../types";
 
 interface ThermalPreferencesSectionProps {
   preferences: ThermalPreferences | null;
@@ -73,7 +69,7 @@ export function ThermalPreferencesSection({
     setIsSaving(true);
     try {
       await onUpdate(localPreferences);
-    } catch (error) {
+    } catch (_error) {
       // Error is handled by parent component
     } finally {
       setIsSaving(false);

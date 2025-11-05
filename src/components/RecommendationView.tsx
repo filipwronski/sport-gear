@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -44,17 +44,7 @@ export default function RecommendationView() {
 
   const { defaultLocation } = useDefaultLocation();
 
-  // Fetch recommendation on mount and location change only
-  useEffect(() => {
-    fetchRecommendation();
-  }, [defaultLocation]);
-
-  // Track when workout parameters change
-  const hasWorkoutParamsChanged =
-    workoutIntensity !== originalWorkoutIntensity ||
-    workoutDuration !== originalWorkoutDuration;
-
-  const fetchRecommendation = async () => {
+  const fetchRecommendation = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -79,7 +69,7 @@ export default function RecommendationView() {
           );
           params.lat = position.coords.latitude.toString();
           params.lng = position.coords.longitude.toString();
-        } catch (geoError) {
+        } catch (_geoError) {
           // Fallback to Warsaw coordinates
           params.lat = "52.237049";
           params.lng = "21.017532";
@@ -106,7 +96,7 @@ export default function RecommendationView() {
           statusCode: response.status,
           details: errorData.error?.details,
           retryAfter: response.headers.get("Retry-After")
-            ? parseInt(response.headers.get("Retry-After")!)
+            ? parseInt(response.headers.get("Retry-After"))
             : undefined,
         };
         throw apiError;
@@ -123,13 +113,23 @@ export default function RecommendationView() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [defaultLocation, workoutIntensity, workoutDuration]);
+
+  // Fetch recommendation on mount and location change only
+  useEffect(() => {
+    fetchRecommendation();
+  }, [fetchRecommendation]);
+
+  // Track when workout parameters change
+  const hasWorkoutParamsChanged =
+    workoutIntensity !== originalWorkoutIntensity ||
+    workoutDuration !== originalWorkoutDuration;
 
   const handleZoneClick = (zone: ZoneType) => {
     setSelectedZone(zone);
   };
 
-  const handleFeedbackSubmitted = (feedback: FeedbackDTO) => {
+  const handleFeedbackSubmitted = (_feedback: FeedbackDTO) => {
     setFeedbackCount((prev) => prev + 1);
   };
 
@@ -235,7 +235,7 @@ export default function RecommendationView() {
       {/* Additional AI Tips */}
       <AdditionalTipsSection
         weatherConditions={recommendation.weather}
-        onTipsLoad={(tips) => {
+        onTipsLoad={(_tips) => {
           // Tips are managed by the hook
         }}
       />

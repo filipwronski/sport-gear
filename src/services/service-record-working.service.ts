@@ -6,11 +6,6 @@ import type {
   ServiceStatsDTO,
   CreateServiceCommand,
   UpdateServiceCommand,
-  ServiceTypeBreakdown,
-  ServiceLocationBreakdown,
-  ServiceTimelineEntry,
-  ServiceTypeEnum,
-  ServiceLocationEnum,
 } from "../types";
 
 /**

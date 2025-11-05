@@ -23,13 +23,8 @@ export const AddBikeDialog = ({
   isSubmitting = false,
 }: AddBikeDialogProps) => {
   const handleSubmit = async (data: CreateBikeCommand) => {
-    try {
-      // This will be handled by the parent component
-      await onSuccess(data as any); // TODO: Fix type
-    } catch (error) {
-      // Error handling is done in the parent component
-      throw error;
-    }
+    // This will be handled by the parent component
+    await onSuccess(data as any); // TODO: Fix type
   };
 
   const handleOpenChange = (newOpen: boolean) => {

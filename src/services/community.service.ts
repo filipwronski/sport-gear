@@ -69,7 +69,7 @@ export async function getUserLocation(
       );
     }
 
-    if (!data?.location) {
+    if (!(data as any)?.location) {
       throw new LocationNotFoundError(locationId);
     }
 
@@ -78,7 +78,7 @@ export async function getUserLocation(
     // We need to extract coordinates using ST_X and ST_Y
     const { data: coordsData, error: coordsError } = await supabaseClient.rpc(
       "extract_coordinates",
-      { location_point: data.location },
+      { location_point: (data as any).location },
     );
 
     if (coordsError) {
@@ -156,16 +156,16 @@ export async function getCommunityOutfits(
     const { data, error } = await supabaseClient.rpc("get_community_outfits", {
       center_lng: location.longitude,
       center_lat: location.latitude,
-      radius_meters: params.radius_km! * 1000, // Convert km to meters
-      time_range_hours: params.time_range!,
+      radius_meters: params.radius_km ? params.radius_km * 1000 : null, // Convert km to meters
+      time_range_hours: params.time_range ?? null,
       temperature: params.temperature ?? null,
-      temperature_range: params.temperature_range!,
+      temperature_range: params.temperature_range ?? null,
       activity_type: params.activity_type ?? null,
       min_rating: params.min_rating ?? null,
       reputation_filter: params.reputation_filter ?? null,
-      sort_by: params.sort!,
-      result_limit: params.limit!,
-      result_offset: params.offset!,
+      sort_by: params.sort ?? null,
+      result_limit: params.limit ?? null,
+      result_offset: params.offset ?? null,
     });
 
     if (error) {
@@ -178,10 +178,10 @@ export async function getCommunityOutfits(
       {
         center_lng: location.longitude,
         center_lat: location.latitude,
-        radius_meters: params.radius_km! * 1000,
-        time_range_hours: params.time_range!,
+        radius_meters: params.radius_km ? params.radius_km * 1000 : null,
+        time_range_hours: params.time_range ?? null,
         temperature: params.temperature ?? null,
-        temperature_range: params.temperature_range!,
+        temperature_range: params.temperature_range ?? null,
         activity_type: params.activity_type ?? null,
         min_rating: params.min_rating ?? null,
         reputation_filter: params.reputation_filter ?? null,
@@ -244,7 +244,7 @@ export async function getCommunityActivity(
     }
 
     // Get user location coordinates
-    const location = await getUserLocation(userId, locationId);
+    const _location = await getUserLocation(userId, locationId);
 
     // Simplified implementation - return mock data for now
     // In real implementation, this would use spatial queries

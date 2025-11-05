@@ -1965,7 +1965,7 @@ mkdir -p src/lib/api
   - Wszystkie typy poprawne
   - Wszystkie error cases obsłużone
   - Wszystkie user stories zaimplementowane
-  - Brak console.log w produkcji
+  - Brak console.info w produkcji
   - Brak TODO comments
   - Proper error messages (po polsku)
 

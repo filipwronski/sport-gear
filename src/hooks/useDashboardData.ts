@@ -3,8 +3,8 @@ import type { DashboardDTO } from "../types";
 import type { UseDashboardDataReturn } from "../components/dashboard/types";
 
 export function useDashboardData(
-  userId: string,
-  locationId?: string,
+  _userId: string,
+  _locationId?: string,
 ): UseDashboardDataReturn & {
   coordinates: { lat: number; lng: number } | null;
 } {
@@ -45,7 +45,7 @@ export function useDashboardData(
           };
           url.searchParams.set("lat", currentCoordinates.lat.toString());
           url.searchParams.set("lng", currentCoordinates.lng.toString());
-        } catch (geoError) {
+        } catch (_geoError) {
           console.warn(
             "Geolocation not available or denied, using default location (Warsaw)",
           );
@@ -90,7 +90,7 @@ export function useDashboardData(
     } finally {
       setIsLoading(false);
     }
-  }, [userId, locationId]);
+  }, []);
 
   useEffect(() => {
     fetchDashboard();

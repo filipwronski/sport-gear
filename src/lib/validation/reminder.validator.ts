@@ -1,9 +1,4 @@
-import type {
-  CreateReminderCommand,
-  CompleteReminderCommand,
-  GetRemindersParams,
-  ServiceTypeEnum,
-} from "../../types";
+import type { GetRemindersParams, ServiceTypeEnum } from "../../types";
 
 /**
  * Validation result interface

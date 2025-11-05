@@ -35,7 +35,7 @@ const DURATION_OPTIONS = [
 ];
 
 export default function RecommendationFilters({
-  defaultLocationId,
+  defaultLocationId: _defaultLocationId,
   onFiltersChange,
   isLoading = false,
 }: RecommendationFiltersProps) {

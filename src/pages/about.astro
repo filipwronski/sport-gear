@@ -335,7 +335,11 @@ import Layout from "../layouts/Layout.astro";
         size="lg"
         variant="secondary"
         className="text-lg px-8 py-3"
-        onClick={() => (window.location.href = "/auth")}
+        onClick={() => {
+          if (typeof window !== "undefined") {
+            window.location.href = "/auth";
+          }
+        }}
       >
         Rozpocznij przygodę
       </Button>

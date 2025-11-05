@@ -1,4 +1,3 @@
-import type { APIContext } from "astro";
 import { ZodError } from "zod";
 import { ApiError } from "./index";
 

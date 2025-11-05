@@ -54,7 +54,7 @@ export default function RecommendationsTabs({
               onDaySelect={(date) => {
                 // Switch to current tab with selected date
                 // This would need URL state management for full implementation
-                console.log("Selected date:", date);
+                console.info("Selected date:", date);
                 setActiveTab("current");
               }}
             />
@@ -66,7 +66,7 @@ export default function RecommendationsTabs({
             <OutfitHistory
               onOutfitClick={(outfit) => {
                 // Handle outfit click - could open detailed view
-                console.log("Clicked outfit:", outfit);
+                console.info("Clicked outfit:", outfit);
               }}
             />
           </TabsContent>

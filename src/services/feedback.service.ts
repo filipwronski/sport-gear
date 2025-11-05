@@ -6,7 +6,7 @@ import type {
   CreateFeedbackCommand,
   GetFeedbacksParams,
 } from "../types";
-import { DatabaseError, NotFoundError, ValidationError } from "../lib/errors";
+import { DatabaseError, NotFoundError } from "../lib/errors";
 import { ProfileService } from "./ProfileService";
 
 /**

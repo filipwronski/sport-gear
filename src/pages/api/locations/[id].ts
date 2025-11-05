@@ -49,7 +49,7 @@ export const PUT: APIRoute = async ({ locals, params, request }) => {
     let body;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch (_e) {
       return createErrorResponse(
         "BAD_REQUEST",
         "Invalid JSON in request body",

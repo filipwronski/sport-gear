@@ -1,11 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { BikeDTO, CreateBikeCommand } from "../../../types";
-import type {
-  BikeFilters,
-  SortOption,
-  UseBikeListReturn,
-  BikeCardDisplayData,
-} from "../types";
+import type { BikeFilters, SortOption, UseBikeListReturn } from "../types";
 import { filterBikes, sortBikes, transformBikeToDisplayData } from "../utils";
 import { fetchBikes, createBike } from "../../../lib/api/bikes";
 import { useToast } from "../../auth/useToast";
@@ -48,7 +43,7 @@ export const useBikeList = (_userId: string): UseBikeListReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, []);
 
   // Initial fetch
   useEffect(() => {

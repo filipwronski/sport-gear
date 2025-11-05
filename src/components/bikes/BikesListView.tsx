@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Plus, Bike } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -21,11 +21,7 @@ export default function BikesListView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    fetchBikes();
-  }, []);
-
-  const fetchBikes = async () => {
+  const fetchBikes = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -54,7 +50,11 @@ export default function BikesListView() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchBikes();
+  }, [fetchBikes]);
 
   const handleAddBike = () => {
     setIsAddDialogOpen(true);

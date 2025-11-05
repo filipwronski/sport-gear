@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { formatISO } from "date-fns";
 import { useDebouncedCallback } from "use-debounce";
 import type {
@@ -31,7 +31,7 @@ export function useRecommendation(defaultLocationId?: string) {
   // Fetch recommendation (debounced 500ms)
   const fetchRecommendation = useDebouncedCallback(
     async (filters: RecommendationFiltersViewModel) => {
-      console.log(
+      console.info(
         "useRecommendation: fetchRecommendation called with filters:",
         filters,
       );
@@ -62,19 +62,19 @@ export function useRecommendation(defaultLocationId?: string) {
 
             params.lat = position.coords.latitude.toString();
             params.lng = position.coords.longitude.toString();
-            console.log(
+            console.info(
               "useRecommendation: Got coordinates from geolocation:",
               params.lat,
               params.lng,
             );
-          } catch (geoError) {
+          } catch (_geoError) {
             console.warn(
               "Geolocation not available, using default location (Warsaw)",
             );
             // Fallback to Warsaw coordinates
             params.lat = "52.237049";
             params.lng = "21.017532";
-            console.log(
+            console.info(
               "useRecommendation: Using fallback coordinates:",
               params.lat,
               params.lng,
@@ -87,7 +87,7 @@ export function useRecommendation(defaultLocationId?: string) {
           // Fallback to Warsaw coordinates
           params.lat = "52.237049";
           params.lng = "21.017532";
-          console.log(
+          console.info(
             "useRecommendation: Using fallback coordinates:",
             params.lat,
             params.lng,
@@ -101,7 +101,7 @@ export function useRecommendation(defaultLocationId?: string) {
         }
 
         const queryString = new URLSearchParams(params).toString();
-        console.log("useRecommendation: Calling API with params:", params);
+        console.info("useRecommendation: Calling API with params:", params);
         const response = await fetch(`/api/recommendations?${queryString}`);
 
         if (!response.ok) {
@@ -184,7 +184,7 @@ export function useRecommendation(defaultLocationId?: string) {
         aiTips: tips,
         isLoadingAiTips: false,
       }));
-    } catch (error) {
+    } catch (_error) {
       setState((prev) => ({ ...prev, isLoadingAiTips: false }));
     }
   }, [state.rateLimitedUntil, state.recommendation?.weather]);
@@ -196,21 +196,21 @@ export function useRecommendation(defaultLocationId?: string) {
       setState((prev) => ({ ...prev, filters: newFilters }));
       fetchRecommendation(newFilters);
     },
-    [state.filters], // Remove fetchRecommendation from dependencies to avoid infinite loop
+    [state.filters, fetchRecommendation],
   );
 
   // Initialize recommendation (for direct calling without filters)
   const initializeRecommendation = useCallback(() => {
-    console.log(
+    console.info(
       "initializeRecommendation: Calling fetchRecommendation with default filters",
     );
     fetchRecommendation(state.filters);
-  }, [state.filters]);
+  }, [state.filters, fetchRecommendation]);
 
   // Refetch current recommendation
   const refetch = useCallback(() => {
     fetchRecommendation(state.filters);
-  }, [state.filters]); // Remove fetchRecommendation from dependencies to avoid infinite loop
+  }, [state.filters, fetchRecommendation]);
 
   return {
     ...state,

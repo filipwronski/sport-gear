@@ -4,7 +4,7 @@ import type { APIRoute } from "astro";
  * POST /api/auth/logout
  * Logs out the user by clearing authentication cookies
  */
-export const POST: APIRoute = async (context) => {
+export const POST: APIRoute = async (_context) => {
   try {
     // Create response
     const response = new Response(JSON.stringify({ success: true }), {

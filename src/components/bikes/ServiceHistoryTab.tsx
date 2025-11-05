@@ -13,7 +13,7 @@ import { ServiceCards } from "./ServiceCards";
 import { AddServiceModal } from "./AddServiceModal";
 import { useServiceHistory } from "./hooks/useServiceHistory";
 import { toast } from "sonner";
-import type { GetServicesParams, ServiceRecordDTO } from "../../types";
+import type { GetServicesParams } from "../../types";
 
 interface ServiceHistoryTabProps {
   bikeId: string;
@@ -111,7 +111,7 @@ export function ServiceHistoryTab({
     }
   };
 
-  const handleEdit = () => {
+  const _handleEdit = () => {
     // TODO: Open edit modal
     toast.info("Edit functionality will be implemented");
   };

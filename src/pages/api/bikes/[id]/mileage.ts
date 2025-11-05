@@ -27,8 +27,28 @@ const bikeService = new BikeService();
  */
 export const PATCH: APIRoute = async ({ params, request, locals }) => {
   try {
-    const userId = locals.userId!;
-    const bikeId = params.id!;
+    if (!locals.userId) {
+      return new Response(
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "User not authenticated",
+        }),
+        { status: 401 },
+      );
+    }
+
+    if (!params.id) {
+      return new Response(
+        JSON.stringify({
+          error: "Bad request",
+          message: "Bike ID is required",
+        }),
+        { status: 400 },
+      );
+    }
+
+    const userId = locals.userId;
+    const bikeId = params.id;
 
     // Validate bike ID format
     const bikeIdValidation = BikeIdSchema.safeParse(bikeId);
@@ -83,7 +103,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Log successful mileage update
-    console.log("[BikeAPI] Mileage updated", {
+    console.info("[BikeAPI] Mileage updated", {
       bikeId: result.id,
       userId,
       newMileage: result.current_mileage,

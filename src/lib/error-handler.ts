@@ -1,15 +1,4 @@
-import { z } from "zod";
-import {
-  ApiError as CustomApiError,
-  BikeNotFoundError,
-  ServiceNotFoundError,
-  InvalidUuidError,
-  InvalidEnumValueError,
-  MileageLowerThanPreviousError,
-  DateInFutureError,
-  InvalidDateRangeError,
-  CannotDeleteServiceError,
-} from "./errors/index.js";
+import { ApiError as CustomApiError } from "./errors/index.js";
 
 /**
  * Centralized error handling for API endpoints

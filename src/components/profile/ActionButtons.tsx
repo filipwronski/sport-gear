@@ -9,7 +9,7 @@ interface ActionButtonsProps {
 }
 
 export function ActionButtons({
-  onExportData,
+  onExportData: _onExportData,
   onDeleteAccount,
   isDeleting = false,
 }: ActionButtonsProps) {

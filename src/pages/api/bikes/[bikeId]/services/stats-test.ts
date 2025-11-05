@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 /**
  * GET /api/bikes/{bikeId}/services/stats-test - Simple stats test
  */
-export const GET: APIRoute = async ({ request, locals, params }) => {
+export const GET: APIRoute = async ({ request: _request, locals, params }) => {
   return new Response(
     JSON.stringify({
       message: "Stats endpoint works",

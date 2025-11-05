@@ -222,7 +222,7 @@ describe("Community Service", () => {
 
     it("should return community outfits successfully", async () => {
       // Mock main query
-      mockSupabase.rpc.mockImplementation((functionName, params) => {
+      mockSupabase.rpc.mockImplementation((functionName, _params) => {
         if (functionName === "extract_coordinates") {
           return Promise.resolve({ data: mockLocation, error: null });
         }

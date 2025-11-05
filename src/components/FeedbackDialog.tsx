@@ -26,7 +26,6 @@ import type {
   CreateFeedbackCommand,
   OutfitDTO,
   ZoneRatings,
-  ActivityTypeEnum,
 } from "../types";
 
 /**
@@ -111,13 +110,7 @@ function ZoneRatingsInput({
 }
 
 // Simple outfit editor for when user didn't follow recommendation
-function OutfitEditor({
-  outfit,
-  onChange,
-}: {
-  outfit: OutfitDTO;
-  onChange: (outfit: OutfitDTO) => void;
-}) {
+function OutfitEditor() {
   // This is a simplified version - in a real app you'd have proper selectors
   // For now, just return the outfit as-is
   return (
@@ -274,7 +267,7 @@ export default function FeedbackDialog({
               <Label className="text-sm font-medium">
                 Edytuj faktycznie użyte ubranie
               </Label>
-              <OutfitEditor outfit={actualOutfit} onChange={setActualOutfit} />
+              <OutfitEditor />
             </div>
           )}
 

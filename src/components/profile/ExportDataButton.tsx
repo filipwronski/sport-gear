@@ -4,7 +4,7 @@ import { Download, Loader2 } from "lucide-react";
 import { useExport } from "./hooks";
 
 export function ExportDataButton() {
-  const { isExporting, error, exportData } = useExport();
+  const { isExporting, error: _error, exportData } = useExport();
 
   const handleExport = async () => {
     try {

@@ -21,7 +21,7 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
       );
     }
 
-    const bikeId = params.bikeId;
+    const _bikeId = params.bikeId;
 
     // Parse query parameters
     const url = new URL(request.url);

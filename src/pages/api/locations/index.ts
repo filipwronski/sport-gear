@@ -85,7 +85,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     let body;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch (_e) {
       return createErrorResponse(
         "BAD_REQUEST",
         "Invalid JSON in request body",

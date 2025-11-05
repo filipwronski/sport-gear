@@ -63,16 +63,15 @@ interface HistoryFiltersProps {
 }
 
 function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
-  const handleTemperatureChange = (value: number[]) => {
+  const handleTemperatureChange = (_value: number[]) => {
     // Note: Temperature filtering is done client-side since API doesn't support it
     // We'll store the values in the local filters state but not pass to API
   };
 
-  const handleSeasonChange = (season: string) => {
+  const handleSeasonChange = (_season: string) => {
     // Note: Season filtering is done client-side since API doesn't support date ranges
     // We'll store the season in local filters but not pass date ranges to API
     // "all" means no filter (undefined)
-    const seasonValue = season === "all" ? undefined : season;
     // For now, just store in local state (client-side filtering not implemented)
   };
 

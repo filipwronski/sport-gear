@@ -2,7 +2,7 @@
  * Ultra minimal ServiceRecordService for testing
  */
 export class ServiceRecordService {
-  async getServicesByBikeId(userId: string, bikeId: string, params: any) {
+  async getServicesByBikeId(_userId: string, _bikeId: string, _params: any) {
     // Mock response without database call
     return {
       services: [],

@@ -7,17 +7,10 @@
  */
 
 import type { APIRoute } from "astro";
-import { z } from "zod";
-import type {
-  RecommendationDTO,
-  NewRecommendationDTO,
-  GetRecommendationParams,
-} from "../../types";
+import type { RecommendationDTO } from "../../types";
 import { GetRecommendationsSchema } from "../../lib/validation/recommendations.schemas";
-import { GetNewRecommendationsSchema } from "../../lib/validation/recommendations.schemas";
 import { RecommendationWeatherService } from "../../services/weather/recommendation-weather.service";
 import { RecommendationService } from "../../services/recommendations/recommendation.service";
-import { NewRecommendationService } from "../../services/recommendations/new-recommendation.service";
 import { supabaseClient } from "../../db/supabase.client";
 import { supabaseServiceClient } from "../../db/supabase.admin.client";
 import { createErrorResponse } from "../../lib/error-handler";
@@ -25,7 +18,6 @@ import {
   ValidationError,
   NotFoundError,
   ServiceUnavailableError,
-  InternalServerError,
 } from "../../lib/errors";
 
 export const GET: APIRoute = async ({ request, locals }) => {
@@ -153,27 +145,6 @@ export const GET: APIRoute = async ({ request, locals }) => {
     });
   }
 };
-
-/**
- * Verify that location belongs to authenticated user
- * Uses service client for development/testing
- */
-async function verifyLocationOwnership(
-  locationId: string,
-  userId: string,
-): Promise<boolean> {
-  // Use service client in development to bypass RLS issues
-  const client = import.meta.env.DEV ? supabaseServiceClient : supabaseClient;
-
-  const { data, error } = await client
-    .from("user_locations")
-    .select("id")
-    .eq("id", locationId)
-    .eq("user_id", userId)
-    .single();
-
-  return !error && !!data;
-}
 
 /**
  * Get user profile with thermal preferences

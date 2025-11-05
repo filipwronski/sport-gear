@@ -15,7 +15,9 @@ export const BikeGrid = ({
   isLoading,
   onBikeClick,
   hasActiveFilters = false,
-  onAddBikeClick = () => {},
+  onAddBikeClick = () => {
+    // Default no-op handler - can be overridden by parent component
+  },
 }: BikeGridProps) => {
   if (bikes.length === 0 && !isLoading) {
     return (

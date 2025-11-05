@@ -5,14 +5,6 @@
  * and properly configured at application startup.
  */
 
-interface EnvConfig {
-  PUBLIC_SUPABASE_URL: string;
-  PUBLIC_SUPABASE_ANON_KEY: string;
-  SUPABASE_SERVICE_ROLE_KEY?: string;
-  OPENWEATHER_API_KEY?: string;
-  OPENROUTER_API_KEY?: string;
-}
-
 interface ValidationResult {
   isValid: boolean;
   errors: string[];
@@ -112,7 +104,7 @@ function isValidSupabaseKey(key: string): boolean {
  */
 export function logEnvironmentValidation(result: ValidationResult): void {
   if (result.isValid) {
-    console.log("✅ Environment variables validation passed");
+    console.info("✅ Environment variables validation passed");
 
     if (result.warnings.length > 0) {
       console.warn("⚠️  Environment warnings:");

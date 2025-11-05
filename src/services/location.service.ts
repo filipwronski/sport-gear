@@ -1,10 +1,10 @@
 import { supabaseClient } from "../db/supabase.client";
 import { supabaseServiceClient } from "../db/supabase.admin.client";
+import type { Database } from "../db/database.types";
 import type {
   LocationDTO,
   CreateLocationCommand,
   UpdateLocationCommand,
-  Database,
 } from "../types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { ConflictError, NotFoundError } from "../lib/errors";
@@ -45,19 +45,19 @@ export class LocationService {
       query = query.eq("is_default", true);
     }
 
-    let { data, error } = await query.order("created_at", {
-      ascending: false,
-    });
+    const queryResult = await query.order("created_at", { ascending: false });
+    let data = queryResult.data;
+    const error = queryResult.error;
 
     // If RLS blocks access (error or returns empty), try service client as fallback
     if (error || !data || data.length === 0) {
       if (error) {
-        console.log(
+        console.info(
           `[LocationService] RLS error, trying service client fallback:`,
           error.message,
         );
       } else {
-        console.log(
+        console.info(
           `[LocationService] RLS returned no locations, trying service client fallback`,
         );
       }
@@ -91,7 +91,7 @@ export class LocationService {
 
     // Extract coordinates for each location using RPC function
     const locationsWithCoordinates = await Promise.all(
-      data.map(async (row) => {
+      (data as LocationRow[]).map(async (row) => {
         try {
           const { data: coords, error: coordsError } = await supabaseClient.rpc(
             "get_location_coordinates",
@@ -154,7 +154,8 @@ export class LocationService {
 
     if (!checkError && existingLocations && existingLocations.length > 0) {
       // Fetch the actual existing location from database
-      const existingId = existingLocations[0].id;
+      const existingId = (existingLocations as unknown as { id: string }[])[0]
+        .id;
 
       const { data: existingLocation, error: fetchError } = await supabaseClient
         .from("user_locations")
@@ -539,7 +540,12 @@ export class LocationService {
     }
 
     // Find target location
-    const targetLocation = userLocations.find((loc) => loc.id === locationId);
+    const targetLocation = (
+      userLocations as unknown as {
+        id: string;
+        is_default: boolean;
+      }[]
+    ).find((loc) => loc.id === locationId);
 
     if (!targetLocation) {
       throw new NotFoundError("Location not found or access denied");

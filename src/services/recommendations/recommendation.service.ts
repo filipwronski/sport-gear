@@ -70,7 +70,7 @@ export class RecommendationService {
   private calculateHead(
     temp: number,
     wind: number,
-    prefs: ThermalPreferences | null,
+    _prefs: ThermalPreferences | null,
   ): string {
     for (const rule of rules.HEAD_RULES) {
       if (temp <= rule.maxTemp) {

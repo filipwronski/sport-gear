@@ -1,7 +1,6 @@
 import { MessageSquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { RecommendationDTO } from "../types";
 
 /**
  * AddFeedbackCTA - Call-to-action component for adding feedback

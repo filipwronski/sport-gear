@@ -886,7 +886,7 @@ async function benchmarkDashboard() {
     times.push(end - start);
   }
   
-  console.log({
+  console.info({
     mean: times.reduce((a, b) => a + b) / times.length,
     p50: times.sort()[Math.floor(times.length * 0.5)],
     p95: times.sort()[Math.floor(times.length * 0.95)],

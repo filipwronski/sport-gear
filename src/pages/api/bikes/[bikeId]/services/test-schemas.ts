@@ -1,11 +1,10 @@
 import type { APIRoute } from "astro";
-import { z } from "zod";
 import { bikeIdParamSchema } from "../../../../../lib/validation/service.schemas";
 
 /**
  * GET /api/bikes/{bikeId}/services - Test with service schemas
  */
-export const GET: APIRoute = async ({ request, locals, params }) => {
+export const GET: APIRoute = async ({ request: _request, locals, params }) => {
   try {
     // Check authentication
     if (!locals.userId) {
@@ -51,12 +50,12 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
         },
       },
     );
-  } catch (error) {
-    console.error("Service endpoint error:", error);
+  } catch (_error) {
+    console.error("Service endpoint error:", _error);
     return new Response(
       JSON.stringify({
         error: "Internal server error",
-        message: String(error),
+        message: String(_error),
       }),
       {
         status: 500,

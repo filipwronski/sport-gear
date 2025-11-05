@@ -79,7 +79,6 @@ export class DashboardService {
         personalization_status: personalizationStatus,
       };
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Dashboard aggregation error:", error);
       throw error; // Re-throw to be handled by route handler
     }
@@ -95,7 +94,7 @@ export class DashboardService {
     try {
       if (!coordinates) {
         // No coordinates provided - return placeholder data
-        console.log("No coordinates provided for weather data");
+        console.info("No coordinates provided for weather data");
         return {
           location_id: "",
           current_temperature: 15,
@@ -116,7 +115,6 @@ export class DashboardService {
       // Outfit recommendation will be fetched on client-side by the component
       return weatherSummary;
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Weather service error in dashboard:", error);
 
       // Provide fallback weather data to prevent dashboard failure
@@ -142,7 +140,6 @@ export class DashboardService {
     try {
       return await this.bikeService.getEquipmentStatus(userId);
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Equipment service error in dashboard:", error);
       throw new EquipmentServiceError("Failed to fetch equipment status");
     }
@@ -159,7 +156,7 @@ export class DashboardService {
     try {
       if (!locationId) {
         // No location set - return zero community activity
-        console.log("No location set for community activity");
+        console.info("No location set for community activity");
         return {
           recent_outfits_count: 0,
           similar_conditions_count: 0,
@@ -168,7 +165,6 @@ export class DashboardService {
 
       return await getCommunityActivity(locationId, userId);
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Community service error in dashboard:", error);
 
       // Graceful fallback - community data is not critical
@@ -189,7 +185,6 @@ export class DashboardService {
     try {
       return await this.profileService.getPersonalizationStatus(userId);
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error("Personalization service error in dashboard:", error);
 
       // Provide fallback personalization data

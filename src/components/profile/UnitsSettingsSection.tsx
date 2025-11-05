@@ -48,7 +48,7 @@ export function UnitsSettingsSection({
     try {
       await onUpdate(value);
       setSelectedUnits(value);
-    } catch (error) {
+    } catch (_error) {
       // Error is handled by parent component
       // Revert local state on error
       setSelectedUnits(units || "metric");

@@ -3,7 +3,6 @@ import { BikeService } from "../../../services/bike.service";
 import {
   UpdateBikeSchema,
   BikeIdSchema,
-  type UpdateBikeInput,
 } from "../../../lib/validation/bike.schemas";
 import {
   handleError,
@@ -130,7 +129,7 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
     }
 
     // Log successful update
-    console.log("[BikeAPI] Bike updated", {
+    console.info("[BikeAPI] Bike updated", {
       bikeId: bike.id,
       userId,
       updatedFields: Object.keys(validated.data),
@@ -186,7 +185,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     await bikeService.deleteBike(userId, bikeId);
 
     // Log successful deletion
-    console.log("[BikeAPI] Bike deleted", {
+    console.info("[BikeAPI] Bike deleted", {
       bikeId,
       userId,
       bikeName: existingBike.name,

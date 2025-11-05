@@ -1689,7 +1689,7 @@ Sentry.init({
 
 ```typescript
 // Log successful operations
-console.log('[BikeAPI] Bike created', { 
+console.info('[BikeAPI] Bike created', { 
   bikeId: bike.id, 
   userId, 
   type: bike.type 

@@ -6,9 +6,6 @@ import {
   ValidationError,
   UnauthorizedError,
   NotFoundError,
-  RateLimitError,
-  ServiceUnavailableError,
-  InternalServerError,
   ApiError,
 } from "../../../lib/errors";
 import {

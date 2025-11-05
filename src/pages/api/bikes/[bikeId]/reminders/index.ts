@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import { createClient } from "@supabase/supabase-js";
 import { BikeReminderService } from "@/services/bike-reminder.service";
 import { ReminderValidator } from "@/lib/validation/reminder.validator";
-import type { CreateReminderCommand, GetRemindersParams } from "@/types";
+import type { CreateReminderCommand } from "@/types";
 
 // Initialize service client (bypasses RLS in development)
 const supabaseServiceClient = createClient(

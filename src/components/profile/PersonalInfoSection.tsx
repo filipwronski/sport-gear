@@ -104,14 +104,14 @@ export function PersonalInfoSection({
 
           if (existingLocation) {
             // City already exists, use its ID
-            console.log(
+            console.info(
               `Using existing location for ${cityName}:`,
               existingLocation.id,
             );
             actualLocationId = existingLocation.id;
           } else {
             // Create new location (without setting as default)
-            console.log(`Creating new location for ${cityName}`);
+            console.info(`Creating new location for ${cityName}`);
             const newLocation = await onCreateLocation({
               latitude: cityData.latitude,
               longitude: cityData.longitude,
@@ -120,7 +120,7 @@ export function PersonalInfoSection({
               is_default: false, // Don't set as default here, will be set via profile update
             });
             actualLocationId = newLocation.id;
-            console.log(`Created new location with ID: ${actualLocationId}`);
+            console.info(`Created new location with ID: ${actualLocationId}`);
           }
         }
       }
@@ -171,7 +171,7 @@ export function PersonalInfoSection({
         const isPendingPolishCity =
           defaultLocationId.startsWith("polish-city-");
         if (!isPendingPolishCity) {
-          console.log("Default location not found, resetting to none");
+          console.info("Default location not found, resetting to none");
           onUpdate({ default_location_id: null });
         }
       }

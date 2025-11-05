@@ -9,7 +9,7 @@ Object.assign(process.env, {
   SUPABASE_KEY: "test-key",
 });
 
-// Mock console.log and console.error for cleaner test output
+// Mock console.info and console.error for cleaner test output
 global.console = {
   ...console,
   log: vi.fn(),

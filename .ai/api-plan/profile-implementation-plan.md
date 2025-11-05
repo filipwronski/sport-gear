@@ -1415,7 +1415,7 @@ export class ProfileService {
    */
   async deleteAccount(userId: string): Promise<void> {
     // Log deletion attempt (audit trail)
-    console.log(`Account deletion requested for user: ${userId}`);
+    console.info(`Account deletion requested for user: ${userId}`);
 
     // Delete profile (CASCADE will handle related records)
     const { error } = await this.supabase

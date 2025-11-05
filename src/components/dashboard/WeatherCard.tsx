@@ -104,7 +104,7 @@ export function WeatherCard({
               }}
               onDaySelect={(date) => {
                 // Could navigate to recommendations with specific date
-                console.log("Selected forecast date:", date);
+                console.info("Selected forecast date:", date);
               }}
             />
           </div>

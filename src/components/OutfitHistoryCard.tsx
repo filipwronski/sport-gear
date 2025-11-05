@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import type { FeedbackDTO } from "../types";
 
@@ -96,7 +95,9 @@ export default function OutfitHistoryCard({
           {/* Notes preview */}
           {outfit.notes && (
             <p className="text-xs text-muted-foreground italic">
-              "{truncateNotes(outfit.notes)}"
+              {'"'}
+              {truncateNotes(outfit.notes)}
+              {'"'}
             </p>
           )}
         </div>

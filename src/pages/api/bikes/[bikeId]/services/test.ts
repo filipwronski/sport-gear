@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 /**
  * GET /api/bikes/{bikeId}/services - Simple test
  */
-export const GET: APIRoute = async ({ request, locals, params }) => {
+export const GET: APIRoute = async ({ request: _request, locals, params }) => {
   try {
     // Check authentication (handled by middleware)
     if (!locals.userId) {

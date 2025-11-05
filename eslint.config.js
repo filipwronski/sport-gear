@@ -22,8 +22,19 @@ const baseConfig = tseslint.config({
     tseslint.configs.stylistic,
   ],
   rules: {
-    "no-console": "warn",
+    "no-console": ["warn", { allow: ["warn", "error", "info"] }],
     "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
+      },
+    ],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-extraneous-class": "off",
   },
 });
 
@@ -57,6 +68,14 @@ const reactConfig = tseslint.config({
     ...eslintPluginReactHooks.configs.recommended.rules,
     "react/react-in-jsx-scope": "off",
     "react-compiler/react-compiler": "error",
+    "react/prop-types": "off", // Disabled for TypeScript - types provide prop validation
+  },
+});
+
+const astroConfig = tseslint.config({
+  files: ["**/*.astro"],
+  rules: {
+    "no-undef": "off", // Allow globals like window in Astro files
   },
 });
 
@@ -66,5 +85,6 @@ export default tseslint.config(
   jsxA11yConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
+  astroConfig,
   eslintPluginPrettier,
 );

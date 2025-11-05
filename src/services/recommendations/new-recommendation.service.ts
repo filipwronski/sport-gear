@@ -156,7 +156,12 @@ export class NewRecommendationService {
   }
 
   private shouldWearHat(input: NewRecommendationInput): boolean {
-    const { temperature, windSpeed, workoutIntensity, workoutDuration } = input;
+    const {
+      temperature,
+      windSpeed: _windSpeed,
+      workoutIntensity,
+      workoutDuration,
+    } = input;
 
     // Always recommend hat when temperature is below 13°C
     if (temperature < 13) return true;

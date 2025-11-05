@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BikeHeader } from "./BikeHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ServiceHistoryTab } from "./ServiceHistoryTab";
@@ -15,11 +15,7 @@ export default function BikeDetailsView({ bikeId }: BikeDetailsViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchBikeDetails();
-  }, [bikeId]);
-
-  const fetchBikeDetails = async () => {
+  const fetchBikeDetails = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -39,7 +35,11 @@ export default function BikeDetailsView({ bikeId }: BikeDetailsViewProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [bikeId]);
+
+  useEffect(() => {
+    fetchBikeDetails();
+  }, [fetchBikeDetails]);
 
   const handleMileageUpdate = (newMileage: number) => {
     if (bike) {

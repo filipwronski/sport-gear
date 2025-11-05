@@ -7,12 +7,8 @@ import { supabaseClient } from "../../db/supabase.client";
 import { supabaseServiceClient } from "../../db/supabase.admin.client";
 import type { WeatherDTO } from "../../types";
 import { OpenWeatherClient } from "./openweather.client";
-import type { Coordinates, WeatherCacheEntry } from "./weather.types";
-import {
-  NotFoundError,
-  ServiceUnavailableError,
-  InternalServerError,
-} from "../../lib/errors";
+import type { Coordinates } from "./weather.types";
+import { NotFoundError } from "../../lib/errors";
 
 const CACHE_TTL = {
   CURRENT: 30 * 60, // 30 minutes
@@ -77,7 +73,7 @@ export class RecommendationWeatherService {
       import.meta.env.DEV &&
       locationId === "94fd4d7a-2fdd-4bd7-949e-4befdcdb7032"
     ) {
-      console.log(
+      console.info(
         "[RecommendationWeatherService] Using hardcoded Warsaw coordinates for demo",
       );
       return {

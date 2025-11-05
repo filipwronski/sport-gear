@@ -14,8 +14,8 @@ interface OutfitRecommendationListProps {
  */
 export default function OutfitRecommendationList({
   recommendation,
-  title = "Zalecane ubranie",
-  expandedZone,
+  title: _title = "Zalecane ubranie",
+  expandedZone: _expandedZone,
 }: OutfitRecommendationListProps) {
   const getClothingLabel = (item: ClothingItem): string => {
     const labels: Record<ClothingItem, string> = {

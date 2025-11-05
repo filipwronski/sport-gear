@@ -3,7 +3,6 @@ import { useDebounce } from "./useDebounce";
 import type {
   CommunityFiltersState,
   CommunityViewState,
-  CommunityOutfitDTO,
   GetCommunityOutfitsParams,
   ActivityTypeEnum,
   ReputationBadgeEnum,
@@ -56,19 +55,19 @@ function parseFiltersFromURL(
         String(DEFAULT_COMMUNITY_FILTERS.radius_km),
     ),
     temperature: searchParams.get("temperature")
-      ? parseFloat(searchParams.get("temperature")!)
+      ? parseFloat(searchParams.get("temperature") || "")
       : undefined,
     temperature_range: parseInt(
       searchParams.get("temperature_range") ||
         String(DEFAULT_COMMUNITY_FILTERS.temperature_range),
     ),
     wind_speed: searchParams.get("wind_speed")
-      ? parseFloat(searchParams.get("wind_speed")!)
+      ? parseFloat(searchParams.get("wind_speed") || "")
       : undefined,
     activity_type:
       (searchParams.get("activity_type") as ActivityTypeEnum) || undefined,
     min_rating: searchParams.get("min_rating")
-      ? parseInt(searchParams.get("min_rating")!)
+      ? parseInt(searchParams.get("min_rating") || "")
       : undefined,
     reputation_filter: searchParams.get("reputation_filter")
       ? (searchParams
@@ -123,7 +122,6 @@ function filtersToApiParams(
     radius_km,
     temperature,
     temperature_range,
-    wind_speed,
     activity_type,
     min_rating,
     reputation_filter,
@@ -138,10 +136,9 @@ function filtersToApiParams(
     radius_km,
     temperature,
     temperature_range,
-    wind_speed,
     activity_type,
     min_rating,
-    reputation_filter,
+    reputation_filter: reputation_filter?.[0], // API expects single value, take first from array
     time_range,
     sort,
     limit,
@@ -337,24 +334,23 @@ export function useCommunityView(
 
   const getActiveFiltersCount = useCallback(() => {
     const {
-      location_id,
-      radius_km,
-      temperature,
-      temperature_range,
-      time_range,
-      sort,
-      limit,
-      offset,
+      location_id: _location_id,
+      radius_km: _radius_km,
+      temperature: _temperature,
+      temperature_range: _temperature_range,
+      time_range: _time_range,
+      sort: _sort,
+      limit: _limit,
+      offset: _offset,
       ...filters
     } = state.filters;
 
-    return Object.values(filters).filter(
-      (value) =>
-        value !== undefined &&
-        value !== null &&
-        value !== "" &&
-        !(Array.isArray(value) && value.length === 0),
-    ).length;
+    return Object.values(filters).filter((value) => {
+      if (value === undefined || value === null) return false;
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === "string") return (value as string) !== "";
+      return true;
+    }).length;
   }, [state.filters]);
 
   return {

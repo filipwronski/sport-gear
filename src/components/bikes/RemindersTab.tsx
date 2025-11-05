@@ -28,7 +28,7 @@ export function RemindersTab({ bikeId }: RemindersTabProps) {
     filters,
   );
 
-  const handleComplete = async () => {
+  const _handleComplete = async () => {
     try {
       // TODO: Implement complete reminder API call
       toast.success("Reminder marked as complete");

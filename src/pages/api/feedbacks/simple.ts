@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request: _request }) => {
   try {
     // Simple response without any imports
     return new Response(
@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ request }) => {
         headers: { "Content-Type": "application/json" },
       },
     );
-  } catch (error) {
+  } catch (_error) {
     return new Response(JSON.stringify({ error: "Internal error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

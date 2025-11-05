@@ -1,28 +1,6 @@
-import type { Database } from "./db/database.types";
-
 // ============================================================================
 // Database Table Types - Shortcuts
 // ============================================================================
-
-type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
-type ProfileInsert = Database["public"]["Tables"]["profiles"]["Insert"];
-type LocationRow = Database["public"]["Tables"]["user_locations"]["Row"];
-type LocationInsert = Database["public"]["Tables"]["user_locations"]["Insert"];
-type BikeRow = Database["public"]["Tables"]["bikes"]["Row"];
-type BikeInsert = Database["public"]["Tables"]["bikes"]["Insert"];
-type ServiceRecordRow = Database["public"]["Tables"]["service_records"]["Row"];
-type ServiceRecordInsert =
-  Database["public"]["Tables"]["service_records"]["Insert"];
-type ServiceReminderRow =
-  Database["public"]["Tables"]["service_reminders"]["Row"];
-type ServiceReminderInsert =
-  Database["public"]["Tables"]["service_reminders"]["Insert"];
-type FeedbackRow = Database["public"]["Tables"]["outfit_feedbacks"]["Row"];
-type FeedbackInsert =
-  Database["public"]["Tables"]["outfit_feedbacks"]["Insert"];
-type SharedOutfitRow = Database["public"]["Tables"]["shared_outfits"]["Row"];
-type DefaultIntervalRow =
-  Database["public"]["Tables"]["default_service_intervals"]["Row"];
 
 // ============================================================================
 // Enums

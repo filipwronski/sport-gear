@@ -1,6 +1,5 @@
-import { supabaseClient } from "../db/supabase.client";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { ForecastDTO, ForecastDayDTO, LocationDTO } from "../types";
+import type { ForecastDTO, ForecastDayDTO } from "../types";
 import {
   NotFoundError,
   ServiceUnavailableError,
@@ -29,17 +28,6 @@ interface OpenWeatherForecastResponse {
       description: string;
     }[];
   }[];
-}
-
-/**
- * Weather cache row structure from weather_cache table
- */
-interface WeatherCacheRow {
-  id: string;
-  location_key: string;
-  forecast_data: ForecastDTO | null;
-  expires_at: string; // ISO timestamp
-  updated_at: string;
 }
 
 /**

@@ -9,7 +9,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Shield } from "lucide-react";
-import type { UpdateProfileCommand } from "../../types";
 
 interface PrivacySettingsSectionProps {
   shareWithCommunity: boolean | null;
@@ -33,7 +32,7 @@ export function PrivacySettingsSection({
     try {
       await onUpdate(checked);
       setShareEnabled(checked);
-    } catch (error) {
+    } catch (_error) {
       // Error is handled by parent component
       // Revert local state on error
       setShareEnabled(!checked);

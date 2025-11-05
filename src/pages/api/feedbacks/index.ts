@@ -2,11 +2,7 @@ import type { APIRoute } from "astro";
 import { FeedbackService } from "../../../services/feedback.service";
 import { FeedbackValidator } from "../../../lib/validation/feedback.validator";
 import { supabaseServiceClient } from "../../../db/supabase.admin.client";
-import {
-  ValidationError,
-  NotFoundError,
-  DatabaseError,
-} from "../../../lib/errors";
+import { ValidationError, NotFoundError } from "../../../lib/errors";
 import type { FeedbacksListDTO, FeedbackDTO } from "../../../types";
 
 /**

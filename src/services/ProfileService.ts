@@ -13,17 +13,10 @@ import type {
   CommunityOutfitDTO,
   ThermalPreferences,
   ReputationBadgeEnum,
-  Coordinates,
 } from "../types";
-import { NotFoundErrorWithStatus, InternalServerError } from "../lib/errors";
+import { InternalServerError } from "../lib/errors";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
-type LocationRow = Database["public"]["Tables"]["user_locations"]["Row"];
-type BikeRow = Database["public"]["Tables"]["bikes"]["Row"];
-type ServiceRecordRow = Database["public"]["Tables"]["service_records"]["Row"];
-type ServiceReminderRow =
-  Database["public"]["Tables"]["service_reminders"]["Row"];
-type FeedbackRow = Database["public"]["Tables"]["outfit_feedbacks"]["Row"];
 
 /**
  * ProfileService - Business logic layer for user profile management
@@ -60,7 +53,7 @@ export class ProfileService {
 
     if (serviceError && serviceError.code === "PGRST116") {
       // Profile doesn't exist, create it automatically
-      console.log(
+      console.info(
         `Profile not found for user: ${userId}, creating new profile`,
       );
       return await this.createProfile(userId);
@@ -76,7 +69,7 @@ export class ProfileService {
     if (error) {
       if (error.code === "PGRST116") {
         // Profile doesn't exist, create it automatically
-        console.log(
+        console.info(
           `Profile not found for user: ${userId}, creating new profile`,
         );
         return await this.createProfile(userId);
@@ -123,7 +116,7 @@ export class ProfileService {
     if (error) {
       // If duplicate key error, the profile was created by another request
       if (error.code === "23505") {
-        console.log(
+        console.info(
           `Profile already exists for user: ${userId}, fetching existing profile`,
         );
         // Try to fetch the existing profile
@@ -267,7 +260,7 @@ export class ProfileService {
    */
   async deleteAccount(userId: string): Promise<void> {
     // Log deletion attempt (audit trail)
-    console.log(`Account deletion requested for user: ${userId}`);
+    console.info(`Account deletion requested for user: ${userId}`);
 
     // Delete profile (CASCADE will handle related records)
     const { error } = await supabaseClient
@@ -281,7 +274,7 @@ export class ProfileService {
     }
 
     // Note: shared_outfits with pseudonym will remain (anonymized)
-    console.log(`Account deleted successfully for user: ${userId}`);
+    console.info(`Account deleted successfully for user: ${userId}`);
   }
 
   // ========================================
@@ -543,7 +536,7 @@ export class ProfileService {
    * Get all shared outfits for user
    */
   private async getSharedOutfits(
-    userId: string,
+    _userId: string,
   ): Promise<CommunityOutfitDTO[]> {
     // This would need to query a view or join multiple tables
     // For now, return empty array as it's complex to implement without the view
@@ -604,12 +597,12 @@ export class ProfileService {
       }
 
       if (existingProfile) {
-        console.log(`Profile already exists for user: ${userId}`);
+        console.info(`Profile already exists for user: ${userId}`);
         return; // Profile exists
       }
 
       // Profile doesn't exist, create it
-      console.log(`Creating profile for user: ${userId}`);
+      console.info(`Creating profile for user: ${userId}`);
 
       // Create profile with default values (service role can create without RLS restrictions)
       const { error: createError } = await serviceClient
@@ -642,12 +635,12 @@ export class ProfileService {
             fallbackError,
           );
         } else {
-          console.log(
+          console.info(
             `Profile created successfully for user: ${userId} (fallback)`,
           );
         }
       } else {
-        console.log(`Profile created successfully for user: ${userId}`);
+        console.info(`Profile created successfully for user: ${userId}`);
       }
     } catch (error) {
       console.error("Error in ensureProfileExists:", error);

@@ -4,7 +4,6 @@ import {
   CommunityValidationError,
   isValidUUID,
 } from "../../lib/validation/community.schemas";
-import type { GetCommunityOutfitsParams } from "../../types";
 
 describe("Community Validation Schemas", () => {
   describe("validateGetCommunityOutfitsParams", () => {

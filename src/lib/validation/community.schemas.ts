@@ -1,9 +1,5 @@
 import { z } from "zod";
-import type {
-  ActivityTypeEnum,
-  ReputationBadgeEnum,
-  GetCommunityOutfitsParams,
-} from "../../types";
+import type { GetCommunityOutfitsParams } from "../../types";
 
 /**
  * Zod schemas for community outfits endpoint validation

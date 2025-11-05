@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 export const GET: APIRoute = async ({ locals }) => {
   try {
     // Sprawdź czy są jacyś prawdziwi użytkownicy w systemie
-    const { data: profiles, error } = await locals.supabase
+    const { data: profiles, error: _error } = await locals.supabase
       .from("profiles")
       .select("id, display_name")
       .limit(1);
@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ locals }) => {
       const realUserId = profiles[0].id;
 
       // Przetestuj API z prawdziwym userem (tymczasowo)
-      const testUserId = realUserId;
+      const _testUserId = realUserId;
 
       return new Response(
         JSON.stringify({

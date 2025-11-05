@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
  * GET /api/bikes/{bikeId}/reminders-simple
  * Fetch reminders for a specific bike (simplified version)
  */
-export const GET: APIRoute = async ({ request, locals, params }) => {
+export const GET: APIRoute = async ({ request: _request, locals, params }) => {
   try {
     // Check authentication
     if (!locals.userId) {

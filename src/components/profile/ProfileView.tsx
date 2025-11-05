@@ -159,7 +159,7 @@ export function ProfileView({
         title: "Eksport zakończony",
         description: "Plik JSON został pobrany na Twoje urządzenie.",
       });
-    } catch (error) {
+    } catch (_error) {
       showToast({
         type: "error",
         title: "Błąd eksportu",

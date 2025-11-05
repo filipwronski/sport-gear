@@ -4,12 +4,10 @@ import { ServiceRecordService } from "../../../../../services/service-record.ser
 import {
   updateServiceSchema,
   bikeServiceParamsSchema,
-  type UpdateServiceCommand,
 } from "../../../../../lib/validation/service.schemas";
 import { handleError } from "../../../../../lib/error-handler";
 import {
   InvalidUuidError,
-  ServiceNotFoundError,
   UnauthorizedErrorWithStatus,
 } from "../../../../../lib/errors/index";
 
@@ -33,7 +31,7 @@ import {
  *
  * Returns: ServiceRecordDTO of updated service
  */
-export const PUT: APIRoute = async ({ request, locals, params }) => {
+export const PUT: APIRoute = async ({ request: _request, locals, params }) => {
   try {
     // Check authentication (handled by middleware)
     if (!locals.userId) {
@@ -63,7 +61,7 @@ export const PUT: APIRoute = async ({ request, locals, params }) => {
     let requestBody;
     try {
       requestBody = await request.json();
-    } catch (error) {
+    } catch (_error) {
       throw new z.ZodError([
         {
           code: "invalid_type",
@@ -127,7 +125,11 @@ export const PUT: APIRoute = async ({ request, locals, params }) => {
  *
  * Returns: 204 No Content on successful deletion
  */
-export const DELETE: APIRoute = async ({ request, locals, params }) => {
+export const DELETE: APIRoute = async ({
+  request: _request,
+  locals,
+  params,
+}) => {
   try {
     // Check authentication (handled by middleware)
     if (!locals.userId) {

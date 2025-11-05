@@ -23,10 +23,10 @@ if (!envValidated) {
 
     // In development, show current config for debugging
     if (import.meta.env.DEV) {
-      console.log("📊 Current environment configuration:");
+      console.info("📊 Current environment configuration:");
       const envInfo = getEnvironmentInfo();
       Object.entries(envInfo).forEach(([key, value]) => {
-        console.log(`   ${key}: ${value}`);
+        console.info(`   ${key}: ${value}`);
       });
     }
 
@@ -56,8 +56,8 @@ if (!envValidated) {
  * For other routes:
  * - Only injects Supabase client
  */
-export const onRequest = defineMiddleware(async (context, next) => {
-  const { request, locals, url } = context;
+export const onRequest = defineMiddleware(async (_context, next) => {
+  const { request, locals, url } = _context;
 
   // Always inject Supabase client
   locals.supabase = supabaseClient;
@@ -142,7 +142,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       const refreshToken = refreshTokenMatch?.[1];
 
       if (refreshToken) {
-        console.log("[Middleware] Access token expired, attempting refresh");
+        console.info("[Middleware] Access token expired, attempting refresh");
         const { data: refreshData, error: refreshError } =
           await supabaseClient.auth.refreshSession({
             refresh_token: refreshToken,

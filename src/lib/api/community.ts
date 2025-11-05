@@ -24,12 +24,13 @@ export class CommunityApiError extends Error {
  */
 export function handleCommunityApiError(error: CommunityApiError): string {
   switch (error.status) {
-    case 400:
+    case 400: {
       // Validation error - display details
       const details = Object.entries(error.body.error.details || {})
         .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
         .join("; ");
       return `Błąd walidacji: ${details}`;
+    }
 
     case 401:
       // Unauthorized - redirect to login

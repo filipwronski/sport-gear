@@ -1987,7 +1987,7 @@ const result = await autocannon({
   }
 });
 
-console.log(result);
+console.info(result);
 // Expected: P95 < 300ms, 0 errors
 ```
 

@@ -6,7 +6,6 @@ import type {
   FeedbackDTO,
   ApiError,
   OutfitDTO,
-  ZoneRatings,
 } from "../types";
 
 /**

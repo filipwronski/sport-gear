@@ -1,7 +1,6 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseClient } from "../../../../../db/supabase.client";
-import { z } from "zod";
 import { ServiceRecordService } from "../../../../../services/service-record-working.service";
 import {
   getServicesParamsSchema,
@@ -187,7 +186,7 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
     let requestBody;
     try {
       requestBody = await request.json();
-    } catch (error) {
+    } catch (_error) {
       return new Response(
         JSON.stringify({
           error: {
