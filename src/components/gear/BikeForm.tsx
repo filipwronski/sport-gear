@@ -20,7 +20,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { CreateBikeSchema, type CreateBikeInput } from "../../lib/validation/bike.schemas";
+import {
+  CreateBikeSchema,
+  type CreateBikeInput,
+} from "../../lib/validation/bike.schemas";
 import type { CreateBikeCommand } from "../../types";
 
 interface BikeFormProps {
@@ -148,10 +151,12 @@ export const BikeForm = ({
                 <Input
                   type="date"
                   {...field}
-                  value={field.value ? field.value.split('T')[0] : ''}
+                  value={field.value ? field.value.split("T")[0] : ""}
                   onChange={(e) => {
                     const value = e.target.value;
-                    field.onChange(value ? `${value}T00:00:00.000Z` : undefined);
+                    field.onChange(
+                      value ? `${value}T00:00:00.000Z` : undefined,
+                    );
                   }}
                 />
               </FormControl>
@@ -174,7 +179,11 @@ export const BikeForm = ({
                   step="1"
                   placeholder="0"
                   {...field}
-                  onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : 0)}
+                  onChange={(e) =>
+                    field.onChange(
+                      e.target.value ? parseInt(e.target.value) : 0,
+                    )
+                  }
                 />
               </FormControl>
               <FormMessage />
@@ -191,9 +200,7 @@ export const BikeForm = ({
             accept="image/*"
             onChange={handleImageChange}
           />
-          {imageError && (
-            <p className="text-sm text-red-500">{imageError}</p>
-          )}
+          {imageError && <p className="text-sm text-red-500">{imageError}</p>}
           <p className="text-xs text-gray-500">
             Maksymalny rozmiar pliku: 5MB. Obsługiwane formaty: JPG, PNG, WEBP
           </p>

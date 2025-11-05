@@ -12,7 +12,9 @@ export interface UseLocationSelectionReturn {
  * Used for weather data and recommendations
  */
 export function useDefaultLocation(): UseLocationSelectionReturn {
-  const [defaultLocation, setDefaultLocation] = useState<LocationDTO | null>(null);
+  const [defaultLocation, setDefaultLocation] = useState<LocationDTO | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -32,13 +34,16 @@ export function useDefaultLocation(): UseLocationSelectionReturn {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+          throw new Error(
+            errorData.error?.message || `HTTP ${response.status}`,
+          );
         }
 
         const locations: LocationDTO[] = await response.json();
         setDefaultLocation(locations.length > 0 ? locations[0] : null);
       } catch (err) {
-        const error = err instanceof Error ? err : new Error("Unknown error occurred");
+        const error =
+          err instanceof Error ? err : new Error("Unknown error occurred");
         setError(error);
       } finally {
         setIsLoading(false);

@@ -252,7 +252,9 @@ function MinRatingSelect({ value, onChange }: MinRatingSelectProps) {
       </Label>
       <Select
         value={value ? String(value) : "all"}
-        onValueChange={(val) => onChange(val === "all" ? undefined : parseInt(val))}
+        onValueChange={(val) =>
+          onChange(val === "all" ? undefined : parseInt(val))
+        }
       >
         <SelectTrigger>
           <SelectValue placeholder="Wszystkie oceny" />

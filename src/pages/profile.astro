@@ -1,10 +1,10 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Navbar from '../components/navigation/Navbar';
-import { ProfileView } from '../components/profile/ProfileView.tsx';
-import { ProfileService } from '../services/ProfileService';
-import { LocationService } from '../services/location.service';
-import type { ProfileDTO, LocationDTO } from '../types';
+import Layout from "../layouts/Layout.astro";
+import Navbar from "../components/navigation/Navbar";
+import { ProfileView } from "../components/profile/ProfileView.tsx";
+import { ProfileService } from "../services/ProfileService";
+import { LocationService } from "../services/location.service";
+import type { ProfileDTO, LocationDTO } from "../types";
 
 // userId is guaranteed to be set by middleware for protected routes
 const userId = Astro.locals.userId as string;
@@ -20,12 +20,17 @@ try {
   profile = await profileService.getProfile(userId);
   locations = await locationService.getUserLocations(userId);
 } catch (error) {
-  console.error('[Profile.astro] Error fetching data:', error);
+  console.error("[Profile.astro] Error fetching data:", error);
   // Continue with null/empty data - client will handle errors
 }
 ---
 
 <Layout title="Profil użytkownika" showHeader={false}>
   <Navbar client:load userId={userId} />
-  <ProfileView client:load userId={userId} initialProfile={profile} initialLocations={locations} />
+  <ProfileView
+    client:load
+    userId={userId}
+    initialProfile={profile}
+    initialLocations={locations}
+  />
 </Layout>

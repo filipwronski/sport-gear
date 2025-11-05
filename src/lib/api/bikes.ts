@@ -49,9 +49,7 @@ export async function fetchBikes(
 /**
  * Create new bike
  */
-export async function createBike(
-  data: CreateBikeCommand,
-): Promise<BikeDTO> {
+export async function createBike(data: CreateBikeCommand): Promise<BikeDTO> {
   const response = await fetch(`${API_BASE_URL}/bikes`, {
     method: "POST",
     credentials: "include",
@@ -67,9 +65,7 @@ export async function createBike(
     }
     if (response.status === 422) {
       const errorData = await response.json();
-      throw new Error(
-        errorData.error?.message || "Validation error"
-      );
+      throw new Error(errorData.error?.message || "Validation error");
     }
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || "Failed to create bike");
@@ -103,9 +99,7 @@ export async function updateBike(
     }
     if (response.status === 422) {
       const errorData = await response.json();
-      throw new Error(
-        errorData.error?.message || "Validation error"
-      );
+      throw new Error(errorData.error?.message || "Validation error");
     }
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.message || "Failed to update bike");

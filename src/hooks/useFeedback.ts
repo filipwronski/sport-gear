@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 import type {
   FeedbackFormViewModel,
   RecommendationDTO,
@@ -7,18 +7,18 @@ import type {
   ApiError,
   OutfitDTO,
   ZoneRatings,
-} from '../types';
+} from "../types";
 
 /**
  * Custom hook for managing feedback form state and submission
  */
 export function useFeedback(recommendation: RecommendationDTO) {
   const [formState, setFormState] = useState<FeedbackFormViewModel>({
-    followedRecommendation: 'yes',
+    followedRecommendation: "yes",
     actualOutfit: recommendation.recommendation,
     overallRating: 3,
     zoneRatings: {},
-    notes: '',
+    notes: "",
     shareWithCommunity: true, // Default based on user profile settings
   });
 
@@ -27,18 +27,21 @@ export function useFeedback(recommendation: RecommendationDTO) {
   const [error, setError] = useState<ApiError | null>(null);
 
   // Update form state
-  const updateFormState = useCallback((updates: Partial<FeedbackFormViewModel>) => {
-    setFormState(prev => ({ ...prev, ...updates }));
-  }, []);
+  const updateFormState = useCallback(
+    (updates: Partial<FeedbackFormViewModel>) => {
+      setFormState((prev) => ({ ...prev, ...updates }));
+    },
+    [],
+  );
 
   // Reset form to initial state
   const resetForm = useCallback(() => {
     setFormState({
-      followedRecommendation: 'yes',
+      followedRecommendation: "yes",
       actualOutfit: recommendation.recommendation,
       overallRating: 3,
       zoneRatings: {},
-      notes: '',
+      notes: "",
       shareWithCommunity: true,
     });
     setIsSubmitting(false);
@@ -59,9 +62,10 @@ export function useFeedback(recommendation: RecommendationDTO) {
         wind_speed: recommendation.weather.wind_speed,
         humidity: recommendation.weather.humidity,
         rain_mm: recommendation.weather.rain_mm,
-        activity_type: formState.followedRecommendation === "yes"
-          ? "spokojna" // TODO: Get from current filters
-          : "spokojna", // TODO: Get from current filters
+        activity_type:
+          formState.followedRecommendation === "yes"
+            ? "spokojna" // TODO: Get from current filters
+            : "spokojna", // TODO: Get from current filters
         duration_minutes: 90, // TODO: Get from current filters
         actual_outfit: formState.actualOutfit,
         overall_rating: formState.overallRating,
@@ -70,17 +74,19 @@ export function useFeedback(recommendation: RecommendationDTO) {
         shared_with_community: formState.shareWithCommunity,
       };
 
-      const response = await fetch('/api/feedbacks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/feedbacks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(command),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         const apiError: ApiError = {
-          code: errorData.error?.code || 'VALIDATION_ERROR',
-          message: errorData.error?.message || 'Wystąpił błąd podczas zapisywania feedbacku',
+          code: errorData.error?.code || "VALIDATION_ERROR",
+          message:
+            errorData.error?.message ||
+            "Wystąpił błąd podczas zapisywania feedbacku",
           statusCode: response.status,
           details: errorData.error?.details,
         };
@@ -109,7 +115,15 @@ export function useFeedback(recommendation: RecommendationDTO) {
     }
 
     // Actual outfit must have all zones
-    const requiredZones: (keyof OutfitDTO)[] = ['head', 'torso', 'arms', 'hands', 'legs', 'feet', 'neck'];
+    const requiredZones: (keyof OutfitDTO)[] = [
+      "head",
+      "torso",
+      "arms",
+      "hands",
+      "legs",
+      "feet",
+      "neck",
+    ];
     for (const zone of requiredZones) {
       if (!formState.actualOutfit[zone]) {
         return false;
@@ -117,7 +131,11 @@ export function useFeedback(recommendation: RecommendationDTO) {
     }
 
     // Torso must have base, mid, outer
-    if (!formState.actualOutfit.torso.base || !formState.actualOutfit.torso.mid || !formState.actualOutfit.torso.outer) {
+    if (
+      !formState.actualOutfit.torso.base ||
+      !formState.actualOutfit.torso.mid ||
+      !formState.actualOutfit.torso.outer
+    ) {
       return false;
     }
 

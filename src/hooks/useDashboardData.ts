@@ -5,12 +5,17 @@ import type { UseDashboardDataReturn } from "../components/dashboard/types";
 export function useDashboardData(
   userId: string,
   locationId?: string,
-): UseDashboardDataReturn & { coordinates: { lat: number; lng: number } | null } {
+): UseDashboardDataReturn & {
+  coordinates: { lat: number; lng: number } | null;
+} {
   const [data, setData] = useState<DashboardDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
-  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [coordinates, setCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const fetchDashboard = useCallback(async () => {
     setIsLoading(true);
@@ -24,13 +29,15 @@ export function useDashboardData(
       // Try to get user's current location for weather data
       if (navigator.geolocation) {
         try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 5000,
-              maximumAge: 300000, // 5 minutes
-            });
-          });
+          const position = await new Promise<GeolocationPosition>(
+            (resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 300000, // 5 minutes
+              });
+            },
+          );
 
           currentCoordinates = {
             lat: position.coords.latitude,
@@ -39,14 +46,18 @@ export function useDashboardData(
           url.searchParams.set("lat", currentCoordinates.lat.toString());
           url.searchParams.set("lng", currentCoordinates.lng.toString());
         } catch (geoError) {
-          console.warn("Geolocation not available or denied, using default location (Warsaw)");
+          console.warn(
+            "Geolocation not available or denied, using default location (Warsaw)",
+          );
           // Fallback to Warsaw coordinates for demo purposes
           currentCoordinates = { lat: 52.237049, lng: 21.017532 };
           url.searchParams.set("lat", currentCoordinates.lat.toString());
           url.searchParams.set("lng", currentCoordinates.lng.toString());
         }
       } else {
-        console.warn("Geolocation not supported, using default location (Warsaw)");
+        console.warn(
+          "Geolocation not supported, using default location (Warsaw)",
+        );
         // Fallback to Warsaw coordinates for demo purposes
         currentCoordinates = { lat: 52.237049, lng: 21.017532 };
         url.searchParams.set("lat", currentCoordinates.lat.toString());

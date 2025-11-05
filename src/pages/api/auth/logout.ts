@@ -23,7 +23,7 @@ export const POST: APIRoute = async (context) => {
       [
         `sb-access-token=; ${cookieOptions}`,
         `sb-refresh-token=; ${cookieOptions}`,
-      ].join(", ")
+      ].join(", "),
     );
 
     return response;
@@ -37,7 +37,7 @@ export const POST: APIRoute = async (context) => {
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 };

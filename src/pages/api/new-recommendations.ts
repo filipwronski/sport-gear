@@ -37,7 +37,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
     const queryParams = {
       lat: url.searchParams.get("lat"),
       lng: url.searchParams.get("lng"),
-      workout_intensity: url.searchParams.get("workout_intensity") || "rekreacyjny",
+      workout_intensity:
+        url.searchParams.get("workout_intensity") || "rekreacyjny",
       workout_duration: url.searchParams.get("workout_duration") || "60",
       date: url.searchParams.get("date") || undefined,
     };
@@ -61,7 +62,11 @@ export const GET: APIRoute = async ({ request, locals }) => {
 
     // 3. Fetch weather data
     const weatherService = new RecommendationWeatherService();
-    const weather = await weatherService.getWeatherByCoordinates(params.lat, params.lng, params.date);
+    const weather = await weatherService.getWeatherByCoordinates(
+      params.lat,
+      params.lng,
+      params.date,
+    );
 
     // 4. Get user profile for thermal preferences
     const profile = await getUserProfile(userId);
@@ -143,7 +148,9 @@ export const GET: APIRoute = async ({ request, locals }) => {
  * Get user profile with thermal preferences
  */
 async function getUserProfile(userId: string) {
-  const client = import.meta.env.DEV ? supabaseServiceClient : supabaseServiceClient;
+  const client = import.meta.env.DEV
+    ? supabaseServiceClient
+    : supabaseServiceClient;
 
   const { data, error } = await client
     .from("profiles")
@@ -157,4 +164,3 @@ async function getUserProfile(userId: string) {
 
   return data;
 }
-

@@ -9,10 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import type {
-  GetRecommendationParams,
-  ActivityTypeEnum
-} from "../types";
+import type { GetRecommendationParams, ActivityTypeEnum } from "../types";
 
 /**
  * RecommendationFilters - Interactive filters for recommendation generation
@@ -27,22 +24,23 @@ const ACTIVITY_TYPES: { value: ActivityTypeEnum; label: string }[] = [
   { value: "recovery", label: "Recovery" },
   { value: "spokojna", label: "Spokojna" },
   { value: "tempo", label: "Tempo" },
-  { value: "interwaly", label: "Interwały" }
+  { value: "interwaly", label: "Interwały" },
 ];
 
 const DURATION_OPTIONS = [
   { value: 60, label: "<1h" },
   { value: 90, label: "1-2h" },
   { value: 150, label: "2-3h" },
-  { value: 240, label: ">3h" }
+  { value: 240, label: ">3h" },
 ];
 
 export default function RecommendationFilters({
   defaultLocationId,
   onFiltersChange,
-  isLoading = false
+  isLoading = false,
 }: RecommendationFiltersProps) {
-  const [activityType, setActivityType] = useState<ActivityTypeEnum>("spokojna");
+  const [activityType, setActivityType] =
+    useState<ActivityTypeEnum>("spokojna");
   const [durationMinutes, setDurationMinutes] = useState(90);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState(false);
@@ -64,7 +62,13 @@ export default function RecommendationFilters({
 
       onFiltersChange(params);
     }
-  }, [isInitialized, activityType, durationMinutes, onFiltersChange, selectedDate]);
+  }, [
+    isInitialized,
+    activityType,
+    durationMinutes,
+    onFiltersChange,
+    selectedDate,
+  ]);
 
   // Update filters when they change
   useEffect(() => {
@@ -81,7 +85,13 @@ export default function RecommendationFilters({
     }
 
     onFiltersChange(params);
-  }, [activityType, durationMinutes, selectedDate, onFiltersChange, isInitialized]);
+  }, [
+    activityType,
+    durationMinutes,
+    selectedDate,
+    onFiltersChange,
+    isInitialized,
+  ]);
 
   const handleRefresh = () => {
     const params: GetRecommendationParams = {
@@ -100,17 +110,17 @@ export default function RecommendationFilters({
   const formatDateForInput = (dateString: string) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   };
 
   const getMinDate = () => {
-    return new Date().toISOString().split('T')[0];
+    return new Date().toISOString().split("T")[0];
   };
 
   const getMaxDate = () => {
     const maxDate = new Date();
     maxDate.setDate(maxDate.getDate() + 7);
-    return maxDate.toISOString().split('T')[0];
+    return maxDate.toISOString().split("T")[0];
   };
 
   return (
@@ -123,7 +133,9 @@ export default function RecommendationFilters({
           variant="outline"
           size="sm"
         >
-          <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+          />
           Odśwież
         </Button>
       </div>
@@ -145,7 +157,9 @@ export default function RecommendationFilters({
           <Label htmlFor="activity">Typ aktywności</Label>
           <Select
             value={activityType}
-            onValueChange={(value) => setActivityType(value as ActivityTypeEnum)}
+            onValueChange={(value) =>
+              setActivityType(value as ActivityTypeEnum)
+            }
           >
             <SelectTrigger id="activity">
               <SelectValue />
@@ -172,7 +186,10 @@ export default function RecommendationFilters({
             </SelectTrigger>
             <SelectContent>
               {DURATION_OPTIONS.map((duration) => (
-                <SelectItem key={duration.value} value={duration.value.toString()}>
+                <SelectItem
+                  key={duration.value}
+                  value={duration.value.toString()}
+                >
                   {duration.label}
                 </SelectItem>
               ))}

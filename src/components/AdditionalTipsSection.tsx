@@ -18,7 +18,7 @@ interface AdditionalTipsSectionProps {
 export default function AdditionalTipsSection({
   recommendationId,
   weatherConditions,
-  onTipsLoad
+  onTipsLoad,
 }: AdditionalTipsSectionProps) {
   const [tips, setTips] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,10 +34,10 @@ export default function AdditionalTipsSection({
     setError(null);
 
     try {
-      const response = await fetch('/api/recommendations/ai-tips', {
-        method: 'POST',
+      const response = await fetch("/api/recommendations/ai-tips", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           recommendation_id: recommendationId,
@@ -46,18 +46,20 @@ export default function AdditionalTipsSection({
       });
 
       if (response.status === 429) {
-        const retryAfter = response.headers.get('Retry-After');
+        const retryAfter = response.headers.get("Retry-After");
         const rateLimitedUntil = retryAfter
           ? new Date(Date.now() + parseInt(retryAfter) * 1000)
           : new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h default
 
         setRateLimitedUntil(rateLimitedUntil);
-        setError('Osiągnięto dzienny limit zapytań AI. Spróbuj ponownie jutro.');
+        setError(
+          "Osiągnięto dzienny limit zapytań AI. Spróbuj ponownie jutro.",
+        );
         return;
       }
 
       if (!response.ok) {
-        throw new Error('Nie udało się pobrać wskazówek AI');
+        throw new Error("Nie udało się pobrać wskazówek AI");
       }
 
       const data: string[] = await response.json();
@@ -67,22 +69,26 @@ export default function AdditionalTipsSection({
         onTipsLoad(data);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Wystąpił błąd podczas ładowania wskazówek');
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Wystąpił błąd podczas ładowania wskazówek",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   const formatTimeUntilReset = () => {
-    if (!rateLimitedUntil) return '';
+    if (!rateLimitedUntil) return "";
 
     const now = new Date();
     const diffMs = rateLimitedUntil.getTime() - now.getTime();
     const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
 
-    if (diffHours >= 24) return 'jutro';
+    if (diffHours >= 24) return "jutro";
     if (diffHours > 1) return `za ${diffHours} godz.`;
-    return 'za mniej niż godzinę';
+    return "za mniej niż godzinę";
   };
 
   return (
@@ -97,7 +103,8 @@ export default function AdditionalTipsSection({
         {tips.length === 0 && !isLoading && !error && (
           <div className="text-center space-y-3">
             <p className="text-sm text-muted-foreground">
-              Uzyskaj spersonalizowane wskazówki AI dostosowane do Twoich warunków treningowych.
+              Uzyskaj spersonalizowane wskazówki AI dostosowane do Twoich
+              warunków treningowych.
             </p>
             <Button
               onClick={handleLoadTips}
@@ -151,8 +158,7 @@ export default function AdditionalTipsSection({
             <AlertDescription>
               {isRateLimited
                 ? `Limit zapytań AI został osiągnięty. Spróbuj ponownie ${formatTimeUntilReset()}.`
-                : error
-              }
+                : error}
             </AlertDescription>
           </Alert>
         )}

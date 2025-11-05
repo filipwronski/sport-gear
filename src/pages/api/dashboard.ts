@@ -45,12 +45,13 @@ export const GET: APIRoute = async ({ request, locals }) => {
     }
 
     // Extract coordinates (optional)
-    const coordinates = query.lat && query.lng
-      ? {
-        lat: parseFloat(query.lat),
-        lng: parseFloat(query.lng),
-      }
-      : null;
+    const coordinates =
+      query.lat && query.lng
+        ? {
+            lat: parseFloat(query.lat),
+            lng: parseFloat(query.lng),
+          }
+        : null;
 
     // Use DashboardService to aggregate all data
     const dashboardService = new DashboardService();

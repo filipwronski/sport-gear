@@ -24,7 +24,10 @@ interface ServiceHistoryTabProps {
   currentMileage?: number;
 }
 
-export function ServiceHistoryTab({ bikeId, currentMileage }: ServiceHistoryTabProps) {
+export function ServiceHistoryTab({
+  bikeId,
+  currentMileage,
+}: ServiceHistoryTabProps) {
   const [filters, setFilters] = useState<GetServicesParams>({
     limit: 20,
     offset: 0,
@@ -202,10 +205,7 @@ export function ServiceHistoryTab({ bikeId, currentMileage }: ServiceHistoryTabP
               <p className="mt-2 text-sm text-gray-500">
                 Get started by adding your first service record.
               </p>
-              <Button
-                className="mt-4"
-                onClick={() => setIsAddModalOpen(true)}
-              >
+              <Button className="mt-4" onClick={() => setIsAddModalOpen(true)}>
                 Add First Service
               </Button>
             </div>
@@ -215,15 +215,9 @@ export function ServiceHistoryTab({ bikeId, currentMileage }: ServiceHistoryTabP
         <Card>
           <CardContent className="pt-6">
             {isMobile ? (
-              <ServiceCards
-                services={services}
-                onDelete={handleDelete}
-              />
+              <ServiceCards services={services} onDelete={handleDelete} />
             ) : (
-              <ServiceTable
-                services={services}
-                onDelete={handleDelete}
-              />
+              <ServiceTable services={services} onDelete={handleDelete} />
             )}
 
             {services.length > 0 && (

@@ -16,9 +16,14 @@ export const ErrorState = ({ error, onRetry }: ErrorStateProps) => {
         Wystąpił błąd
       </h3>
       <p className="text-sm text-gray-500 text-center mb-6 max-w-md">
-        {errorMessage || "Nie udało się pobrać listy rowerów. Spróbuj ponownie."}
+        {errorMessage ||
+          "Nie udało się pobrać listy rowerów. Spróbuj ponownie."}
       </p>
-      <Button onClick={onRetry} variant="outline" className="flex items-center space-x-2">
+      <Button
+        onClick={onRetry}
+        variant="outline"
+        className="flex items-center space-x-2"
+      >
         <RefreshCw className="w-4 h-4" />
         <span>Spróbuj ponownie</span>
       </Button>

@@ -15,8 +15,12 @@ export interface UseProfileReturn {
  * Custom hook for managing user profile data
  * Handles fetching, updating and deleting user profile
  */
-export function useProfile(initialProfile?: ProfileDTO | null): UseProfileReturn {
-  const [profile, setProfile] = useState<ProfileDTO | null>(initialProfile || null);
+export function useProfile(
+  initialProfile?: ProfileDTO | null,
+): UseProfileReturn {
+  const [profile, setProfile] = useState<ProfileDTO | null>(
+    initialProfile || null,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -42,7 +46,8 @@ export function useProfile(initialProfile?: ProfileDTO | null): UseProfileReturn
       const profileData: ProfileDTO = await response.json();
       setProfile(profileData);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
+      const error =
+        err instanceof Error ? err : new Error("Unknown error occurred");
       setError(error);
     } finally {
       setIsLoading(false);
@@ -71,7 +76,8 @@ export function useProfile(initialProfile?: ProfileDTO | null): UseProfileReturn
       const updatedProfile: ProfileDTO = await response.json();
       setProfile(updatedProfile);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
+      const error =
+        err instanceof Error ? err : new Error("Unknown error occurred");
       setError(error);
       throw error; // Re-throw to allow component-level error handling
     } finally {
@@ -100,7 +106,8 @@ export function useProfile(initialProfile?: ProfileDTO | null): UseProfileReturn
       // Account deleted successfully - clear local state
       setProfile(null);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
+      const error =
+        err instanceof Error ? err : new Error("Unknown error occurred");
       setError(error);
       throw error; // Re-throw to allow component-level error handling
     } finally {

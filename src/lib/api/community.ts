@@ -158,7 +158,9 @@ export async function stopSharingOutfit(outfitId: string): Promise<void> {
  * Utility function to normalize outfit data from API
  * Provides fallbacks for missing data
  */
-export function normalizeOutfit(outfit: CommunityOutfitDTO): CommunityOutfitDTO {
+export function normalizeOutfit(
+  outfit: CommunityOutfitDTO,
+): CommunityOutfitDTO {
   return {
     ...outfit,
     user_pseudonym: outfit.user_pseudonym || "Anonim",

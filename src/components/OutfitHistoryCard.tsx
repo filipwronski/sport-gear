@@ -12,13 +12,16 @@ interface OutfitHistoryCardProps {
   onClick?: () => void;
 }
 
-export default function OutfitHistoryCard({ outfit, onClick }: OutfitHistoryCardProps) {
+export default function OutfitHistoryCard({
+  outfit,
+  onClick,
+}: OutfitHistoryCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("pl-PL", {
       day: "numeric",
       month: "short",
-      year: "numeric"
+      year: "numeric",
     });
   };
 
@@ -27,7 +30,7 @@ export default function OutfitHistoryCard({ outfit, onClick }: OutfitHistoryCard
       recovery: "Recovery",
       spokojna: "Spokojna",
       tempo: "Tempo",
-      interwaly: "Interwały"
+      interwaly: "Interwały",
     };
     return types[activityType] || activityType;
   };
@@ -45,9 +48,11 @@ export default function OutfitHistoryCard({ outfit, onClick }: OutfitHistoryCard
     return items.slice(0, 4).join(" "); // Show max 4 items
   };
 
-  const truncateNotes = (notes: string | null, maxLength: number = 50) => {
+  const truncateNotes = (notes: string | null, maxLength = 50) => {
     if (!notes) return null;
-    return notes.length > maxLength ? `${notes.substring(0, maxLength)}...` : notes;
+    return notes.length > maxLength
+      ? `${notes.substring(0, maxLength)}...`
+      : notes;
   };
 
   return (
@@ -66,21 +71,23 @@ export default function OutfitHistoryCard({ outfit, onClick }: OutfitHistoryCard
             </span>
             <div className="flex items-center gap-1">
               <Star className="w-3 h-3 fill-current text-yellow-500" />
-              <span className="text-sm font-medium">{outfit.overall_rating}/5</span>
+              <span className="text-sm font-medium">
+                {outfit.overall_rating}/5
+              </span>
             </div>
           </div>
 
           {/* Weather conditions */}
           <div className="text-xs text-muted-foreground">
             {outfit.temperature}°C, 💨 {outfit.wind_speed} km/h
-            {outfit.rain_mm && outfit.rain_mm > 0 && `, 🌧️ ${outfit.rain_mm} mm`}
+            {outfit.rain_mm &&
+              outfit.rain_mm > 0 &&
+              `, 🌧️ ${outfit.rain_mm} mm`}
           </div>
 
           {/* Outfit preview */}
           <div className="flex items-center gap-2">
-            <div className="text-lg">
-              {getOutfitPreview() || "👕"}
-            </div>
+            <div className="text-lg">{getOutfitPreview() || "👕"}</div>
             <span className="text-sm text-muted-foreground">
               {formatActivityType(outfit.activity_type)}
             </span>

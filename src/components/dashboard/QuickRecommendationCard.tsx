@@ -3,7 +3,10 @@ import { Compass, ArrowRight, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import OutfitRecommendationList from "@/components/OutfitRecommendationList";
-import type { ClothingRecommendationDTO, NewRecommendationDTO } from "../../types";
+import type {
+  ClothingRecommendationDTO,
+  NewRecommendationDTO,
+} from "../../types";
 
 interface QuickRecommendationCardProps {
   recommendation: string;
@@ -16,7 +19,8 @@ export function QuickRecommendationCard({
   locationId,
   coordinates,
 }: QuickRecommendationCardProps) {
-  const [outfitRecommendation, setOutfitRecommendation] = useState<ClothingRecommendationDTO | null>(null);
+  const [outfitRecommendation, setOutfitRecommendation] =
+    useState<ClothingRecommendationDTO | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -78,13 +82,13 @@ export function QuickRecommendationCard({
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="w-6 h-6 animate-spin mr-2" />
-            <span className="text-sm text-muted-foreground">Ładowanie rekomendacji...</span>
+            <span className="text-sm text-muted-foreground">
+              Ładowanie rekomendacji...
+            </span>
           </div>
         ) : outfitRecommendation ? (
           <div className="space-y-4">
-            <OutfitRecommendationList
-              recommendation={outfitRecommendation}
-            />
+            <OutfitRecommendationList recommendation={outfitRecommendation} />
             <Button
               onClick={handleViewDetails}
               variant="outline"

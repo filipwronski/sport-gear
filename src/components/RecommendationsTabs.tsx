@@ -28,7 +28,9 @@ interface RecommendationsTabsProps {
   defaultLocationId?: string;
 }
 
-export default function RecommendationsTabs({ defaultLocationId }: RecommendationsTabsProps) {
+export default function RecommendationsTabs({
+  defaultLocationId,
+}: RecommendationsTabsProps) {
   const [activeTab, setActiveTab] = useState("current");
   const { defaultLocation } = useDefaultLocation();
 
@@ -52,7 +54,7 @@ export default function RecommendationsTabs({ defaultLocationId }: Recommendatio
               onDaySelect={(date) => {
                 // Switch to current tab with selected date
                 // This would need URL state management for full implementation
-                console.log('Selected date:', date);
+                console.log("Selected date:", date);
                 setActiveTab("current");
               }}
             />
@@ -64,7 +66,7 @@ export default function RecommendationsTabs({ defaultLocationId }: Recommendatio
             <OutfitHistory
               onOutfitClick={(outfit) => {
                 // Handle outfit click - could open detailed view
-                console.log('Clicked outfit:', outfit);
+                console.log("Clicked outfit:", outfit);
               }}
             />
           </TabsContent>

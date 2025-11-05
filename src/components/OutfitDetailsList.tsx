@@ -10,7 +10,7 @@ import {
   Hand,
   ShirtIcon as TorsoIcon,
   Footprints,
-  Heart
+  Heart,
 } from "lucide-react";
 import type { OutfitDTO, ZoneType } from "../types";
 
@@ -30,43 +30,46 @@ interface ZoneItem {
   content: string;
 }
 
-export default function OutfitDetailsList({ outfit, expandedZone }: OutfitDetailsListProps) {
+export default function OutfitDetailsList({
+  outfit,
+  expandedZone,
+}: OutfitDetailsListProps) {
   const getZoneItems = (): ZoneItem[] => [
     {
       zone: "head",
       label: "Głowa",
       icon: Crown,
-      content: outfit.head || "Brak"
+      content: outfit.head || "Brak",
     },
     {
       zone: "neck",
       label: "Szyja",
       icon: Heart,
-      content: outfit.neck || "Brak"
+      content: outfit.neck || "Brak",
     },
     {
       zone: "torso",
       label: "Tułów (3 warstwy)",
       icon: TorsoIcon,
-      content: `Warstwa 1 (bielizna): ${outfit.torso.base}\nWarstwa 2 (środkowa): ${outfit.torso.mid}\nWarstwa 3 (zewnętrzna): ${outfit.torso.outer}`
+      content: `Warstwa 1 (bielizna): ${outfit.torso.base}\nWarstwa 2 (środkowa): ${outfit.torso.mid}\nWarstwa 3 (zewnętrzna): ${outfit.torso.outer}`,
     },
     {
       zone: "arms",
       label: "Ramiona",
       icon: Shirt,
-      content: outfit.arms || "Brak"
+      content: outfit.arms || "Brak",
     },
     {
       zone: "hands",
       label: "Dłonie",
       icon: Hand,
-      content: outfit.hands || "Brak"
+      content: outfit.hands || "Brak",
     },
     {
       zone: "legs",
       label: "Nogi",
       icon: Footprints,
-      content: outfit.legs || "Brak"
+      content: outfit.legs || "Brak",
     },
     {
       zone: "feet",
@@ -74,8 +77,8 @@ export default function OutfitDetailsList({ outfit, expandedZone }: OutfitDetail
       icon: Footprints,
       content: outfit.feet.socks
         ? `Skarpetki: ${outfit.feet.socks}${outfit.feet.covers ? `\nOchraniacze: ${outfit.feet.covers}` : ""}`
-        : "Brak"
-    }
+        : "Brak",
+    },
   ];
 
   const defaultValue = expandedZone ? [expandedZone] : [];
@@ -84,11 +87,7 @@ export default function OutfitDetailsList({ outfit, expandedZone }: OutfitDetail
     <div className="space-y-2">
       <h3 className="text-lg font-semibold mb-4">Szczegóły rekomendacji</h3>
 
-      <Accordion
-        type="multiple"
-        defaultValue={defaultValue}
-        className="w-full"
-      >
+      <Accordion type="multiple" defaultValue={defaultValue} className="w-full">
         {getZoneItems().map((item) => (
           <AccordionItem key={item.zone} value={item.zone}>
             <AccordionTrigger className="hover:no-underline">
@@ -108,9 +107,7 @@ export default function OutfitDetailsList({ outfit, expandedZone }: OutfitDetail
                     ))}
                   </div>
                 ) : (
-                  <div className="text-foreground">
-                    {item.content}
-                  </div>
+                  <div className="text-foreground">{item.content}</div>
                 )}
               </div>
             </AccordionContent>

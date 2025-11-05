@@ -85,7 +85,6 @@ export class DashboardService {
     }
   }
 
-
   /**
    * Get weather summary with error handling
    * Falls back to default values if weather service fails
@@ -108,10 +107,11 @@ export class DashboardService {
         };
       }
 
-      const weatherSummary = await this.weatherService.getWeatherSummaryByCoordinates(
-        coordinates.lat,
-        coordinates.lng,
-      );
+      const weatherSummary =
+        await this.weatherService.getWeatherSummaryByCoordinates(
+          coordinates.lat,
+          coordinates.lng,
+        );
 
       // Outfit recommendation will be fetched on client-side by the component
       return weatherSummary;

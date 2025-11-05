@@ -104,7 +104,7 @@ export const useBikeList = (_userId: string): UseBikeListReturn => {
         throw err;
       }
     },
-    [showToast, closeAddDialog, fetchBikesData]
+    [showToast, closeAddDialog, fetchBikesData],
   );
 
   // Navigate to bike details

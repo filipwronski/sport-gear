@@ -80,4 +80,6 @@ export const GetNewRecommendationsSchema = z.object({
     }, "Date must be between today and 7 days in the future"),
 });
 
-export type GetNewRecommendationsInput = z.infer<typeof GetNewRecommendationsSchema>;
+export type GetNewRecommendationsInput = z.infer<
+  typeof GetNewRecommendationsSchema
+>;

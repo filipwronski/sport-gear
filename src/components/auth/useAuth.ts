@@ -50,7 +50,6 @@ export const useAuth = (): AuthHookReturn => {
     successMessage: null,
   });
 
-
   // Clear error message
   const clearError = useCallback(() => {
     setAuthState((prev) => ({ ...prev, error: null }));
@@ -166,17 +165,17 @@ export const useAuth = (): AuthHookReturn => {
 
           // Set session cookies for server-side authentication
           const maxAge = 60 * 60 * 24 * 30; // 30 days
-          const isLocalhost = window.location.hostname === 'localhost';
+          const isLocalhost = window.location.hostname === "localhost";
 
           // For localhost, don't use 'secure' flag
-          const cookieOptions = `max-age=${maxAge}; path=/; samesite=lax${isLocalhost ? '' : '; secure'}`;
+          const cookieOptions = `max-age=${maxAge}; path=/; samesite=lax${isLocalhost ? "" : "; secure"}`;
 
           document.cookie = `sb-access-token=${authData.session.access_token}; ${cookieOptions}`;
           document.cookie = `sb-refresh-token=${authData.session.refresh_token}; ${cookieOptions}`;
 
           // Set remember me cookie if requested
           if (data.rememberMe) {
-            document.cookie = `remember_user=true; max-age=${30 * 24 * 60 * 60}; path=/; samesite=lax${isLocalhost ? '' : '; secure'}`;
+            document.cookie = `remember_user=true; max-age=${30 * 24 * 60 * 60}; path=/; samesite=lax${isLocalhost ? "" : "; secure"}`;
           }
 
           // Show success toast and redirect

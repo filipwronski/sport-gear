@@ -65,18 +65,23 @@ function parseFiltersFromURL(
     wind_speed: searchParams.get("wind_speed")
       ? parseFloat(searchParams.get("wind_speed")!)
       : undefined,
-    activity_type: (searchParams.get("activity_type") as ActivityTypeEnum) || undefined,
+    activity_type:
+      (searchParams.get("activity_type") as ActivityTypeEnum) || undefined,
     min_rating: searchParams.get("min_rating")
       ? parseInt(searchParams.get("min_rating")!)
       : undefined,
     reputation_filter: searchParams.get("reputation_filter")
-      ? (searchParams.get("reputation_filter")!.split(",") as ReputationBadgeEnum[])
+      ? (searchParams
+          .get("reputation_filter")!
+          .split(",") as ReputationBadgeEnum[])
       : undefined,
     time_range: parseInt(
       searchParams.get("time_range") ||
         String(DEFAULT_COMMUNITY_FILTERS.time_range),
     ),
-    sort: (searchParams.get("sort") as CommunityFiltersState["sort"]) || DEFAULT_COMMUNITY_FILTERS.sort,
+    sort:
+      (searchParams.get("sort") as CommunityFiltersState["sort"]) ||
+      DEFAULT_COMMUNITY_FILTERS.sort,
     limit: parseInt(
       searchParams.get("limit") || String(DEFAULT_COMMUNITY_FILTERS.limit),
     ),

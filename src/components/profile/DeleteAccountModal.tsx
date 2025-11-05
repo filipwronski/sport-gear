@@ -63,7 +63,8 @@ export function DeleteAccountModal({
             Usuń konto
           </DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
-            Ta akcja jest nieodwracalna. Wszystkie Twoje dane zostaną trwale usunięte.
+            Ta akcja jest nieodwracalna. Wszystkie Twoje dane zostaną trwale
+            usunięte.
           </DialogDescription>
         </DialogHeader>
 
@@ -102,7 +103,8 @@ export function DeleteAccountModal({
                 Potwierdzam usunięcie konta
               </Label>
               <p className="text-xs text-muted-foreground">
-                Rozumiem, że ta akcja jest nieodwracalna i wszystkie moje dane zostaną usunięte.
+                Rozumiem, że ta akcja jest nieodwracalna i wszystkie moje dane
+                zostaną usunięte.
               </p>
             </div>
           </div>

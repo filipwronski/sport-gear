@@ -84,10 +84,7 @@ export const BikeListView = ({ userId }: BikeListViewProps) => {
           onSortChange={handleSortChange}
           onSearchChange={handleSearchChange}
         />
-        <ErrorState
-          error={error}
-          onRetry={refetchBikes}
-        />
+        <ErrorState error={error} onRetry={refetchBikes} />
       </div>
     );
   }

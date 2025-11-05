@@ -41,80 +41,103 @@ export function useRecommendation(defaultLocationId?: string) {
         error: null,
       }));
 
-    try {
-      const params: Record<string, string> = {
-        activity_type: filters.activityType,
-        duration_minutes: filters.durationMinutes.toString(),
-      };
+      try {
+        const params: Record<string, string> = {
+          activity_type: filters.activityType,
+          duration_minutes: filters.durationMinutes.toString(),
+        };
 
-      // Get coordinates for weather data
-      if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 5000,
-              maximumAge: 300000, // 5 minutes
-            });
-          });
+        // Get coordinates for weather data
+        if (navigator.geolocation) {
+          try {
+            const position = await new Promise<GeolocationPosition>(
+              (resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                  enableHighAccuracy: true,
+                  timeout: 5000,
+                  maximumAge: 300000, // 5 minutes
+                });
+              },
+            );
 
-          params.lat = position.coords.latitude.toString();
-          params.lng = position.coords.longitude.toString();
-          console.log("useRecommendation: Got coordinates from geolocation:", params.lat, params.lng);
-        } catch (geoError) {
-          console.warn("Geolocation not available, using default location (Warsaw)");
+            params.lat = position.coords.latitude.toString();
+            params.lng = position.coords.longitude.toString();
+            console.log(
+              "useRecommendation: Got coordinates from geolocation:",
+              params.lat,
+              params.lng,
+            );
+          } catch (geoError) {
+            console.warn(
+              "Geolocation not available, using default location (Warsaw)",
+            );
+            // Fallback to Warsaw coordinates
+            params.lat = "52.237049";
+            params.lng = "21.017532";
+            console.log(
+              "useRecommendation: Using fallback coordinates:",
+              params.lat,
+              params.lng,
+            );
+          }
+        } else {
+          console.warn(
+            "Geolocation not supported, using default location (Warsaw)",
+          );
           // Fallback to Warsaw coordinates
           params.lat = "52.237049";
           params.lng = "21.017532";
-          console.log("useRecommendation: Using fallback coordinates:", params.lat, params.lng);
+          console.log(
+            "useRecommendation: Using fallback coordinates:",
+            params.lat,
+            params.lng,
+          );
         }
-      } else {
-        console.warn("Geolocation not supported, using default location (Warsaw)");
-        // Fallback to Warsaw coordinates
-        params.lat = "52.237049";
-        params.lng = "21.017532";
-        console.log("useRecommendation: Using fallback coordinates:", params.lat, params.lng);
+
+        if (filters.selectedDate) {
+          params.date = formatISO(filters.selectedDate, {
+            representation: "date",
+          });
+        }
+
+        const queryString = new URLSearchParams(params).toString();
+        console.log("useRecommendation: Calling API with params:", params);
+        const response = await fetch(`/api/recommendations?${queryString}`);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          const error: ApiError = {
+            code: errorData.error?.code || "UNKNOWN_ERROR",
+            message:
+              errorData.error?.message ||
+              "Wystąpił błąd podczas pobierania rekomendacji",
+            statusCode: response.status,
+            details: errorData.error?.details,
+            retryAfter: response.headers.get("Retry-After")
+              ? parseInt(response.headers.get("Retry-After")!)
+              : undefined,
+          };
+          throw error;
+        }
+
+        const data: RecommendationDTO = await response.json();
+
+        setState((prev) => ({
+          ...prev,
+          recommendation: data,
+          isLoadingRecommendation: false,
+          aiTips: data.additional_tips || [], // May be included in the main response
+        }));
+      } catch (error) {
+        setState((prev) => ({
+          ...prev,
+          error: error as ApiError,
+          isLoadingRecommendation: false,
+        }));
       }
-
-      if (filters.selectedDate) {
-        params.date = formatISO(filters.selectedDate, { representation: "date" });
-      }
-
-      const queryString = new URLSearchParams(params).toString();
-      console.log("useRecommendation: Calling API with params:", params);
-      const response = await fetch(`/api/recommendations?${queryString}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        const error: ApiError = {
-          code: errorData.error?.code || "UNKNOWN_ERROR",
-          message:
-            errorData.error?.message || "Wystąpił błąd podczas pobierania rekomendacji",
-          statusCode: response.status,
-          details: errorData.error?.details,
-          retryAfter: response.headers.get("Retry-After")
-            ? parseInt(response.headers.get("Retry-After")!)
-            : undefined,
-        };
-        throw error;
-      }
-
-      const data: RecommendationDTO = await response.json();
-
-      setState((prev) => ({
-        ...prev,
-        recommendation: data,
-        isLoadingRecommendation: false,
-        aiTips: data.additional_tips || [], // May be included in the main response
-      }));
-    } catch (error) {
-      setState((prev) => ({
-        ...prev,
-        error: error as ApiError,
-        isLoadingRecommendation: false,
-      }));
-    }
-  }, 500);
+    },
+    500,
+  );
 
   // Fetch AI tips (optional, on-demand)
   const fetchAiTips = useCallback(async () => {
@@ -173,12 +196,14 @@ export function useRecommendation(defaultLocationId?: string) {
       setState((prev) => ({ ...prev, filters: newFilters }));
       fetchRecommendation(newFilters);
     },
-    [state.filters] // Remove fetchRecommendation from dependencies to avoid infinite loop
+    [state.filters], // Remove fetchRecommendation from dependencies to avoid infinite loop
   );
 
   // Initialize recommendation (for direct calling without filters)
   const initializeRecommendation = useCallback(() => {
-    console.log("initializeRecommendation: Calling fetchRecommendation with default filters");
+    console.log(
+      "initializeRecommendation: Calling fetchRecommendation with default filters",
+    );
     fetchRecommendation(state.filters);
   }, [state.filters]);
 

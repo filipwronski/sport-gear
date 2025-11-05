@@ -103,7 +103,7 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
               Authorization: `Bearer ${token}`,
             },
           },
-        }
+        },
       );
     }
 
@@ -236,7 +236,7 @@ export const POST: APIRoute = async ({ request, locals, params }) => {
               Authorization: `Bearer ${token}`,
             },
           },
-        }
+        },
       );
     }
 

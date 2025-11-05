@@ -45,10 +45,7 @@ export const AddBikeDialog = ({
           <DialogTitle>Dodaj nowy rower</DialogTitle>
         </DialogHeader>
 
-        <BikeForm
-          onSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-        />
+        <BikeForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
 
         <DialogFooter>
           <Button

@@ -17,8 +17,9 @@ export function ActionButtons({
     <div className="space-y-4">
       <div className="text-center sm:text-left">
         <p className="text-sm text-muted-foreground">
-          Zgodnie z RODO masz prawo do eksportu wszystkich swoich danych w formacie JSON.
-          Możesz również trwale usunąć swoje konto - ta akcja jest nieodwracalna.
+          Zgodnie z RODO masz prawo do eksportu wszystkich swoich danych w
+          formacie JSON. Możesz również trwale usunąć swoje konto - ta akcja
+          jest nieodwracalna.
         </p>
       </div>
       <div className="flex flex-col sm:flex-row gap-3 justify-center sm:justify-end">

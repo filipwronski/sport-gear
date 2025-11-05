@@ -17,7 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User, MapPin } from "lucide-react";
-import { POLISH_CITIES, getPolishCityByName } from "../../constants/location.constants";
+import {
+  POLISH_CITIES,
+  getPolishCityByName,
+} from "../../constants/location.constants";
 import type {
   ProfileDTO,
   LocationDTO,
@@ -32,7 +35,10 @@ interface PersonalInfoSectionProps {
   isLoadingLocations?: boolean;
   onUpdate: (command: Partial<UpdateProfileCommand>) => Promise<void>;
   onCreateLocation: (command: CreateLocationCommand) => Promise<LocationDTO>;
-  onUpdateLocation: (locationId: string, command: UpdateLocationCommand) => Promise<LocationDTO>;
+  onUpdateLocation: (
+    locationId: string,
+    command: UpdateLocationCommand,
+  ) => Promise<LocationDTO>;
 }
 
 export function PersonalInfoSection({
@@ -82,17 +88,26 @@ export function PersonalInfoSection({
         if (cityData) {
           // Check if this city already exists in user's locations
           // Normalize city name for comparison (remove diacritics, lowercase)
-          const normalizedCityName = cityName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-          const existingLocation = locations.find(
-            loc => {
-              const locNormalized = loc.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-              return locNormalized === normalizedCityName && loc.country_code === "PL";
-            }
-          );
+          const normalizedCityName = cityName
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+          const existingLocation = locations.find((loc) => {
+            const locNormalized = loc.city
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "");
+            return (
+              locNormalized === normalizedCityName && loc.country_code === "PL"
+            );
+          });
 
           if (existingLocation) {
             // City already exists, use its ID
-            console.log(`Using existing location for ${cityName}:`, existingLocation.id);
+            console.log(
+              `Using existing location for ${cityName}:`,
+              existingLocation.id,
+            );
             actualLocationId = existingLocation.id;
           } else {
             // Create new location (without setting as default)
@@ -109,7 +124,6 @@ export function PersonalInfoSection({
           }
         }
       }
-
 
       await onUpdate({
         display_name: displayName.trim() || undefined,
@@ -145,9 +159,17 @@ export function PersonalInfoSection({
   // Also, add a small delay to avoid race conditions during location updates
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (defaultLocationId !== "none" && defaultLocationId && !defaultLocation && locations.length > 0 && !isSaving && !isLoadingLocations) {
+      if (
+        defaultLocationId !== "none" &&
+        defaultLocationId &&
+        !defaultLocation &&
+        locations.length > 0 &&
+        !isSaving &&
+        !isLoadingLocations
+      ) {
         // Check if this is a Polish city that's in the process of being created
-        const isPendingPolishCity = defaultLocationId.startsWith("polish-city-");
+        const isPendingPolishCity =
+          defaultLocationId.startsWith("polish-city-");
         if (!isPendingPolishCity) {
           console.log("Default location not found, resetting to none");
           onUpdate({ default_location_id: null });
@@ -156,7 +178,14 @@ export function PersonalInfoSection({
     }, 1000); // Wait 1 second to allow for location updates to complete
 
     return () => clearTimeout(timeoutId);
-  }, [defaultLocationId, defaultLocation, locations.length, onUpdate, isSaving, isLoadingLocations]);
+  }, [
+    defaultLocationId,
+    defaultLocation,
+    locations.length,
+    onUpdate,
+    isSaving,
+    isLoadingLocations,
+  ]);
 
   return (
     <Card>
@@ -199,10 +228,12 @@ export function PersonalInfoSection({
                 {isLoadingLocations
                   ? "Ładowanie lokalizacji..."
                   : defaultLocation
-                  ? `${defaultLocation.city}, ${defaultLocation.country_code}`
-                  : defaultLocationId.startsWith("polish-city-")
-                  ? getPolishCityByName(defaultLocationId.replace("polish-city-", ""))?.name + ", PL"
-                  : "Brak wybranej lokalizacji"}
+                    ? `${defaultLocation.city}, ${defaultLocation.country_code}`
+                    : defaultLocationId.startsWith("polish-city-")
+                      ? getPolishCityByName(
+                          defaultLocationId.replace("polish-city-", ""),
+                        )?.name + ", PL"
+                      : "Brak wybranej lokalizacji"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -215,7 +246,9 @@ export function PersonalInfoSection({
               {POLISH_CITIES.map((city) => {
                 const cityValue = `polish-city-${city.name}`;
                 const existingLocation = locations.find(
-                  loc => loc.city.toLowerCase() === city.name.toLowerCase() && loc.country_code === "PL"
+                  (loc) =>
+                    loc.city.toLowerCase() === city.name.toLowerCase() &&
+                    loc.country_code === "PL",
                 );
                 return (
                   <SelectItem key={cityValue} value={cityValue}>
@@ -243,7 +276,8 @@ export function PersonalInfoSection({
             </SelectContent>
           </Select>
           <p className="text-sm text-muted-foreground">
-            Ta lokalizacja będzie używana domyślnie dla rekomendacji pogody i outfitów
+            Ta lokalizacja będzie używana domyślnie dla rekomendacji pogody i
+            outfitów
           </p>
         </div>
 

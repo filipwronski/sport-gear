@@ -51,7 +51,10 @@ export const bikeStatusToLabel = (status: BikeStatusEnum): string => {
 export const bikeStatusToBadgeVariant = (
   status: BikeStatusEnum,
 ): "default" | "secondary" | "outline" => {
-  const variantMap: Record<BikeStatusEnum, "default" | "secondary" | "outline"> = {
+  const variantMap: Record<
+    BikeStatusEnum,
+    "default" | "secondary" | "outline"
+  > = {
     active: "default",
     archived: "secondary",
     sold: "outline",
@@ -96,7 +99,10 @@ export const reminderStatusToLabel = (status: ReminderStatusEnum): string => {
 export const reminderStatusToBadgeVariant = (
   status: ReminderStatusEnum,
 ): "default" | "warning" | "destructive" => {
-  const variantMap: Record<ReminderStatusEnum, "default" | "warning" | "destructive"> = {
+  const variantMap: Record<
+    ReminderStatusEnum,
+    "default" | "warning" | "destructive"
+  > = {
     active: "default",
     upcoming: "warning",
     overdue: "destructive",
@@ -155,7 +161,7 @@ export const formatKmRemaining = (km: number): string => {
  * Transformacja BikeDTO do BikeCardDisplayData
  */
 export const transformBikeToDisplayData = (
-  bike: BikeDTO
+  bike: BikeDTO,
 ): BikeCardDisplayData => {
   return {
     id: bike.id,
@@ -169,22 +175,22 @@ export const transformBikeToDisplayData = (
     currentMileage: bike.current_mileage || 0,
     mileageFormatted: formatMileage(bike.current_mileage),
     lastService: null, // TODO: implement when service data available
-  nextService: bike.next_service
-    ? {
-        type: bike.next_service.service_type,
-        typeLabel: serviceTypeToLabel(bike.next_service.service_type),
-        targetMileage: bike.next_service.target_mileage,
-        kmRemaining: bike.next_service.km_remaining,
-        kmRemainingFormatted: formatKmRemaining(
-          bike.next_service.km_remaining,
-        ),
-        status: bike.next_service.status,
-        statusBadgeVariant: reminderStatusToBadgeVariant(
-          bike.next_service.status,
-        ),
-        statusLabel: reminderStatusToLabel(bike.next_service.status),
-      }
-    : null,
+    nextService: bike.next_service
+      ? {
+          type: bike.next_service.service_type,
+          typeLabel: serviceTypeToLabel(bike.next_service.service_type),
+          targetMileage: bike.next_service.target_mileage,
+          kmRemaining: bike.next_service.km_remaining,
+          kmRemainingFormatted: formatKmRemaining(
+            bike.next_service.km_remaining,
+          ),
+          status: bike.next_service.status,
+          statusBadgeVariant: reminderStatusToBadgeVariant(
+            bike.next_service.status,
+          ),
+          statusLabel: reminderStatusToLabel(bike.next_service.status),
+        }
+      : null,
     activeRemindersCount: bike.active_reminders_count,
     totalCost: bike.total_cost,
     totalCostFormatted: formatCost(bike.total_cost),
@@ -217,7 +223,7 @@ export const filterBikes = (
   if (searchQuery.trim() !== "") {
     const query = searchQuery.toLowerCase();
     filtered = filtered.filter((bike) =>
-      bike.name.toLowerCase().includes(query)
+      bike.name.toLowerCase().includes(query),
     );
   }
 
@@ -227,10 +233,7 @@ export const filterBikes = (
 /**
  * Sortowanie rowerów
  */
-export const sortBikes = (
-  bikes: BikeDTO[],
-  sortBy: SortOption,
-): BikeDTO[] => {
+export const sortBikes = (bikes: BikeDTO[], sortBy: SortOption): BikeDTO[] => {
   const sorted = [...bikes];
 
   switch (sortBy) {
@@ -240,23 +243,23 @@ export const sortBikes = (
       return sorted.sort((a, b) => b.name.localeCompare(a.name, "pl"));
     case "mileage_asc":
       return sorted.sort(
-        (a, b) => (a.current_mileage || 0) - (b.current_mileage || 0)
+        (a, b) => (a.current_mileage || 0) - (b.current_mileage || 0),
       );
     case "mileage_desc":
       return sorted.sort(
-        (a, b) => (b.current_mileage || 0) - (a.current_mileage || 0)
+        (a, b) => (b.current_mileage || 0) - (a.current_mileage || 0),
       );
     case "created_at_asc":
       return sorted.sort(
         (a, b) =>
           new Date(a.created_at || 0).getTime() -
-          new Date(b.created_at || 0).getTime()
+          new Date(b.created_at || 0).getTime(),
       );
     case "created_at_desc":
       return sorted.sort(
         (a, b) =>
           new Date(b.created_at || 0).getTime() -
-          new Date(a.created_at || 0).getTime()
+          new Date(a.created_at || 0).getTime(),
       );
     default:
       return sorted;

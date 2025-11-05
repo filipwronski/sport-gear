@@ -13,7 +13,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import WeatherSummary from "./WeatherSummary";
 import type {
   RecommendationDTO,
@@ -21,7 +26,7 @@ import type {
   CreateFeedbackCommand,
   OutfitDTO,
   ZoneRatings,
-  ActivityTypeEnum
+  ActivityTypeEnum,
 } from "../types";
 
 /**
@@ -38,7 +43,7 @@ interface FeedbackDialogProps {
 // Simple emoji rating component
 function RatingEmojis({
   value,
-  onChange
+  onChange,
 }: {
   value: number;
   onChange: (value: number) => void;
@@ -68,7 +73,7 @@ function RatingEmojis({
 // Zone ratings input component
 function ZoneRatingsInput({
   value,
-  onChange
+  onChange,
 }: {
   value: ZoneRatings;
   onChange: (ratings: ZoneRatings) => void;
@@ -80,13 +85,13 @@ function ZoneRatingsInput({
     { key: "hands", label: "Dłonie" },
     { key: "legs", label: "Nogi" },
     { key: "feet", label: "Stopy" },
-    { key: "neck", label: "Szyja" }
+    { key: "neck", label: "Szyja" },
   ] as const;
 
   const handleZoneChange = (zone: keyof ZoneRatings, rating: number) => {
     onChange({
       ...value,
-      [zone]: rating
+      [zone]: rating,
     });
   };
 
@@ -108,7 +113,7 @@ function ZoneRatingsInput({
 // Simple outfit editor for when user didn't follow recommendation
 function OutfitEditor({
   outfit,
-  onChange
+  onChange,
 }: {
   outfit: OutfitDTO;
   onChange: (outfit: OutfitDTO) => void;
@@ -131,24 +136,28 @@ export default function FeedbackDialog({
   isOpen,
   onClose,
   recommendation,
-  onSubmitted
+  onSubmitted,
 }: FeedbackDialogProps) {
-  const [followedRecommendation, setFollowedRecommendation] = useState<'yes' | 'no'>('yes');
-  const [actualOutfit, setActualOutfit] = useState<OutfitDTO>(recommendation.recommendation);
+  const [followedRecommendation, setFollowedRecommendation] = useState<
+    "yes" | "no"
+  >("yes");
+  const [actualOutfit, setActualOutfit] = useState<OutfitDTO>(
+    recommendation.recommendation,
+  );
   const [overallRating, setOverallRating] = useState(3);
   const [zoneRatings, setZoneRatings] = useState<ZoneRatings>({});
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
   const [shareWithCommunity, setShareWithCommunity] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const resetForm = () => {
-    setFollowedRecommendation('yes');
+    setFollowedRecommendation("yes");
     setActualOutfit(recommendation.recommendation);
     setOverallRating(3);
     setZoneRatings({});
-    setNotes('');
+    setNotes("");
     setShareWithCommunity(true);
     setIsSubmitting(false);
     setSubmitted(false);
@@ -174,24 +183,27 @@ export default function FeedbackDialog({
         wind_speed: recommendation.weather.wind_speed,
         humidity: recommendation.weather.humidity,
         rain_mm: recommendation.weather.rain_mm,
-        activity_type: 'spokojna', // TODO: Get from current filters
+        activity_type: "spokojna", // TODO: Get from current filters
         duration_minutes: 90, // TODO: Get from current filters
         actual_outfit: actualOutfit,
         overall_rating: overallRating,
-        zone_ratings: Object.keys(zoneRatings).length > 0 ? zoneRatings : undefined,
+        zone_ratings:
+          Object.keys(zoneRatings).length > 0 ? zoneRatings : undefined,
         notes: notes.trim() || undefined,
         shared_with_community: shareWithCommunity,
       };
 
-      const response = await fetch('/api/feedbacks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/feedbacks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(command),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error?.message || 'Failed to submit feedback');
+        throw new Error(
+          errorData.error?.message || "Failed to submit feedback",
+        );
       }
 
       const feedback: FeedbackDTO = await response.json();
@@ -203,9 +215,12 @@ export default function FeedbackDialog({
         handleClose();
         onSubmitted(feedback);
       }, 2000);
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Wystąpił błąd podczas zapisywania');
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Wystąpił błąd podczas zapisywania",
+      );
       setIsSubmitting(false);
     }
   };
@@ -225,16 +240,22 @@ export default function FeedbackDialog({
         <div className="space-y-6">
           {/* Weather reminder */}
           <div>
-            <Label className="text-sm font-medium mb-2 block">Warunki pogodowe podczas treningu</Label>
+            <Label className="text-sm font-medium mb-2 block">
+              Warunki pogodowe podczas treningu
+            </Label>
             <WeatherSummary weather={recommendation.weather} compact />
           </div>
 
           {/* Followed recommendation question */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Czy zastosowałeś się do rekomendacji?</Label>
+            <Label className="text-sm font-medium">
+              Czy zastosowałeś się do rekomendacji?
+            </Label>
             <RadioGroup
               value={followedRecommendation}
-              onValueChange={(value) => setFollowedRecommendation(value as 'yes' | 'no')}
+              onValueChange={(value) =>
+                setFollowedRecommendation(value as "yes" | "no")
+              }
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="followed-yes" />
@@ -248,9 +269,11 @@ export default function FeedbackDialog({
           </div>
 
           {/* Outfit editor (only if not followed) */}
-          {followedRecommendation === 'no' && (
+          {followedRecommendation === "no" && (
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Edytuj faktycznie użyte ubranie</Label>
+              <Label className="text-sm font-medium">
+                Edytuj faktycznie użyte ubranie
+              </Label>
               <OutfitEditor outfit={actualOutfit} onChange={setActualOutfit} />
             </div>
           )}
@@ -273,7 +296,10 @@ export default function FeedbackDialog({
                 Oceń poszczególne strefy ciała (opcjonalnie)
               </AccordionTrigger>
               <AccordionContent>
-                <ZoneRatingsInput value={zoneRatings} onChange={setZoneRatings} />
+                <ZoneRatingsInput
+                  value={zoneRatings}
+                  onChange={setZoneRatings}
+                />
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -332,14 +358,15 @@ export default function FeedbackDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={isSubmitting}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isSubmitting}
+          >
             Anuluj
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!canSubmit || isSubmitting}
-          >
-            {isSubmitting ? 'Zapisuję...' : 'Zapisz feedback'}
+          <Button onClick={handleSubmit} disabled={!canSubmit || isSubmitting}>
+            {isSubmitting ? "Zapisuję..." : "Zapisz feedback"}
           </Button>
         </DialogFooter>
       </DialogContent>

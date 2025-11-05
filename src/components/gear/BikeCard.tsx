@@ -1,4 +1,9 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BikeCardStats } from "./BikeCardStats";
@@ -11,7 +16,9 @@ interface BikeCardProps {
 }
 
 export const BikeCard = ({ bike, onClick }: BikeCardProps) => {
-  const TypeIcon = Icons[bike.typeIcon as keyof typeof Icons] as React.ComponentType<{ className?: string }>;
+  const TypeIcon = Icons[
+    bike.typeIcon as keyof typeof Icons
+  ] as React.ComponentType<{ className?: string }>;
 
   return (
     <Card

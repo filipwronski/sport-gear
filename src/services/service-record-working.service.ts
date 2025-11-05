@@ -71,7 +71,10 @@ export class ServiceRecordService {
             query = query.order("mileage_at_service", { ascending: true });
             break;
           case "cost_desc":
-            query = query.order("cost", { ascending: false, nullsFirst: false });
+            query = query.order("cost", {
+              ascending: false,
+              nullsFirst: false,
+            });
             break;
           case "cost_asc":
             query = query.order("cost", { ascending: true, nullsFirst: true });
@@ -88,11 +91,7 @@ export class ServiceRecordService {
       const offset = params.offset || 0;
       query = query.range(offset, offset + limit - 1);
 
-      const {
-        data: services,
-        error,
-        count,
-      } = await query;
+      const { data: services, error, count } = await query;
 
       if (error) {
         console.error("[ServiceRecordService] Error fetching services:", error);

@@ -1,16 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Shield } from 'lucide-react';
-import type { UpdateProfileCommand } from '../../types';
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Shield } from "lucide-react";
+import type { UpdateProfileCommand } from "../../types";
 
 interface PrivacySettingsSectionProps {
   shareWithCommunity: boolean | null;
   onUpdate: (share: boolean) => Promise<void>;
 }
 
-export function PrivacySettingsSection({ shareWithCommunity, onUpdate }: PrivacySettingsSectionProps) {
+export function PrivacySettingsSection({
+  shareWithCommunity,
+  onUpdate,
+}: PrivacySettingsSectionProps) {
   const [shareEnabled, setShareEnabled] = useState(shareWithCommunity ?? false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -60,8 +69,8 @@ export function PrivacySettingsSection({ shareWithCommunity, onUpdate }: Privacy
               Udostępniaj moje zestawy społeczności
             </Label>
             <p className="text-sm text-muted-foreground">
-              Pozwól innym użytkownikom zobaczyć Twoje zestawy ubiorów w sekcji społeczności.
-              Twoje dane osobowe pozostaną anonimowe.
+              Pozwól innym użytkownikom zobaczyć Twoje zestawy ubiorów w sekcji
+              społeczności. Twoje dane osobowe pozostaną anonimowe.
             </p>
           </div>
         </div>

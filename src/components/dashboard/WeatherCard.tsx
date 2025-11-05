@@ -9,7 +9,11 @@ interface WeatherCardProps {
   coordinates?: { lat: number; lng: number };
 }
 
-export function WeatherCard({ weather, refreshedAt, coordinates }: WeatherCardProps) {
+export function WeatherCard({
+  weather,
+  refreshedAt,
+  coordinates,
+}: WeatherCardProps) {
   const getWeatherIcon = (description: string) => {
     const lowerDesc = description.toLowerCase();
     if (lowerDesc.includes("clear") || lowerDesc.includes("sunny")) {
@@ -100,7 +104,7 @@ export function WeatherCard({ weather, refreshedAt, coordinates }: WeatherCardPr
               }}
               onDaySelect={(date) => {
                 // Could navigate to recommendations with specific date
-                console.log('Selected forecast date:', date);
+                console.log("Selected forecast date:", date);
               }}
             />
           </div>

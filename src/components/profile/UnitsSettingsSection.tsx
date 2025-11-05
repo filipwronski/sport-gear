@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Ruler } from 'lucide-react';
-import type { UnitsEnum } from '../../types';
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Ruler } from "lucide-react";
+import type { UnitsEnum } from "../../types";
 
 interface UnitsSettingsSectionProps {
   units: UnitsEnum | null;
@@ -11,17 +17,30 @@ interface UnitsSettingsSectionProps {
 }
 
 const UNITS_OPTIONS = [
-  { value: 'metric' as const, label: 'Metryczne', description: 'Kilometry, stopnie Celsjusza' },
-  { value: 'imperial' as const, label: 'Imperialne', description: 'Mile, stopnie Fahrenheita' },
+  {
+    value: "metric" as const,
+    label: "Metryczne",
+    description: "Kilometry, stopnie Celsjusza",
+  },
+  {
+    value: "imperial" as const,
+    label: "Imperialne",
+    description: "Mile, stopnie Fahrenheita",
+  },
 ];
 
-export function UnitsSettingsSection({ units, onUpdate }: UnitsSettingsSectionProps) {
-  const [selectedUnits, setSelectedUnits] = useState<UnitsEnum>(units || 'metric');
+export function UnitsSettingsSection({
+  units,
+  onUpdate,
+}: UnitsSettingsSectionProps) {
+  const [selectedUnits, setSelectedUnits] = useState<UnitsEnum>(
+    units || "metric",
+  );
   const [isUpdating, setIsUpdating] = useState(false);
 
   // Update local state when prop changes
   useEffect(() => {
-    setSelectedUnits(units || 'metric');
+    setSelectedUnits(units || "metric");
   }, [units]);
 
   const handleUnitsChange = async (value: UnitsEnum) => {
@@ -32,7 +51,7 @@ export function UnitsSettingsSection({ units, onUpdate }: UnitsSettingsSectionPr
     } catch (error) {
       // Error is handled by parent component
       // Revert local state on error
-      setSelectedUnits(units || 'metric');
+      setSelectedUnits(units || "metric");
     } finally {
       setIsUpdating(false);
     }
@@ -45,9 +64,7 @@ export function UnitsSettingsSection({ units, onUpdate }: UnitsSettingsSectionPr
           <Ruler className="h-5 w-5" />
           Jednostki
         </CardTitle>
-        <CardDescription>
-          Wybierz preferowany system jednostek
-        </CardDescription>
+        <CardDescription>Wybierz preferowany system jednostek</CardDescription>
       </CardHeader>
       <CardContent>
         <RadioGroup

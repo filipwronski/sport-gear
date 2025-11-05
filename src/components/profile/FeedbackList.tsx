@@ -35,9 +35,7 @@ function renderStars(rating: number) {
         <Star
           key={star}
           className={`h-4 w-4 ${
-            star <= rating
-              ? "fill-yellow-400 text-yellow-400"
-              : "text-gray-300"
+            star <= rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
           }`}
         />
       ))}
@@ -158,7 +156,11 @@ function FeedbackCard({
   );
 }
 
-export function FeedbackList({ feedbacks, onDeleteFeedback, isDeleting }: FeedbackListProps) {
+export function FeedbackList({
+  feedbacks,
+  onDeleteFeedback,
+  isDeleting,
+}: FeedbackListProps) {
   if (feedbacks.length === 0) {
     return (
       <Card>
@@ -166,8 +168,8 @@ export function FeedbackList({ feedbacks, onDeleteFeedback, isDeleting }: Feedba
           <Star className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium mb-2">Brak feedbacków</h3>
           <p className="text-sm text-muted-foreground text-center">
-            Nie dodałeś jeszcze żadnego feedbacku po treningu.
-            Rozpocznij dodawanie opinii, aby budować swoją reputację!
+            Nie dodałeś jeszcze żadnego feedbacku po treningu. Rozpocznij
+            dodawanie opinii, aby budować swoją reputację!
           </p>
         </CardContent>
       </Card>

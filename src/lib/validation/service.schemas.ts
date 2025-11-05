@@ -39,8 +39,14 @@ export const getServicesParamsSchema = z
     service_location: serviceLocationSchema.optional(),
     limit: z.coerce.number().int().min(1).max(100).default(50),
     offset: z.coerce.number().int().min(0).default(0),
-    from_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-    to_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    from_date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
+    to_date: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .optional(),
     sort: serviceSortSchema,
   })
   .refine(
@@ -75,14 +81,16 @@ export const getServiceStatsParamsSchema = z
 
 export const createServiceSchema = z
   .object({
-    service_date: z
-      .string()
-      .refine((date) => {
+    service_date: z.string().refine(
+      (date) => {
         const parsedDate = new Date(date);
         return !isNaN(parsedDate.getTime()) && parsedDate <= new Date();
-      }, {
-        message: "service_date must be a valid date and cannot be in the future",
-      }),
+      },
+      {
+        message:
+          "service_date must be a valid date and cannot be in the future",
+      },
+    ),
     mileage_at_service: z.number().int().positive(),
     service_type: serviceTypeSchema,
     service_location: serviceLocationSchema.optional(),
@@ -106,12 +114,16 @@ export const createServiceSchema = z
 export const updateServiceSchema = z.object({
   service_date: z
     .string()
-    .refine((date) => {
-      const parsedDate = new Date(date);
-      return !isNaN(parsedDate.getTime()) && parsedDate <= new Date();
-    }, {
-      message: "service_date must be a valid date and cannot be in the future",
-    })
+    .refine(
+      (date) => {
+        const parsedDate = new Date(date);
+        return !isNaN(parsedDate.getTime()) && parsedDate <= new Date();
+      },
+      {
+        message:
+          "service_date must be a valid date and cannot be in the future",
+      },
+    )
     .optional(),
   mileage_at_service: z.number().int().positive().optional(),
   service_type: serviceTypeSchema.optional(),

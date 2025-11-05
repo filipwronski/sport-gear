@@ -1,12 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Thermometer, ChevronDown, RotateCcw } from 'lucide-react';
-import type { ThermalPreferences, ThermalFeelingEnum, UpdateProfileCommand } from '../../types';
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Thermometer, ChevronDown, RotateCcw } from "lucide-react";
+import type {
+  ThermalPreferences,
+  ThermalFeelingEnum,
+  UpdateProfileCommand,
+} from "../../types";
 
 interface ThermalPreferencesSectionProps {
   preferences: ThermalPreferences | null;
@@ -14,21 +34,22 @@ interface ThermalPreferencesSectionProps {
   onStartQuiz: () => void;
 }
 
-const THERMAL_FEELING_OPTIONS: { value: ThermalFeelingEnum; label: string }[] = [
-  { value: 'marzlak', label: 'Marzlak - szybko mi zimno' },
-  { value: 'neutralnie', label: 'Neutralnie - normalna wrażliwość' },
-  { value: 'szybko_mi_goraco', label: 'Szybko mi gorąco - wolniej się pocę' },
-];
+const THERMAL_FEELING_OPTIONS: { value: ThermalFeelingEnum; label: string }[] =
+  [
+    { value: "marzlak", label: "Marzlak - szybko mi zimno" },
+    { value: "neutralnie", label: "Neutralnie - normalna wrażliwość" },
+    { value: "szybko_mi_goraco", label: "Szybko mi gorąco - wolniej się pocę" },
+  ];
 
 export function ThermalPreferencesSection({
   preferences,
   onUpdate,
-  onStartQuiz
+  onStartQuiz,
 }: ThermalPreferencesSectionProps) {
   const [isManualEditOpen, setIsManualEditOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [localPreferences, setLocalPreferences] = useState<ThermalPreferences>({
-    general_feeling: 'neutralnie',
+    general_feeling: "neutralnie",
     cold_hands: false,
     cold_feet: false,
     cap_threshold_temp: 20,
@@ -41,12 +62,12 @@ export function ThermalPreferencesSection({
     }
   }, [preferences]);
 
-  const hasChanges = preferences ? (
-    localPreferences.general_feeling !== preferences.general_feeling ||
-    localPreferences.cold_hands !== preferences.cold_hands ||
-    localPreferences.cold_feet !== preferences.cold_feet ||
-    localPreferences.cap_threshold_temp !== preferences.cap_threshold_temp
-  ) : true;
+  const hasChanges = preferences
+    ? localPreferences.general_feeling !== preferences.general_feeling ||
+      localPreferences.cold_hands !== preferences.cold_hands ||
+      localPreferences.cold_feet !== preferences.cold_feet ||
+      localPreferences.cap_threshold_temp !== preferences.cap_threshold_temp
+    : true;
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -85,11 +106,19 @@ export function ThermalPreferencesSection({
             Przejdź quiz ponownie
           </Button>
 
-          <Collapsible open={isManualEditOpen} onOpenChange={setIsManualEditOpen}>
+          <Collapsible
+            open={isManualEditOpen}
+            onOpenChange={setIsManualEditOpen}
+          >
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full sm:w-auto justify-between">
+              <Button
+                variant="ghost"
+                className="w-full sm:w-auto justify-between"
+              >
                 Ręczna edycja ustawień
-                <ChevronDown className={`h-4 w-4 transition-transform ${isManualEditOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${isManualEditOpen ? "rotate-180" : ""}`}
+                />
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-4 mt-4">
@@ -98,7 +127,10 @@ export function ThermalPreferencesSection({
                 <Select
                   value={localPreferences.general_feeling}
                   onValueChange={(value: ThermalFeelingEnum) =>
-                    setLocalPreferences(prev => ({ ...prev, general_feeling: value }))
+                    setLocalPreferences((prev) => ({
+                      ...prev,
+                      general_feeling: value,
+                    }))
                   }
                 >
                   <SelectTrigger>
@@ -121,7 +153,10 @@ export function ThermalPreferencesSection({
                     id="cold-hands"
                     checked={localPreferences.cold_hands}
                     onCheckedChange={(checked) =>
-                      setLocalPreferences(prev => ({ ...prev, cold_hands: checked as boolean }))
+                      setLocalPreferences((prev) => ({
+                        ...prev,
+                        cold_hands: checked as boolean,
+                      }))
                     }
                   />
                   <Label htmlFor="cold-hands">Szybko marzną mi ręce</Label>
@@ -131,7 +166,10 @@ export function ThermalPreferencesSection({
                     id="cold-feet"
                     checked={localPreferences.cold_feet}
                     onCheckedChange={(checked) =>
-                      setLocalPreferences(prev => ({ ...prev, cold_feet: checked as boolean }))
+                      setLocalPreferences((prev) => ({
+                        ...prev,
+                        cold_feet: checked as boolean,
+                      }))
                     }
                   />
                   <Label htmlFor="cold-feet">Szybko marzną mi stopy</Label>
@@ -139,22 +177,29 @@ export function ThermalPreferencesSection({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cap-threshold">Próg temperatury dla czapki (°C)</Label>
+                <Label htmlFor="cap-threshold">
+                  Próg temperatury dla czapki (°C)
+                </Label>
                 <Select
                   value={(localPreferences.cap_threshold_temp ?? 20).toString()}
                   onValueChange={(value) =>
-                    setLocalPreferences(prev => ({ ...prev, cap_threshold_temp: parseInt(value) }))
+                    setLocalPreferences((prev) => ({
+                      ...prev,
+                      cap_threshold_temp: parseInt(value),
+                    }))
                   }
                 >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 31 }, (_, i) => i - 10).map((temp) => (
-                      <SelectItem key={temp} value={temp.toString()}>
-                        {temp}°C
-                      </SelectItem>
-                    ))}
+                    {Array.from({ length: 31 }, (_, i) => i - 10).map(
+                      (temp) => (
+                        <SelectItem key={temp} value={temp.toString()}>
+                          {temp}°C
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
                 <p className="text-sm text-muted-foreground">
@@ -165,7 +210,7 @@ export function ThermalPreferencesSection({
               {hasChanges && (
                 <div className="flex justify-end pt-4">
                   <Button onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? 'Zapisywanie...' : 'Zapisz zmiany'}
+                    {isSaving ? "Zapisywanie..." : "Zapisz zmiany"}
                   </Button>
                 </div>
               )}

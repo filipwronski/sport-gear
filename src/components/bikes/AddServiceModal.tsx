@@ -22,7 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { createServiceSchema, type CreateServiceCommand } from "@/lib/validation/service.schemas";
+import {
+  createServiceSchema,
+  type CreateServiceCommand,
+} from "@/lib/validation/service.schemas";
 import { toast } from "sonner";
 
 interface AddServiceModalProps {
@@ -86,9 +89,11 @@ export function AddServiceModal({
     setIsSubmitting(true);
     try {
       // Convert date to ISO string - add seconds if missing
-      const serviceDate = data.service_date.includes(':') && data.service_date.split(':').length === 2
-        ? `${data.service_date}:00`
-        : data.service_date;
+      const serviceDate =
+        data.service_date.includes(":") &&
+        data.service_date.split(":").length === 2
+          ? `${data.service_date}:00`
+          : data.service_date;
       const serviceData = {
         ...data,
         service_date: new Date(serviceDate).toISOString(),
@@ -114,7 +119,7 @@ export function AddServiceModal({
     } catch (error) {
       console.error("Error creating service:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to create service"
+        error instanceof Error ? error.message : "Failed to create service",
       );
     } finally {
       setIsSubmitting(false);
@@ -147,13 +152,17 @@ export function AddServiceModal({
               className={errors.service_date ? "border-red-500" : ""}
             />
             {errors.service_date && (
-              <p className="text-sm text-red-500">{errors.service_date.message}</p>
+              <p className="text-sm text-red-500">
+                {errors.service_date.message}
+              </p>
             )}
           </div>
 
           {/* Mileage at Service */}
           <div className="space-y-2">
-            <Label htmlFor="mileage_at_service">Mileage at Service (km) *</Label>
+            <Label htmlFor="mileage_at_service">
+              Mileage at Service (km) *
+            </Label>
             <Input
               id="mileage_at_service"
               type="number"
@@ -174,7 +183,9 @@ export function AddServiceModal({
             <Select
               onValueChange={(value) => setValue("service_type", value as any)}
             >
-              <SelectTrigger className={errors.service_type ? "border-red-500" : ""}>
+              <SelectTrigger
+                className={errors.service_type ? "border-red-500" : ""}
+              >
                 <SelectValue placeholder="Select service type" />
               </SelectTrigger>
               <SelectContent>
@@ -186,7 +197,9 @@ export function AddServiceModal({
               </SelectContent>
             </Select>
             {errors.service_type && (
-              <p className="text-sm text-red-500">{errors.service_type.message}</p>
+              <p className="text-sm text-red-500">
+                {errors.service_type.message}
+              </p>
             )}
           </div>
 
@@ -194,7 +207,9 @@ export function AddServiceModal({
           <div className="space-y-2">
             <Label>Service Location</Label>
             <Select
-              onValueChange={(value) => setValue("service_location", value as any)}
+              onValueChange={(value) =>
+                setValue("service_location", value as any)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select service location (optional)" />
@@ -254,7 +269,9 @@ export function AddServiceModal({
                   setValue("create_reminder", checked as boolean)
                 }
               />
-              <Label htmlFor="create_reminder">Create maintenance reminder</Label>
+              <Label htmlFor="create_reminder">
+                Create maintenance reminder
+              </Label>
             </div>
           </div>
 

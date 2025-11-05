@@ -10,12 +10,18 @@ import { useProfile } from "./hooks/useProfile";
 import { useLocations } from "./hooks/useLocations";
 import { useExport } from "./hooks/useExport";
 import { useToast } from "../auth/useToast";
-import type { UpdateProfileCommand, ThermalPreferences, UnitsEnum, ProfileDTO, LocationDTO } from "../../types";
+import type {
+  UpdateProfileCommand,
+  ThermalPreferences,
+  UnitsEnum,
+  ProfileDTO,
+  LocationDTO,
+} from "../../types";
 
 export function ProfileView({
   userId,
   initialProfile,
-  initialLocations
+  initialLocations,
 }: {
   userId?: string;
   initialProfile?: ProfileDTO | null;
@@ -63,7 +69,9 @@ export function ProfileView({
   }, [fetchProfile, fetchLocations, userId, initialProfile, initialLocations]);
 
   // Handle profile updates
-  const handleProfileUpdate = async (command: Partial<UpdateProfileCommand>) => {
+  const handleProfileUpdate = async (
+    command: Partial<UpdateProfileCommand>,
+  ) => {
     try {
       await updateProfile(command);
       showToast({
@@ -82,7 +90,9 @@ export function ProfileView({
   };
 
   // Handle thermal preferences update
-  const handleThermalPreferencesUpdate = async (preferences: ThermalPreferences) => {
+  const handleThermalPreferencesUpdate = async (
+    preferences: ThermalPreferences,
+  ) => {
     try {
       await updateProfile({ thermal_preferences: preferences });
       showToast({
@@ -175,7 +185,8 @@ export function ProfileView({
       showToast({
         type: "error",
         title: "Błąd usunięcia konta",
-        description: "Nie udało się usunąć konta. Sprawdź hasło i spróbuj ponownie.",
+        description:
+          "Nie udało się usunąć konta. Sprawdź hasło i spróbuj ponownie.",
       });
       throw error;
     }

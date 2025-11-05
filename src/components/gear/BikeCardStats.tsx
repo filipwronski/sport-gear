@@ -35,8 +35,8 @@ export const BikeCardStats = ({ bike }: BikeCardStatsProps) => {
               bike.nextService.statusBadgeVariant === "warning"
                 ? "secondary"
                 : bike.nextService.statusBadgeVariant === "destructive"
-                ? "destructive"
-                : "default"
+                  ? "destructive"
+                  : "default"
             }
             className="text-xs"
           >

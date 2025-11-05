@@ -1,5 +1,9 @@
 import { useState, useCallback } from "react";
-import type { LocationDTO, CreateLocationCommand, UpdateLocationCommand } from "../../../types";
+import type {
+  LocationDTO,
+  CreateLocationCommand,
+  UpdateLocationCommand,
+} from "../../../types";
 
 export interface UseLocationsReturn {
   locations: LocationDTO[];
@@ -7,15 +11,22 @@ export interface UseLocationsReturn {
   error: Error | null;
   fetchLocations: () => Promise<void>;
   createLocation: (command: CreateLocationCommand) => Promise<LocationDTO>;
-  updateLocation: (locationId: string, command: UpdateLocationCommand) => Promise<LocationDTO>;
+  updateLocation: (
+    locationId: string,
+    command: UpdateLocationCommand,
+  ) => Promise<LocationDTO>;
 }
 
 /**
  * Custom hook for managing user locations
  * Handles fetching user locations for profile management
  */
-export function useLocations(initialLocations?: LocationDTO[]): UseLocationsReturn {
-  const [locations, setLocations] = useState<LocationDTO[]>(initialLocations || []);
+export function useLocations(
+  initialLocations?: LocationDTO[],
+): UseLocationsReturn {
+  const [locations, setLocations] = useState<LocationDTO[]>(
+    initialLocations || [],
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -40,74 +51,92 @@ export function useLocations(initialLocations?: LocationDTO[]): UseLocationsRetu
       const locationsData: LocationDTO[] = await response.json();
       setLocations(locationsData);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
+      const error =
+        err instanceof Error ? err : new Error("Unknown error occurred");
       setError(error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const createLocation = useCallback(async (command: CreateLocationCommand): Promise<LocationDTO> => {
-    setError(null);
+  const createLocation = useCallback(
+    async (command: CreateLocationCommand): Promise<LocationDTO> => {
+      setError(null);
 
-    try {
-      const response = await fetch("/api/locations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(command),
-        credentials: "include",
-      });
+      try {
+        const response = await fetch("/api/locations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(command),
+          credentials: "include",
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error?.message || `HTTP ${response.status}`,
+          );
+        }
+
+        const newLocation: LocationDTO = await response.json();
+
+        // Add to local state
+        setLocations((prev) => [newLocation, ...prev]);
+
+        return newLocation;
+      } catch (err) {
+        const error =
+          err instanceof Error ? err : new Error("Unknown error occurred");
+        setError(error);
+        throw error;
       }
+    },
+    [],
+  );
 
-      const newLocation: LocationDTO = await response.json();
+  const updateLocation = useCallback(
+    async (
+      locationId: string,
+      command: UpdateLocationCommand,
+    ): Promise<LocationDTO> => {
+      setError(null);
 
-      // Add to local state
-      setLocations(prev => [newLocation, ...prev]);
+      try {
+        const response = await fetch(`/api/locations/${locationId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(command),
+          credentials: "include",
+        });
 
-      return newLocation;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
-      setError(error);
-      throw error;
-    }
-  }, []);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(
+            errorData.error?.message || `HTTP ${response.status}`,
+          );
+        }
 
-  const updateLocation = useCallback(async (locationId: string, command: UpdateLocationCommand): Promise<LocationDTO> => {
-    setError(null);
+        const updatedLocation: LocationDTO = await response.json();
 
-    try {
-      const response = await fetch(`/api/locations/${locationId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(command),
-        credentials: "include",
-      });
+        // Update in local state
+        setLocations((prev) =>
+          prev.map((loc) => (loc.id === locationId ? updatedLocation : loc)),
+        );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        return updatedLocation;
+      } catch (err) {
+        const error =
+          err instanceof Error ? err : new Error("Unknown error occurred");
+        setError(error);
+        throw error;
       }
-
-      const updatedLocation: LocationDTO = await response.json();
-
-      // Update in local state
-      setLocations(prev => prev.map(loc => loc.id === locationId ? updatedLocation : loc));
-
-      return updatedLocation;
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
-      setError(error);
-      throw error;
-    }
-  }, []);
+    },
+    [],
+  );
 
   return {
     locations,

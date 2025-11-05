@@ -4,14 +4,22 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import WeatherSummary from "./WeatherSummary";
-import WorkoutSelector, { type WorkoutIntensity, type WorkoutDuration } from "./WorkoutSelector";
+import WorkoutSelector, {
+  type WorkoutIntensity,
+  type WorkoutDuration,
+} from "./WorkoutSelector";
 import CyclistSVG from "./CyclistSVG";
 import OutfitRecommendationList from "./OutfitRecommendationList";
 import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
 import { useDefaultLocation } from "@/hooks/useLocationSelection";
-import type { ZoneType, FeedbackDTO, NewRecommendationDTO, ApiError } from "../types";
+import type {
+  ZoneType,
+  FeedbackDTO,
+  NewRecommendationDTO,
+  ApiError,
+} from "../types";
 
 /**
  * Simplified RecommendationView - Shows current weather-based outfit recommendation
@@ -20,15 +28,19 @@ export default function RecommendationView() {
   const [selectedZone, setSelectedZone] = useState<ZoneType | undefined>();
   const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
   const [feedbackCount, setFeedbackCount] = useState(0);
-  const [recommendation, setRecommendation] = useState<NewRecommendationDTO | null>(null);
+  const [recommendation, setRecommendation] =
+    useState<NewRecommendationDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ApiError | null>(null);
-  const [workoutIntensity, setWorkoutIntensity] = useState<WorkoutIntensity>("rekreacyjny");
+  const [workoutIntensity, setWorkoutIntensity] =
+    useState<WorkoutIntensity>("rekreacyjny");
   const [workoutDuration, setWorkoutDuration] = useState<WorkoutDuration>(60);
 
   // Track original workout parameters to detect changes
-  const [originalWorkoutIntensity, setOriginalWorkoutIntensity] = useState<WorkoutIntensity>("rekreacyjny");
-  const [originalWorkoutDuration, setOriginalWorkoutDuration] = useState<WorkoutDuration>(60);
+  const [originalWorkoutIntensity, setOriginalWorkoutIntensity] =
+    useState<WorkoutIntensity>("rekreacyjny");
+  const [originalWorkoutDuration, setOriginalWorkoutDuration] =
+    useState<WorkoutDuration>(60);
 
   const { defaultLocation } = useDefaultLocation();
 
@@ -38,7 +50,9 @@ export default function RecommendationView() {
   }, [defaultLocation]);
 
   // Track when workout parameters change
-  const hasWorkoutParamsChanged = workoutIntensity !== originalWorkoutIntensity || workoutDuration !== originalWorkoutDuration;
+  const hasWorkoutParamsChanged =
+    workoutIntensity !== originalWorkoutIntensity ||
+    workoutDuration !== originalWorkoutDuration;
 
   const fetchRecommendation = async () => {
     setIsLoading(true);
@@ -46,7 +60,7 @@ export default function RecommendationView() {
 
     try {
       // Get coordinates
-      let params: Record<string, string> = {};
+      const params: Record<string, string> = {};
 
       // Use default location if available
       if (defaultLocation) {
@@ -54,13 +68,15 @@ export default function RecommendationView() {
         params.lng = defaultLocation.location.longitude.toString();
       } else if (navigator.geolocation) {
         try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 5000,
-              maximumAge: 300000,
-            });
-          });
+          const position = await new Promise<GeolocationPosition>(
+            (resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 300000,
+              });
+            },
+          );
           params.lat = position.coords.latitude.toString();
           params.lng = position.coords.longitude.toString();
         } catch (geoError) {
@@ -84,7 +100,9 @@ export default function RecommendationView() {
         const errorData = await response.json();
         const apiError: ApiError = {
           code: errorData.error?.code || "UNKNOWN_ERROR",
-          message: errorData.error?.message || "Wystąpił błąd podczas pobierania rekomendacji",
+          message:
+            errorData.error?.message ||
+            "Wystąpił błąd podczas pobierania rekomendacji",
           statusCode: response.status,
           details: errorData.error?.details,
           retryAfter: response.headers.get("Retry-After")
@@ -112,7 +130,7 @@ export default function RecommendationView() {
   };
 
   const handleFeedbackSubmitted = (feedback: FeedbackDTO) => {
-    setFeedbackCount(prev => prev + 1);
+    setFeedbackCount((prev) => prev + 1);
   };
 
   if (isLoading) {
@@ -180,7 +198,9 @@ export default function RecommendationView() {
             disabled={isLoading || !hasWorkoutParamsChanged}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+            />
             Zaktualizuj rekomendacje
           </Button>
         </div>

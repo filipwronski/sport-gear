@@ -8,7 +8,11 @@
 
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import type { RecommendationDTO, NewRecommendationDTO, GetRecommendationParams } from "../../types";
+import type {
+  RecommendationDTO,
+  NewRecommendationDTO,
+  GetRecommendationParams,
+} from "../../types";
 import { GetRecommendationsSchema } from "../../lib/validation/recommendations.schemas";
 import { GetNewRecommendationsSchema } from "../../lib/validation/recommendations.schemas";
 import { RecommendationWeatherService } from "../../services/weather/recommendation-weather.service";
@@ -68,7 +72,11 @@ export const GET: APIRoute = async ({ request, locals }) => {
     // 3. Fetch data in parallel (coordinates-based, no location ownership check needed)
     const weatherService = new RecommendationWeatherService();
     const [weather, profile] = await Promise.all([
-      weatherService.getWeatherByCoordinates(params.lat, params.lng, params.date),
+      weatherService.getWeatherByCoordinates(
+        params.lat,
+        params.lng,
+        params.date,
+      ),
       getUserProfile(userId),
     ]);
 

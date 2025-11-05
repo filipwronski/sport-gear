@@ -10,9 +10,7 @@ export interface ResetPasswordFormProps {
   onBack: () => void;
 }
 
-const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({
-  onBack,
-}) => {
+const ResetPasswordForm: React.FC<ResetPasswordFormProps> = ({ onBack }) => {
   const { authState, resetPassword } = useAuth();
 
   const {

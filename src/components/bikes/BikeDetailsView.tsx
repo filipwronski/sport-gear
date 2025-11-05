@@ -99,7 +99,10 @@ export default function BikeDetailsView({ bikeId }: BikeDetailsViewProps) {
         </TabsList>
 
         <TabsContent value="history" className="mt-6">
-          <ServiceHistoryTab bikeId={bikeId} currentMileage={bike?.current_mileage} />
+          <ServiceHistoryTab
+            bikeId={bikeId}
+            currentMileage={bike?.current_mileage}
+          />
         </TabsContent>
 
         <TabsContent value="reminders" className="mt-6">

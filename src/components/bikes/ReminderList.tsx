@@ -7,9 +7,7 @@ interface ReminderListProps {
   reminders: ServiceReminderDTO[];
 }
 
-export function ReminderList({
-  reminders,
-}: ReminderListProps) {
+export function ReminderList({ reminders }: ReminderListProps) {
   const serviceTypeLabels: Record<string, string> = {
     lancuch: "Chain",
     kaseta: "Cassette",

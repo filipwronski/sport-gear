@@ -255,7 +255,7 @@ export class WeatherService {
     apiData: OpenWeatherForecastResponse,
   ): ForecastDTO {
     // Group forecast data by day
-    const dailyData: { [date: string]: any[] } = {};
+    const dailyData: Record<string, any[]> = {};
 
     apiData.list.forEach((item) => {
       const date = new Date(item.dt * 1000).toISOString().split("T")[0];
@@ -270,10 +270,13 @@ export class WeatherService {
       .slice(0, 5)
       .map((date) => {
         const dayData = dailyData[date];
-        const tempMin = Math.min(...dayData.map(d => d.main.temp_min));
-        const tempMax = Math.max(...dayData.map(d => d.main.temp_max));
+        const tempMin = Math.min(...dayData.map((d) => d.main.temp_min));
+        const tempMax = Math.max(...dayData.map((d) => d.main.temp_max));
         const windSpeed = Math.round(dayData[0].wind.speed * 3.6); // m/s to km/h
-        const rainMm = dayData.reduce((sum, d) => sum + (d.rain?.["3h"] || 0), 0);
+        const rainMm = dayData.reduce(
+          (sum, d) => sum + (d.rain?.["3h"] || 0),
+          0,
+        );
         const description = dayData[0].weather[0]?.description || "clear";
 
         return {

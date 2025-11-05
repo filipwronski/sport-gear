@@ -1,5 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { useInfiniteQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 
 // Create a client for outfit history
 const historyQueryClient = new QueryClient({
@@ -22,12 +26,27 @@ import { History, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import OutfitHistoryCard from "./OutfitHistoryCard";
-import type { FeedbackDTO, GetFeedbacksParams, ActivityTypeEnum } from "../types";
+import type {
+  FeedbackDTO,
+  GetFeedbacksParams,
+  ActivityTypeEnum,
+} from "../types";
 
 /**
  * HistoryFilters - Filter controls for outfit history
@@ -36,9 +55,9 @@ interface HistoryFiltersProps {
   filters: {
     temperatureMin: number;
     temperatureMax: number;
-    season?: 'spring' | 'summer' | 'autumn' | 'winter';
+    season?: "spring" | "summer" | "autumn" | "winter";
     activityType?: ActivityTypeEnum;
-    sort: 'created_at_desc' | 'created_at_asc' | 'rating_desc' | 'rating_asc';
+    sort: "created_at_desc" | "created_at_asc" | "rating_desc" | "rating_asc";
   };
   onChange: (filters: Partial<GetFeedbacksParams>) => void;
 }
@@ -53,14 +72,15 @@ function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
     // Note: Season filtering is done client-side since API doesn't support date ranges
     // We'll store the season in local filters but not pass date ranges to API
     // "all" means no filter (undefined)
-    const seasonValue = season === 'all' ? undefined : season;
+    const seasonValue = season === "all" ? undefined : season;
     // For now, just store in local state (client-side filtering not implemented)
   };
 
   const handleActivityTypeChange = (activityType: string) => {
     onChange({
       ...filters,
-      activity_type: activityType === 'all' ? undefined : (activityType as ActivityTypeEnum),
+      activity_type:
+        activityType === "all" ? undefined : (activityType as ActivityTypeEnum),
     });
   };
 
@@ -75,15 +95,16 @@ function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
     onChange({
       limit: 30,
       offset: 0,
-      sort: 'created_at_desc',
+      sort: "created_at_desc",
     });
   };
 
-  const hasActiveFilters = filters.temperatureMin !== -10 ||
+  const hasActiveFilters =
+    filters.temperatureMin !== -10 ||
     filters.temperatureMax !== 35 ||
     filters.season ||
     filters.activityType ||
-    filters.sort !== 'created_at_desc';
+    filters.sort !== "created_at_desc";
 
   return (
     <Card>
@@ -114,7 +135,10 @@ function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
           {/* Season */}
           <div className="space-y-2">
             <Label>Pora roku</Label>
-            <Select value={filters.season || undefined} onValueChange={handleSeasonChange}>
+            <Select
+              value={filters.season || undefined}
+              onValueChange={handleSeasonChange}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Wszystkie" />
               </SelectTrigger>
@@ -131,7 +155,10 @@ function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
           {/* Activity Type */}
           <div className="space-y-2">
             <Label>Typ aktywności</Label>
-            <Select value={filters.activityType || undefined} onValueChange={handleActivityTypeChange}>
+            <Select
+              value={filters.activityType || undefined}
+              onValueChange={handleActivityTypeChange}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Wszystkie" />
               </SelectTrigger>
@@ -148,7 +175,10 @@ function HistoryFilters({ filters, onChange }: HistoryFiltersProps) {
           {/* Sort */}
           <div className="space-y-2">
             <Label>Sortowanie</Label>
-            <Select value={filters.sort || 'created_at_desc'} onValueChange={handleSortChange}>
+            <Select
+              value={filters.sort || "created_at_desc"}
+              onValueChange={handleSortChange}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -182,7 +212,9 @@ interface OutfitHistoryProps {
   onOutfitClick?: (outfit: FeedbackDTO) => void;
 }
 
-async function fetchFeedbacks(params: GetFeedbacksParams): Promise<{ feedbacks: FeedbackDTO[], total: number, has_more: boolean }> {
+async function fetchFeedbacks(
+  params: GetFeedbacksParams,
+): Promise<{ feedbacks: FeedbackDTO[]; total: number; has_more: boolean }> {
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -193,17 +225,20 @@ async function fetchFeedbacks(params: GetFeedbacksParams): Promise<{ feedbacks: 
 
   const response = await fetch(`/api/feedbacks?${searchParams}`);
   if (!response.ok) {
-    throw new Error('Failed to fetch feedback history');
+    throw new Error("Failed to fetch feedback history");
   }
   return response.json();
 }
 
 // Internal component that uses React Query
-function OutfitHistoryInternal({ defaultFilters, onOutfitClick }: OutfitHistoryProps) {
+function OutfitHistoryInternal({
+  defaultFilters,
+  onOutfitClick,
+}: OutfitHistoryProps) {
   const [filters, setFilters] = useState<GetFeedbacksParams>({
     limit: 30,
     offset: 0,
-    sort: 'created_at_desc',
+    sort: "created_at_desc",
     ...defaultFilters,
   });
   const [isMounted, setIsMounted] = useState(false);
@@ -220,7 +255,7 @@ function OutfitHistoryInternal({ defaultFilters, onOutfitClick }: OutfitHistoryP
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ['feedbacks', filters],
+    queryKey: ["feedbacks", filters],
     queryFn: ({ pageParam = 0 }) =>
       fetchFeedbacks({ ...filters, offset: pageParam }),
     getNextPageParam: (lastPage, pages) => {
@@ -234,7 +269,7 @@ function OutfitHistoryInternal({ defaultFilters, onOutfitClick }: OutfitHistoryP
   });
 
   const allFeedbacks = useMemo(() => {
-    return data?.pages.flatMap(page => page.feedbacks) || [];
+    return data?.pages.flatMap((page) => page.feedbacks) || [];
   }, [data]);
 
   const totalCount = data?.pages[0]?.total || 0;
@@ -295,7 +330,7 @@ function OutfitHistoryInternal({ defaultFilters, onOutfitClick }: OutfitHistoryP
                 temperatureMax: 35,
                 season: undefined, // Client-side filtering not implemented yet
                 activityType: filters.activity_type,
-                sort: filters.sort || 'created_at_desc',
+                sort: filters.sort || "created_at_desc",
               }}
               onChange={handleFiltersChange}
             />
@@ -324,9 +359,12 @@ function OutfitHistoryInternal({ defaultFilters, onOutfitClick }: OutfitHistoryP
         <Card>
           <CardContent className="text-center py-12">
             <History className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-            <h4 className="text-lg font-medium mb-2">Brak zapisanych treningów</h4>
+            <h4 className="text-lg font-medium mb-2">
+              Brak zapisanych treningów
+            </h4>
             <p className="text-muted-foreground mb-4">
-              Twoje treningi z ocenami 4 lub 5 będą automatycznie zapisywane w historii.
+              Twoje treningi z ocenami 4 lub 5 będą automatycznie zapisywane w
+              historii.
             </p>
             <p className="text-sm text-muted-foreground">
               Rozpocznij treningi i dodawaj feedback aby budować swoją historię!
@@ -354,7 +392,7 @@ function OutfitHistoryInternal({ defaultFilters, onOutfitClick }: OutfitHistoryP
                 disabled={isFetchingNextPage}
                 variant="outline"
               >
-                {isFetchingNextPage ? 'Ładowanie...' : 'Załaduj więcej'}
+                {isFetchingNextPage ? "Ładowanie..." : "Załaduj więcej"}
               </Button>
             </div>
           )}

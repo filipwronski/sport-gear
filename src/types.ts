@@ -42,7 +42,11 @@ export type ServiceTypeEnum =
   | "inne";
 export type ServiceLocationEnum = "warsztat" | "samodzielnie";
 export type ActivityTypeEnum = "recovery" | "spokojna" | "tempo" | "interwaly";
-export type WorkoutIntensity = "rekreacyjny" | "tempo" | "intensywny" | "długodystansowy";
+export type WorkoutIntensity =
+  | "rekreacyjny"
+  | "tempo"
+  | "intensywny"
+  | "długodystansowy";
 export type ThermalFeelingEnum = "marzlak" | "neutralnie" | "szybko_mi_goraco";
 export type ReputationBadgeEnum =
   | "nowicjusz"
@@ -939,7 +943,14 @@ export const SORT_OPTIONS: SortOption[] = [
 /**
  * Zone type for body parts in cyclist silhouette
  */
-export type ZoneType = 'head' | 'torso' | 'arms' | 'hands' | 'legs' | 'feet' | 'neck';
+export type ZoneType =
+  | "head"
+  | "torso"
+  | "arms"
+  | "hands"
+  | "legs"
+  | "feet"
+  | "neck";
 
 /**
  * Recommendation filters view model
@@ -968,7 +979,7 @@ export interface RecommendationViewState {
  * Feedback form view model
  */
 export interface FeedbackFormViewModel {
-  followedRecommendation: 'yes' | 'no';
+  followedRecommendation: "yes" | "no";
   actualOutfit: OutfitDTO;
   overallRating: number; // 1-5
   zoneRatings: ZoneRatings;
@@ -982,9 +993,9 @@ export interface FeedbackFormViewModel {
 export interface HistoryFiltersViewModel {
   temperatureMin: number; // -10
   temperatureMax: number; // 35
-  season?: 'spring' | 'summer' | 'autumn' | 'winter';
+  season?: "spring" | "summer" | "autumn" | "winter";
   activityType?: ActivityTypeEnum;
-  sort: 'created_at_desc' | 'created_at_asc' | 'rating_desc' | 'rating_asc';
+  sort: "created_at_desc" | "created_at_asc" | "rating_desc" | "rating_asc";
   limit: number; // 30
   offset: number; // 0
 }
@@ -1000,6 +1011,6 @@ export interface ApiError {
   code: string; // 'VALIDATION_ERROR', 'LOCATION_NOT_FOUND', etc.
   message: string;
   statusCode: number;
-  details?: Array<{ field?: string; message: string }>;
+  details?: { field?: string; message: string }[];
   retryAfter?: number; // for 503, 429
 }

@@ -4,7 +4,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { ClothingRecommendationDTO, ZoneType, ClothingItem } from "../types";
+import type {
+  ClothingRecommendationDTO,
+  ZoneType,
+  ClothingItem,
+} from "../types";
 
 /**
  * HumanFigureSVG - Interactive human figure silhouette with clean contour lines and clickable zones
@@ -15,7 +19,6 @@ interface CyclistSVGProps {
   selectedZone?: ZoneType;
   onZoneClick?: (zone: ZoneType) => void;
 }
-
 
 // Definicje stref do ręcznego pozycjonowania
 const ZONE_DEFINITIONS = [
@@ -63,7 +66,6 @@ const ZONE_DEFINITIONS = [
   },
 ];
 
-
 // Możesz ręcznie zmieniać pozycje punktów poniżej
 const ZONE_POSITIONS: Record<ZoneType, { x: number; y: number }[]> = {
   head: [
@@ -106,7 +108,6 @@ export default function CyclistSVG({
   selectedZone,
   onZoneClick,
 }: CyclistSVGProps) {
-
   // Helper function to check if a zone has recommended items
   const isZoneRecommended = (zone: ZoneType): boolean => {
     // Arms are always covered in cycling clothing
@@ -120,21 +121,35 @@ export default function CyclistSVG({
 
   // Get items for a specific zone
   const getZoneItems = (zone: ZoneType): ClothingItem[] => {
-    return recommendation.items.filter(item => {
+    return recommendation.items.filter((item) => {
       switch (zone) {
         case "head":
           return item === "czapka";
         case "neck":
           return item === "komin na szyję";
         case "torso":
-          return item === "koszulka termoaktywna" || item === "bluza" || item === "kurtka" ||
-                 item === "kurtka przeciwwiatrowa" || item === "kurtka zimowa" || item === "kamizelka przeciwwiatrowa";
+          return (
+            item === "koszulka termoaktywna" ||
+            item === "bluza" ||
+            item === "kurtka" ||
+            item === "kurtka przeciwwiatrowa" ||
+            item === "kurtka zimowa" ||
+            item === "kamizelka przeciwwiatrowa"
+          );
         case "arms":
           return item === "rękawki";
         case "hands":
-          return item === "rękawiczki letnie" || item === "rękawiczki jesienne" || item === "rękawiczki zimowe";
+          return (
+            item === "rękawiczki letnie" ||
+            item === "rękawiczki jesienne" ||
+            item === "rękawiczki zimowe"
+          );
         case "legs":
-          return item === "nogawki" || item === "krótkie spodenki" || item === "długie spodnie";
+          return (
+            item === "nogawki" ||
+            item === "krótkie spodenki" ||
+            item === "długie spodnie"
+          );
         case "feet":
           return item === "noski na buty" || item === "ochraniacze na buty";
         default:
@@ -185,7 +200,6 @@ export default function CyclistSVG({
       handleZoneClick(zone);
     }
   };
-
 
   return (
     <TooltipProvider>

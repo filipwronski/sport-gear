@@ -76,7 +76,11 @@ export const GET: APIRoute = async ({ url, locals }) => {
     }
 
     // Step 4: Initialize WeatherService and get forecast
-    const weatherService = new WeatherService(locals.supabase, supabaseServiceClient, apiKey);
+    const weatherService = new WeatherService(
+      locals.supabase,
+      supabaseServiceClient,
+      apiKey,
+    );
     const forecast = await weatherService.getForecastByCoordinates(
       validatedParams.lat,
       validatedParams.lng,

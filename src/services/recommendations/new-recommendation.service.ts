@@ -24,7 +24,9 @@ export class NewRecommendationService {
   /**
    * Generate clothing recommendation based on weather and workout parameters
    */
-  generateRecommendation(input: NewRecommendationInput): ClothingRecommendationDTO {
+  generateRecommendation(
+    input: NewRecommendationInput,
+  ): ClothingRecommendationDTO {
     const items: ClothingItem[] = [];
 
     // Base layer - always recommend thermal shirt
@@ -37,7 +39,8 @@ export class NewRecommendationService {
       items.push("krótkie spodenki");
 
       // Add leg accessories for longer rides
-      if (input.workoutDuration >= 90) { // 1.5 hours
+      if (input.workoutDuration >= 90) {
+        // 1.5 hours
         if (input.temperature <= 18) {
           items.push("nogawki");
         }
@@ -96,8 +99,17 @@ export class NewRecommendationService {
     return false;
   }
 
-  private addUpperBodyLayers(input: NewRecommendationInput, items: ClothingItem[]): void {
-    const { temperature, windSpeed, humidity, workoutIntensity, workoutDuration } = input;
+  private addUpperBodyLayers(
+    input: NewRecommendationInput,
+    items: ClothingItem[],
+  ): void {
+    const {
+      temperature,
+      windSpeed,
+      humidity,
+      workoutIntensity,
+      workoutDuration,
+    } = input;
 
     // Very cold - heavy layers
     if (temperature <= -5) {
@@ -188,7 +200,13 @@ export class NewRecommendationService {
   }
 
   private shouldWearNeckProtection(input: NewRecommendationInput): boolean {
-    const { temperature, windSpeed, humidity, workoutIntensity, workoutDuration } = input;
+    const {
+      temperature,
+      windSpeed,
+      humidity,
+      workoutIntensity,
+      workoutDuration,
+    } = input;
 
     // Cold weather
     if (temperature <= 10) return true;
@@ -223,4 +241,3 @@ export class NewRecommendationService {
     return false;
   }
 }
-

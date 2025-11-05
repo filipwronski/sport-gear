@@ -15,18 +15,18 @@ interface OutfitRecommendationListProps {
 export default function OutfitRecommendationList({
   recommendation,
   title = "Zalecane ubranie",
-  expandedZone
+  expandedZone,
 }: OutfitRecommendationListProps) {
   const getClothingLabel = (item: ClothingItem): string => {
     const labels: Record<ClothingItem, string> = {
-      "nogawki": "Nogawki",
-      "rękawki": "Rękawki",
+      nogawki: "Nogawki",
+      rękawki: "Rękawki",
       "koszulka termoaktywna": "Koszulka termoaktywna",
-      "bluza": "Bluza",
-      "kurtka": "Kurtka",
+      bluza: "Bluza",
+      kurtka: "Kurtka",
       "krótkie spodenki": "Krótkie spodenki",
       "długie spodnie": "Długie spodnie",
-      "czapka": "Czapka",
+      czapka: "Czapka",
       "rękawiczki letnie": "Rękawiczki letnie",
       "rękawiczki jesienne": "Rękawiczki jesienne",
       "rękawiczki zimowe": "Rękawiczki zimowe",
@@ -42,23 +42,32 @@ export default function OutfitRecommendationList({
 
   const getCategoryLabel = (category: string): string => {
     const labels: Record<string, string> = {
-      "head": "Głowa",
-      "neck": "Szyja",
-      "torso": "Tułów",
-      "arms": "Ramiona",
-      "hands": "Dłonie",
-      "legs": "Nogi",
-      "feet": "Stopy",
-      "other": "Inne",
+      head: "Głowa",
+      neck: "Szyja",
+      torso: "Tułów",
+      arms: "Ramiona",
+      hands: "Dłonie",
+      legs: "Nogi",
+      feet: "Stopy",
+      other: "Inne",
     };
     return labels[category] || category;
   };
 
   const getClothingCategory = (item: ClothingItem): string => {
-    if (item.includes("koszulka") || item.includes("bluza") || item.includes("kurtka") || item.includes("kamizelka")) {
+    if (
+      item.includes("koszulka") ||
+      item.includes("bluza") ||
+      item.includes("kurtka") ||
+      item.includes("kamizelka")
+    ) {
       return "torso";
     }
-    if (item.includes("spodenki") || item.includes("spodnie") || item.includes("nogawki")) {
+    if (
+      item.includes("spodenki") ||
+      item.includes("spodnie") ||
+      item.includes("nogawki")
+    ) {
       return "legs";
     }
     if (item.includes("rękawiczki") || item.includes("rękawki")) {
@@ -77,17 +86,28 @@ export default function OutfitRecommendationList({
   };
 
   // Group items by category
-  const groupedItems = recommendation.items.reduce((acc, item) => {
-    const category = getClothingCategory(item);
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(item);
-    return acc;
-  }, {} as Record<string, ClothingItem[]>);
+  const groupedItems = recommendation.items.reduce(
+    (acc, item) => {
+      const category = getClothingCategory(item);
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(item);
+      return acc;
+    },
+    {} as Record<string, ClothingItem[]>,
+  );
 
   // Define the logical order of body parts for display
-  const categoryOrder = ['head', 'neck', 'torso', 'arms', 'hands', 'legs', 'feet'];
+  const categoryOrder = [
+    "head",
+    "neck",
+    "torso",
+    "arms",
+    "hands",
+    "legs",
+    "feet",
+  ];
 
   return (
     <Card>
@@ -100,24 +120,30 @@ export default function OutfitRecommendationList({
       <CardContent>
         <div className="space-y-3">
           {categoryOrder
-            .filter(category => groupedItems[category] && groupedItems[category].length > 0)
+            .filter(
+              (category) =>
+                groupedItems[category] && groupedItems[category].length > 0,
+            )
             .map((category) => (
-            <div key={category} className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  {getCategoryLabel(category)}
-                </Badge>
+              <div key={category} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">
+                    {getCategoryLabel(category)}
+                  </Badge>
+                </div>
+                <div className="ml-4 space-y-1">
+                  {groupedItems[category].map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 text-sm"
+                    >
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      <span>{getClothingLabel(item)}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="ml-4 space-y-1">
-                {groupedItems[category].map((item, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span>{getClothingLabel(item)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+            ))}
 
           {recommendation.items.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">

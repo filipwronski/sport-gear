@@ -10,17 +10,27 @@ interface WeatherSummaryProps {
   compact?: boolean;
 }
 
-export default function WeatherSummary({ weather, compact = false }: WeatherSummaryProps) {
+export default function WeatherSummary({
+  weather,
+  compact = false,
+}: WeatherSummaryProps) {
   const formatTemperature = (temp: number) => `${Math.round(temp)}°C`;
   const formatWindSpeed = (speed: number) => `${Math.round(speed)} km/h`;
-  const getWeatherIcon = (icon: string) => `http://openweathermap.org/img/wn/${icon}@2x.png`;
+  const getWeatherIcon = (icon: string) =>
+    `http://openweathermap.org/img/wn/${icon}@2x.png`;
 
   if (compact) {
     return (
       <div className="flex items-center gap-3 text-sm">
-        <div className="text-lg font-semibold">{formatTemperature(weather.temperature)}</div>
-        <div className="text-muted-foreground">Odczuwalna: {formatTemperature(weather.feels_like)}</div>
-        <div className="text-muted-foreground">💨 {formatWindSpeed(weather.wind_speed)}</div>
+        <div className="text-lg font-semibold">
+          {formatTemperature(weather.temperature)}
+        </div>
+        <div className="text-muted-foreground">
+          Odczuwalna: {formatTemperature(weather.feels_like)}
+        </div>
+        <div className="text-muted-foreground">
+          💨 {formatWindSpeed(weather.wind_speed)}
+        </div>
         {weather.rain_mm && weather.rain_mm > 0 && (
           <div className="text-muted-foreground">🌧️ {weather.rain_mm} mm</div>
         )}
@@ -38,17 +48,23 @@ export default function WeatherSummary({ weather, compact = false }: WeatherSumm
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Temperatura</span>
-              <span className="text-lg font-semibold">{formatTemperature(weather.temperature)}</span>
+              <span className="text-lg font-semibold">
+                {formatTemperature(weather.temperature)}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Odczuwalna</span>
-              <span className="text-sm">{formatTemperature(weather.feels_like)}</span>
+              <span className="text-sm">
+                {formatTemperature(weather.feels_like)}
+              </span>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Wiatr</span>
-              <span className="text-sm">{formatWindSpeed(weather.wind_speed)}</span>
+              <span className="text-sm">
+                {formatWindSpeed(weather.wind_speed)}
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Wilgotność</span>
@@ -68,7 +84,9 @@ export default function WeatherSummary({ weather, compact = false }: WeatherSumm
             alt={weather.description}
             className="w-12 h-12"
           />
-          <p className="text-sm text-muted-foreground capitalize">{weather.description}</p>
+          <p className="text-sm text-muted-foreground capitalize">
+            {weather.description}
+          </p>
         </div>
       </CardContent>
     </Card>

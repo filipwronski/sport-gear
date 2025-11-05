@@ -15,20 +15,23 @@ export function useExport(): UseExportReturn {
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const downloadJsonFile = useCallback((data: ProfileExportDTO, filename: string) => {
-    const jsonString = JSON.stringify(data, null, 2);
-    const blob = new Blob([jsonString], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+  const downloadJsonFile = useCallback(
+    (data: ProfileExportDTO, filename: string) => {
+      const jsonString = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-    URL.revokeObjectURL(url);
-  }, []);
+      URL.revokeObjectURL(url);
+    },
+    [],
+  );
 
   const exportData = useCallback(async () => {
     setIsExporting(true);
@@ -55,7 +58,8 @@ export function useExport(): UseExportReturn {
 
       downloadJsonFile(exportData, filename);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
+      const error =
+        err instanceof Error ? err : new Error("Unknown error occurred");
       setError(error);
       throw error; // Re-throw to allow component-level error handling
     } finally {

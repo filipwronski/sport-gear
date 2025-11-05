@@ -26,15 +26,13 @@ export const BikeListHeader = ({
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
-          Moje rowery
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">Moje rowery</h1>
         <p className="text-sm text-gray-600">
           {totalCount === 0
             ? "Brak rowerów"
             : totalCount === 1
-            ? "1 rower"
-            : `${totalCount} rowerów`}
+              ? "1 rower"
+              : `${totalCount} rowerów`}
         </p>
       </div>
 

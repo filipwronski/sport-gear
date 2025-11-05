@@ -1,5 +1,9 @@
 import { useState, useCallback } from "react";
-import type { FeedbackDTO, FeedbacksListDTO, GetFeedbacksParams } from "../../../types";
+import type {
+  FeedbackDTO,
+  FeedbacksListDTO,
+  GetFeedbacksParams,
+} from "../../../types";
 
 export interface UseFeedbackHistoryReturn {
   feedbacks: FeedbackDTO[];
@@ -42,52 +46,61 @@ export function useFeedbackHistory(): UseFeedbackHistoryReturn {
     return queryParams.toString();
   }, []);
 
-  const fetchFeedbacks = useCallback(async (params: Partial<GetFeedbacksParams> = {}) => {
-    setIsLoading(true);
-    setError(null);
+  const fetchFeedbacks = useCallback(
+    async (params: Partial<GetFeedbacksParams> = {}) => {
+      setIsLoading(true);
+      setError(null);
 
-    // Get current filters and merge with new params
-    setFilters(currentFilters => {
-      const newFilters = { ...currentFilters, ...params, offset: 0 }; // Reset offset for new fetch
+      // Get current filters and merge with new params
+      setFilters((currentFilters) => {
+        const newFilters = { ...currentFilters, ...params, offset: 0 }; // Reset offset for new fetch
 
-      // Perform the fetch with the new filters
-      const performFetch = async () => {
-        try {
-          const queryString = buildQueryString(newFilters);
-          const url = `/api/feedbacks${queryString ? `?${queryString}` : ""}`;
+        // Perform the fetch with the new filters
+        const performFetch = async () => {
+          try {
+            const queryString = buildQueryString(newFilters);
+            const url = `/api/feedbacks${queryString ? `?${queryString}` : ""}`;
 
-          const response = await fetch(url, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
+            const response = await fetch(url, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
 
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(
+                errorData.error?.message || `HTTP ${response.status}`,
+              );
+            }
+
+            const data: FeedbacksListDTO = await response.json();
+            setFeedbacks(data.feedbacks);
+            setTotal(data.total);
+            setHasMore(data.has_more);
+          } catch (err) {
+            const error =
+              err instanceof Error ? err : new Error("Unknown error occurred");
+            setError(error);
+          } finally {
+            setIsLoading(false);
           }
+        };
 
-          const data: FeedbacksListDTO = await response.json();
-          setFeedbacks(data.feedbacks);
-          setTotal(data.total);
-          setHasMore(data.has_more);
-        } catch (err) {
-          const error = err instanceof Error ? err : new Error("Unknown error occurred");
-          setError(error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
+        performFetch();
+        return newFilters;
+      });
+    },
+    [buildQueryString],
+  );
 
-      performFetch();
-      return newFilters;
-    });
-  }, [buildQueryString]);
-
-  const updateFilters = useCallback(async (newFilters: Partial<GetFeedbacksParams>) => {
-    await fetchFeedbacks(newFilters);
-  }, [fetchFeedbacks]);
+  const updateFilters = useCallback(
+    async (newFilters: Partial<GetFeedbacksParams>) => {
+      await fetchFeedbacks(newFilters);
+    },
+    [fetchFeedbacks],
+  );
 
   const loadNextPage = useCallback(async () => {
     if (!hasMore || isLoading) return;
@@ -96,7 +109,7 @@ export function useFeedbackHistory(): UseFeedbackHistoryReturn {
     setError(null);
 
     // Update filters and perform fetch atomically
-    setFilters(currentFilters => {
+    setFilters((currentFilters) => {
       const newOffset = currentFilters.offset! + currentFilters.limit!;
       const newFilters = { ...currentFilters, offset: newOffset };
 
@@ -115,7 +128,9 @@ export function useFeedbackHistory(): UseFeedbackHistoryReturn {
 
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+            throw new Error(
+              errorData.error?.message || `HTTP ${response.status}`,
+            );
           }
 
           const data: FeedbacksListDTO = await response.json();
@@ -123,7 +138,8 @@ export function useFeedbackHistory(): UseFeedbackHistoryReturn {
           setTotal(data.total);
           setHasMore(data.has_more);
         } catch (err) {
-          const error = err instanceof Error ? err : new Error("Unknown error occurred");
+          const error =
+            err instanceof Error ? err : new Error("Unknown error occurred");
           setError(error);
         } finally {
           setIsLoading(false);
@@ -153,7 +169,8 @@ export function useFeedbackHistory(): UseFeedbackHistoryReturn {
       setFeedbacks((prev) => prev.filter((f) => f.id !== feedbackId));
       setTotal((prev) => prev - 1);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error("Unknown error occurred");
+      const error =
+        err instanceof Error ? err : new Error("Unknown error occurred");
       setError(error);
       throw error; // Re-throw to allow component-level error handling
     }

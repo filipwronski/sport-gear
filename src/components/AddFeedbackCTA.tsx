@@ -14,7 +14,7 @@ interface AddFeedbackCTAProps {
 
 export default function AddFeedbackCTA({
   onFeedbackClick,
-  feedbackCount = 0
+  feedbackCount = 0,
 }: AddFeedbackCTAProps) {
   const getPersonalizationMessage = () => {
     if (feedbackCount === 0) {
@@ -65,7 +65,8 @@ export default function AddFeedbackCTA({
           {isPersonalizationActive && (
             <div className="mt-3 p-2 bg-green-50 dark:bg-green-950/20 rounded-md border border-green-200 dark:border-green-800">
               <p className="text-xs text-green-700 dark:text-green-400 flex items-center justify-center gap-1">
-                ✨ Personalizacja aktywna - Twoje rekomendacje są optymalizowane!
+                ✨ Personalizacja aktywna - Twoje rekomendacje są
+                optymalizowane!
               </p>
             </div>
           )}

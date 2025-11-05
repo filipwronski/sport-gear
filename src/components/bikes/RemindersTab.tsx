@@ -181,9 +181,7 @@ export function RemindersTab({ bikeId }: RemindersTabProps) {
           </CardContent>
         </Card>
       ) : (
-        <ReminderList
-          reminders={reminders}
-        />
+        <ReminderList reminders={reminders} />
       )}
     </div>
   );

@@ -157,7 +157,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
               Authorization: `Bearer ${token}`,
             },
           },
-        }
+        },
       );
     }
 
