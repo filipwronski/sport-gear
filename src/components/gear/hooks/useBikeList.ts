@@ -43,7 +43,7 @@ export const useBikeList = (_userId: string): UseBikeListReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   // Initial fetch
   useEffect(() => {

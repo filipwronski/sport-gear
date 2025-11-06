@@ -155,9 +155,6 @@ describe("useAuth", () => {
       expect(mockSignUp).toHaveBeenCalledWith({
         email: "test@example.com",
         password: "Password123!",
-        options: {
-          emailRedirectTo: "http://localhost:3000/auth/callback",
-        },
       });
       expect(mockShowToast).toHaveBeenCalledWith(
         expect.objectContaining({ type: "success" }),

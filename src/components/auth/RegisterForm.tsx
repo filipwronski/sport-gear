@@ -118,6 +118,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             type={showPassword ? "text" : "password"}
             placeholder="utwórz silne hasło"
             className="pl-10 pr-10"
+            aria-invalid={!!errors.password}
             {...register("password", {
               required: "Hasło jest wymagane",
               validate: (value) => {

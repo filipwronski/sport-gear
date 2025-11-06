@@ -50,7 +50,7 @@ export default function BikesListView() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     fetchBikes();
