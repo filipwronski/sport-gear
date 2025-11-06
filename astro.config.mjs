@@ -11,9 +11,9 @@ export default defineConfig({
   output: "server",
   integrations: [
     preact({
-      include: ['**/*.tsx', '**/*.jsx'],
+      include: ["**/*.tsx", "**/*.jsx"],
     }),
-    sitemap()
+    sitemap(),
   ],
   server: { port: 3000 },
   vite: {
