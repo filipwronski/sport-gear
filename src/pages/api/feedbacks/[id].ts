@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
-import { FeedbackService } from "../../../services/feedback.service";
-import { FeedbackValidator } from "../../../lib/validation/feedback.validator";
-import { supabaseServiceClient } from "../../../db/supabase.admin.client";
-import { NotFoundError } from "../../../lib/errors";
+import { FeedbackService } from "@/services/feedback.service";
+import { FeedbackValidator } from "@/lib/validation/feedback.validator";
+import { supabaseServiceClient } from "@/db/supabase.admin.client";
+import { NotFoundError } from "@/lib/errors";
 
 /**
  * DELETE /api/feedbacks/{id} - Delete user feedback

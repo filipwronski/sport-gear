@@ -1,17 +1,17 @@
 import type { APIRoute } from "astro";
-import { WeatherService } from "../../../services/weather.service";
-import { supabaseServiceClient } from "../../../db/supabase.admin.client";
-import { validateForecastParams } from "../../../lib/validation/weather.schemas";
+import { WeatherService } from "@/services/weather.service";
+import { supabaseServiceClient } from "@/db/supabase.admin.client";
+import { validateForecastParams } from "@/lib/validation/weather.schemas";
 import {
   ValidationError,
   UnauthorizedError,
   NotFoundError,
   ApiError,
-} from "../../../lib/errors";
+} from "@/lib/errors";
 import {
   createErrorResponse,
   createSuccessResponse,
-} from "../../../lib/utils/response.utils";
+} from "@/lib/utils/response.utils";
 
 /**
  * GET /api/weather/forecast
