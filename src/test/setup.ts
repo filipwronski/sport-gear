@@ -3,6 +3,8 @@
  * Configures global test environment and mocks
  */
 
+import "@testing-library/jest-dom";
+
 // Mock environment variables
 Object.assign(process.env, {
   SUPABASE_URL: "https://test.supabase.co",

@@ -98,7 +98,7 @@ CycleGear helps road cyclists make confident decisions about what to wear before
 
 ### Prerequisites
 
-- **Node.js** >= 18.0.0 (recommended: 20.x or 22.x)
+- **Node.js** >= 20.0.0 (recommended: 20.x or 22.x)
 - **pnpm** >= 8.0.0 (install via `npm install -g pnpm`)
 - **Git**
 

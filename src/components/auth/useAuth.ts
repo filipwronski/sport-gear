@@ -207,10 +207,12 @@ export const useAuth = (): AuthHookReturn => {
       setAuthState({ isLoading: true, error: null, successMessage: null });
 
       try {
-        // Since email confirmations are disabled, no redirect needed
         const { data: authData, error } = await supabaseClient.auth.signUp({
           email: data.email,
           password: data.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
         });
 
         if (error) {
