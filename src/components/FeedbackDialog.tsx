@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Star, Sparkles } from "lucide-react";
+import { Star, Sparkles, AlertTriangle } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -20,13 +20,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import WeatherSummary from "./WeatherSummary";
+import { useDefaultLocation } from "../hooks/useLocationSelection";
 import type {
-  RecommendationDTO,
+  NewRecommendationDTO,
   FeedbackDTO,
   CreateFeedbackCommand,
   OutfitDTO,
   ZoneRatings,
 } from "../types";
+import { convertClothingItemsToOutfit } from "../lib/utils/outfit-converter";
 
 /**
  * FeedbackDialog - Comprehensive feedback modal
@@ -35,7 +37,7 @@ import type {
 interface FeedbackDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  recommendation: RecommendationDTO;
+  recommendation: NewRecommendationDTO;
   onSubmitted: (feedback: FeedbackDTO) => void;
 }
 
@@ -131,11 +133,12 @@ export default function FeedbackDialog({
   recommendation,
   onSubmitted,
 }: FeedbackDialogProps) {
+  const { defaultLocation } = useDefaultLocation();
   const [followedRecommendation, setFollowedRecommendation] = useState<
     "yes" | "no"
   >("yes");
   const [actualOutfit, setActualOutfit] = useState<OutfitDTO>(
-    recommendation.recommendation,
+    convertClothingItemsToOutfit(recommendation.recommendation.items),
   );
   const [overallRating, setOverallRating] = useState(3);
   const [zoneRatings, setZoneRatings] = useState<ZoneRatings>({});
@@ -147,7 +150,7 @@ export default function FeedbackDialog({
 
   const resetForm = () => {
     setFollowedRecommendation("yes");
-    setActualOutfit(recommendation.recommendation);
+    setActualOutfit(convertClothingItemsToOutfit(recommendation.recommendation.items));
     setOverallRating(3);
     setZoneRatings({});
     setNotes("");
@@ -170,7 +173,7 @@ export default function FeedbackDialog({
 
     try {
       const command: CreateFeedbackCommand = {
-        // location_id will be added from user context or recommendation
+        location_id: defaultLocation?.locationId || undefined,
         temperature: recommendation.weather.temperature,
         feels_like: recommendation.weather.feels_like,
         wind_speed: recommendation.weather.wind_speed,
@@ -183,7 +186,7 @@ export default function FeedbackDialog({
         zone_ratings:
           Object.keys(zoneRatings).length > 0 ? zoneRatings : undefined,
         notes: notes.trim() || undefined,
-        shared_with_community: shareWithCommunity,
+        shared_with_community: shareWithCommunity && !!defaultLocation,
       };
 
       const response = await fetch("/api/feedbacks", {
@@ -316,20 +319,42 @@ export default function FeedbackDialog({
           </div>
 
           {/* Share with community */}
-          <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-            <div className="space-y-1">
-              <Label htmlFor="share-community" className="text-sm font-medium">
-                Udostępnij społeczności
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Inni użytkownicy zobaczą Twoje doświadczenie
-              </p>
+          <div className="space-y-2">
+            <div className={`flex items-center justify-between p-3 rounded-lg ${
+              defaultLocation ? 'bg-muted' : 'bg-orange-50 border border-orange-200'
+            }`}>
+              <div className="space-y-1">
+                <Label htmlFor="share-community" className="text-sm font-medium">
+                  Udostępnij społeczności
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {defaultLocation
+                    ? "Inni użytkownicy zobaczą Twoje doświadczenie"
+                    : "Ustaw domyślną lokalizację aby udostępnić doświadczenie społeczności"
+                  }
+                </p>
+              </div>
+              <Switch
+                id="share-community"
+                checked={shareWithCommunity && !!defaultLocation}
+                onCheckedChange={(checked) => {
+                  if (!defaultLocation && checked) {
+                    // Don't allow enabling if no location
+                    return;
+                  }
+                  setShareWithCommunity(checked);
+                }}
+                disabled={!defaultLocation}
+              />
             </div>
-            <Switch
-              id="share-community"
-              checked={shareWithCommunity}
-              onCheckedChange={setShareWithCommunity}
-            />
+            {!defaultLocation && (
+              <div className="flex items-center gap-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
+                <AlertTriangle className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                <p className="text-xs text-orange-700">
+                  Aby udostępnić feedback społeczności, ustaw domyślną lokalizację w ustawieniach profilu.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Error message */}
