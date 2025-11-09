@@ -44,7 +44,7 @@ export default function RecommendationView() {
 
   const { defaultLocation } = useDefaultLocation();
 
-  const fetchRecommendation = useCallback(async () => {
+  const fetchRecommendationWithParams = useCallback(async (intensity: WorkoutIntensity, duration: WorkoutDuration) => {
     setIsLoading(true);
     setError(null);
 
@@ -80,8 +80,8 @@ export default function RecommendationView() {
         params.lng = "21.017532";
       }
 
-      params.workout_intensity = workoutIntensity;
-      params.workout_duration = workoutDuration.toString();
+      params.workout_intensity = intensity;
+      params.workout_duration = duration.toString();
 
       const queryString = new URLSearchParams(params).toString();
       const response = await fetch(`/api/new-recommendations?${queryString}`);
@@ -106,19 +106,24 @@ export default function RecommendationView() {
       setRecommendation(data);
 
       // Update original parameters when recommendation is successfully fetched
-      setOriginalWorkoutIntensity(workoutIntensity);
-      setOriginalWorkoutDuration(workoutDuration);
+      setOriginalWorkoutIntensity(intensity);
+      setOriginalWorkoutDuration(duration);
     } catch (err) {
       setError(err as ApiError);
     } finally {
       setIsLoading(false);
     }
-  }, [defaultLocation, workoutIntensity, workoutDuration]);
+  }, [defaultLocation]);
+
+  // Fetch function for the button that uses current parameters
+  const fetchRecommendation = useCallback(() => {
+    fetchRecommendationWithParams(workoutIntensity, workoutDuration);
+  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration]);
 
   // Fetch recommendation on mount and location change only
   useEffect(() => {
-    fetchRecommendation();
-  }, [fetchRecommendation]);
+    fetchRecommendationWithParams(originalWorkoutIntensity, originalWorkoutDuration);
+  }, [fetchRecommendationWithParams]);
 
   // Track when workout parameters change
   const hasWorkoutParamsChanged =
