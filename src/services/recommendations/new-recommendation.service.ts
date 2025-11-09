@@ -90,11 +90,11 @@ export class NewRecommendationService {
       effectiveTemp = this.calculateHeatIndex(temperature, humidity);
     }
 
-    // Adjust for workout intensity - higher intensity makes you feel warmer
+    // Adjust for workout intensity - higher intensity makes you feel hotter, so you need cooler clothing
     if (workoutIntensity === "intensywny") {
-      effectiveTemp += 2;
+      effectiveTemp -= 2;
     } else if (workoutIntensity === "tempo") {
-      effectiveTemp += 1;
+      effectiveTemp -= 1;
     }
 
     // Adjust for long rides - body adapts to cold
@@ -161,12 +161,8 @@ export class NewRecommendationService {
       items.push("komin na szyję");
     }
 
-    // Feet protection - socks OR shoe covers, not both
-    if (this.shouldWearShoeCovers(adjustedInput)) {
-      items.push("ochraniacze na buty");
-    } else {
-      items.push("noski na buty");
-    }
+    // Feet protection based on temperature
+    this.addFeetProtection(adjustedInput, items);
 
     return { items };
   }
@@ -360,27 +356,73 @@ export class NewRecommendationService {
       "effectiveTemp" in input
         ? input.effectiveTemp
         : this.getEffectiveTemperature(input);
-    const { windSpeed, humidity, workoutIntensity, workoutDuration } = input;
+    const { windSpeed, temperature, workoutIntensity, workoutDuration } = input;
 
-    // Cold weather (using effective temperature)
-    if (effectiveTemp <= 8) return true;
+    // Never recommend in warm weather, even with wind
+    if (temperature >= 20) return false;
 
-    // Very windy conditions
-    if (windSpeed >= 18) return true;
+    // Recommend from around 13°C with wind
+    if (effectiveTemp <= 13 && windSpeed >= 10) return true;
 
-    // Humid cold conditions
-    if (effectiveTemp <= 10 && humidity >= 80) return true;
+    // Very windy conditions in cool weather
+    if (windSpeed >= 18 && effectiveTemp <= 15) return true;
 
-    // Intensive workouts in cool conditions
-    if (effectiveTemp <= 13 && workoutIntensity === "intensywny") return true;
+    // Intensive workouts in windy conditions
+    if (
+      workoutIntensity === "intensywny" &&
+      windSpeed >= 15 &&
+      effectiveTemp <= 16
+    ) {
+      return true;
+    }
 
-    // Long rides with wind
-    if (workoutDuration >= 120 && windSpeed >= 18) return true;
-
-    // Very long rides regardless of temperature
-    if (workoutDuration >= 200) return true;
+    // Long rides with moderate wind
+    if (workoutDuration >= 120 && windSpeed >= 12 && effectiveTemp <= 15) {
+      return true;
+    }
 
     return false;
+  }
+
+  private addFeetProtection(
+    input: NewRecommendationInput | AdjustedRecommendationInput,
+    items: ClothingItem[],
+  ): void {
+    const effectiveTemp =
+      "effectiveTemp" in input
+        ? input.effectiveTemp
+        : this.getEffectiveTemperature(input);
+    const { temperature } = input;
+
+    // Warm days - no foot protection needed
+    if (temperature >= 20) {
+      items.push("skarpetki letnie");
+      return;
+    }
+
+    // Warm to moderate days - summer socks
+    if (effectiveTemp >= 15) {
+      items.push("skarpetki letnie");
+      return;
+    }
+
+    // Cool days - summer socks
+    if (effectiveTemp >= 10) {
+      items.push("skarpetki letnie");
+      items.push("noski na buty");
+      return;
+    }
+
+    // Cold days - summer socks + shoe covers
+    if (effectiveTemp >= 5) {
+      items.push("skarpetki letnie");
+      items.push("ochraniacze na buty");
+      return;
+    }
+
+    // Very cold days - winter socks + shoe covers
+    items.push("skarpetki zimowe");
+    items.push("ochraniacze na buty");
   }
 
   private shouldWearShoeCovers(
@@ -390,23 +432,8 @@ export class NewRecommendationService {
       "effectiveTemp" in input
         ? input.effectiveTemp
         : this.getEffectiveTemperature(input);
-    const { humidity, windSpeed, workoutIntensity } = input;
 
-    // Very cold or extremely windy conditions (using effective temperature)
-    if (effectiveTemp <= -2 || windSpeed >= 25) return true;
-
-    // Cold and humid
-    if (effectiveTemp <= 6 && humidity >= 80) return true;
-
-    // Intensive workouts in cold conditions
-    if (effectiveTemp <= 10 && workoutIntensity === "intensywny") return true;
-
-    // Tempo workouts in very cold conditions
-    if (effectiveTemp <= 8 && workoutIntensity === "tempo") return true;
-
-    // Windy conditions for long rides
-    if (windSpeed >= 20 && effectiveTemp <= 12) return true;
-
-    return false;
+    // Shoe covers only used in very cold days (< 5°C) with winter socks
+    return effectiveTemp < 5;
   }
 }

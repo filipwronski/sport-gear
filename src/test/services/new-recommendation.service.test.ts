@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { NewRecommendationService } from "../../services/recommendations/new-recommendation.service";
 import type { NewRecommendationInput } from "../../services/recommendations/new-recommendation.service";
 
@@ -115,7 +115,7 @@ describe("New Recommendation Service", () => {
       };
 
       const effectiveTemp = service["getEffectiveTemperature"](input);
-      expect(effectiveTemp).toBe(17); // 15 + 2 for intensive workout
+      expect(effectiveTemp).toBe(13); // 15 - 2 for intensive workout (feels hotter, needs cooler clothing)
     });
 
     it("should slightly adjust effective temperature for tempo workouts", () => {
@@ -128,7 +128,7 @@ describe("New Recommendation Service", () => {
       };
 
       const effectiveTemp = service["getEffectiveTemperature"](input);
-      expect(effectiveTemp).toBe(16); // 15 + 1 for tempo workout
+      expect(effectiveTemp).toBe(14); // 15 - 1 for tempo workout (feels hotter, needs cooler clothing)
     });
 
     it("should apply wind chill for recreational workouts in cold", () => {
@@ -619,7 +619,7 @@ describe("New Recommendation Service", () => {
       expect(result).toBe(true);
     });
 
-    it("should recommend neck protection for long rides with moderate wind", () => {
+    it("should not recommend neck protection for warm weather even with wind", () => {
       const input = {
         temperature: 18,
         humidity: 60,
@@ -630,10 +630,10 @@ describe("New Recommendation Service", () => {
       };
 
       const result = service["shouldWearNeckProtection"](input);
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
-    it("should recommend neck protection for very long rides in mild weather", () => {
+    it("should not recommend neck protection for very long rides in warm weather without wind", () => {
       const input = {
         temperature: 18,
         humidity: 60,
@@ -641,6 +641,20 @@ describe("New Recommendation Service", () => {
         workoutIntensity: "rekreacyjny" as const,
         workoutDuration: 200,
         effectiveTemp: 18,
+      };
+
+      const result = service["shouldWearNeckProtection"](input);
+      expect(result).toBe(false);
+    });
+
+    it("should recommend neck protection from around 13°C with wind", () => {
+      const input = {
+        temperature: 12,
+        humidity: 60,
+        windSpeed: 15,
+        workoutIntensity: "rekreacyjny" as const,
+        workoutDuration: 60,
+        effectiveTemp: 10,
       };
 
       const result = service["shouldWearNeckProtection"](input);
@@ -677,7 +691,7 @@ describe("New Recommendation Service", () => {
       expect(result).toBe(true);
     });
 
-    it("should recommend shoe covers in extremely windy conditions", () => {
+    it("should not recommend shoe covers in moderate cold even with extreme wind", () => {
       const input = {
         temperature: 10,
         humidity: 60,
@@ -688,10 +702,10 @@ describe("New Recommendation Service", () => {
       };
 
       const result = service["shouldWearShoeCovers"](input);
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
-    it("should recommend shoe covers for intensive workouts in cold weather", () => {
+    it("should not recommend shoe covers for intensive workouts in moderate cold", () => {
       const input = {
         temperature: 8,
         humidity: 60,
@@ -702,10 +716,10 @@ describe("New Recommendation Service", () => {
       };
 
       const result = service["shouldWearShoeCovers"](input);
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
-    it("should recommend shoe covers for tempo workouts in very cold weather", () => {
+    it("should not recommend shoe covers for tempo workouts in moderate cold", () => {
       const input = {
         temperature: 5,
         humidity: 60,
@@ -716,10 +730,10 @@ describe("New Recommendation Service", () => {
       };
 
       const result = service["shouldWearShoeCovers"](input);
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
-    it("should recommend shoe covers in windy conditions with cold effective temperature", () => {
+    it("should not recommend shoe covers when effective temperature is exactly 5°C", () => {
       const input = {
         temperature: 8,
         humidity: 60,
@@ -727,6 +741,20 @@ describe("New Recommendation Service", () => {
         workoutIntensity: "rekreacyjny" as const,
         workoutDuration: 60,
         effectiveTemp: 5,
+      };
+
+      const result = service["shouldWearShoeCovers"](input);
+      expect(result).toBe(false);
+    });
+
+    it("should recommend shoe covers only in very cold weather below 5°C", () => {
+      const input = {
+        temperature: 3,
+        humidity: 60,
+        windSpeed: 10,
+        workoutIntensity: "rekreacyjny" as const,
+        workoutDuration: 60,
+        effectiveTemp: 3,
       };
 
       const result = service["shouldWearShoeCovers"](input);
@@ -783,9 +811,13 @@ describe("New Recommendation Service", () => {
 
       expect(result.items).toContain("koszulka termoaktywna");
       expect(result.items).toContain("krótkie spodenki");
-      expect(result.items).toContain("noski na buty");
+      // No foot protection needed in hot weather
+      expect(result.items).not.toContain("noski na buty");
+      expect(result.items).not.toContain("skarpetki letnie");
+      expect(result.items).not.toContain("skarpetki zimowe");
+      expect(result.items).not.toContain("ochraniacze na buty");
       // May include hat for sun protection
-      expect(result.items.length).toBeGreaterThanOrEqual(3);
+      expect(result.items.length).toBeGreaterThanOrEqual(2);
     });
 
     it("should generate intensive workout outfit", () => {
@@ -827,7 +859,9 @@ describe("New Recommendation Service", () => {
       expect(result.items).toContain("czapka");
       expect(result.items).toContain("rękawiczki jesienne");
       expect(result.items).toContain("komin na szyję");
-      expect(result.items).toContain("noski na buty");
+      // Cool weather (14°C) - summer socks
+      expect(result.items).toContain("skarpetki letnie");
+      expect(result.items).not.toContain("noski na buty");
     });
 
     it("should include leg warmers for longer rides in cool weather", () => {

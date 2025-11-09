@@ -87,6 +87,8 @@ export type ClothingItem =
   | "rękawiczki letnie"
   | "rękawiczki jesienne"
   | "rękawiczki zimowe"
+  | "skarpetki letnie"
+  | "skarpetki zimowe"
   | "noski na buty"
   | "ochraniacze na buty"
   | "komin na szyję"

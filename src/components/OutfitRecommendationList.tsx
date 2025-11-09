@@ -30,6 +30,8 @@ export default function OutfitRecommendationList({
       "rękawiczki letnie": "Rękawiczki letnie",
       "rękawiczki jesienne": "Rękawiczki jesienne",
       "rękawiczki zimowe": "Rękawiczki zimowe",
+      "skarpetki letnie": "Skarpetki letnie",
+      "skarpetki zimowe": "Skarpetki zimowe",
       "noski na buty": "Noski na buty",
       "ochraniacze na buty": "Ochraniacze na buty",
       "komin na szyję": "Komin na szyję",
@@ -79,7 +81,7 @@ export default function OutfitRecommendationList({
     if (item.includes("szyję") || item.includes("komin")) {
       return "neck";
     }
-    if (item.includes("noski") || item.includes("ochraniacze")) {
+    if (item.includes("noski") || item.includes("ochraniacze") || item.includes("skarpetki")) {
       return "feet";
     }
     return "other";
