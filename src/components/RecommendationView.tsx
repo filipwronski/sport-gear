@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WeatherSummary from "./WeatherSummary";
 import WorkoutSelector, {
   type WorkoutIntensity,
@@ -182,8 +182,9 @@ export default function RecommendationView() {
 
   return (
     <div className="space-y-6">
-      {/* Workout Parameters Selector */}
-      <div className="space-y-4">
+      {/* Workout Parameters and Weather in one row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Workout Parameters Selector */}
         <WorkoutSelector
           intensity={workoutIntensity}
           duration={workoutDuration}
@@ -191,37 +192,41 @@ export default function RecommendationView() {
           onDurationChange={setWorkoutDuration}
         />
 
-        {/* Update Recommendations Button - always visible, disabled when no changes */}
-        <div className="flex justify-center">
-          <Button
-            onClick={fetchRecommendation}
-            disabled={isLoading || !hasWorkoutParamsChanged}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-            />
-            Zaktualizuj rekomendacje
-          </Button>
-        </div>
+        {/* Weather Summary */}
+        <WeatherSummary weather={recommendation.weather} />
       </div>
 
-      {/* Weather Summary */}
-      <WeatherSummary weather={recommendation.weather} />
+      {/* Update Recommendations Button - below the parameters and weather */}
+      <div className="flex justify-center">
+        <Button
+          onClick={fetchRecommendation}
+          disabled={isLoading || !hasWorkoutParamsChanged}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw
+            className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+          />
+          Zaktualizuj rekomendacje
+        </Button>
+      </div>
 
       {/* Main recommendation display */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
         {/* Cyclist SVG */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Sylwetka kolarza</h3>
-          <div className="flex justify-center">
-            <CyclistSVG
-              recommendation={recommendation.recommendation}
-              selectedZone={selectedZone}
-              onZoneClick={handleZoneClick}
-            />
-          </div>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Sylwetka kolarza</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center">
+              <CyclistSVG
+                recommendation={recommendation.recommendation}
+                selectedZone={selectedZone}
+                onZoneClick={handleZoneClick}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Outfit Recommendation */}
         <div className="space-y-4">
