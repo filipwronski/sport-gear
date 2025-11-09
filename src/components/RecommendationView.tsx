@@ -10,7 +10,7 @@ import WorkoutSelector, {
 } from "./WorkoutSelector";
 import CyclistSVG from "./CyclistSVG";
 import OutfitRecommendationList from "./OutfitRecommendationList";
-import AdditionalTipsSection from "./AdditionalTipsSection";
+// import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
 import { useDefaultLocation } from "@/hooks/useLocationSelection";
@@ -216,25 +216,23 @@ export default function RecommendationView() {
       </div>
 
       {/* Main recommendation display */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 items-stretch">
         {/* Cyclist SVG */}
-        <Card>
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>Sylwetka kolarza</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="flex justify-center">
-              <CyclistSVG
-                recommendation={recommendation.recommendation}
-                selectedZone={selectedZone}
-                onZoneClick={handleZoneClick}
-              />
-            </div>
+          <CardContent className="flex-1 flex items-center justify-center">
+            <CyclistSVG
+              recommendation={recommendation.recommendation}
+              selectedZone={selectedZone}
+              onZoneClick={handleZoneClick}
+            />
           </CardContent>
         </Card>
 
         {/* Outfit Recommendation */}
-        <div className="space-y-4">
+        <div className="space-y-4 h-full">
           <OutfitRecommendationList
             recommendation={recommendation.recommendation}
             expandedZone={selectedZone}
@@ -242,13 +240,13 @@ export default function RecommendationView() {
         </div>
       </div>
 
-      {/* Additional AI Tips */}
-      <AdditionalTipsSection
+      {/* Additional AI Tips - DISABLED */}
+      {/* <AdditionalTipsSection
         weatherConditions={recommendation.weather}
         onTipsLoad={(_tips) => {
           // Tips are managed by the hook
         }}
-      />
+      /> */}
 
       {/* Feedback CTA */}
       <AddFeedbackCTA
