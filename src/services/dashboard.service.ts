@@ -18,6 +18,7 @@ import type {
 import { ProfileService } from "./ProfileService";
 import { WeatherService } from "./weather.service";
 import { BikeService } from "./bike.service";
+import { LocationService } from "./location.service";
 import { getCommunityActivity } from "./community.service";
 import { EquipmentServiceError } from "../lib/errors/dashboard.errors";
 import { supabaseClient } from "../db/supabase.client";
@@ -50,15 +51,36 @@ export class DashboardService {
    * Executes all data fetching operations in parallel for optimal performance
    *
    * @param userId - Authenticated user ID
-   * @param locationId - Location ID for weather data
+   * @param coordinates - Coordinates for weather data (optional)
+   * @param locationId - Location ID to resolve coordinates from (optional)
    * @returns Complete dashboard data aggregated from all services
    * @throws Error if critical services fail (weather, equipment)
    */
   async getDashboard(
     userId: string,
     coordinates: { lat: number; lng: number } | null,
+    locationId?: string | null,
   ): Promise<DashboardDTO> {
     try {
+      // Resolve coordinates from locationId if needed
+      let resolvedCoordinates = coordinates;
+      if (!coordinates && locationId) {
+        try {
+          const locationService = new LocationService();
+          const location = await locationService.getUserLocations(userId).then(
+            locations => locations.find(loc => loc.id === locationId)
+          );
+          if (location) {
+            resolvedCoordinates = {
+              lat: location.location.latitude,
+              lng: location.location.longitude,
+            };
+          }
+        } catch (error) {
+          console.warn(`Could not resolve coordinates for location ${locationId}:`, error);
+        }
+      }
+
       // Execute all service calls in parallel for optimal performance
       const [
         weatherSummary,
@@ -66,9 +88,9 @@ export class DashboardService {
         communityActivity,
         personalizationStatus,
       ] = await Promise.all([
-        this.getWeatherSummary(coordinates),
+        this.getWeatherSummary(resolvedCoordinates),
         this.getEquipmentStatus(userId),
-        this.getCommunityActivity(null, userId), // TODO: Pass coordinates when community service supports it
+        this.getCommunityActivity(locationId, userId),
         this.getPersonalizationStatus(userId),
       ]);
 

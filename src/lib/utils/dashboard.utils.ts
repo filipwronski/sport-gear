@@ -43,6 +43,18 @@ export function validateDashboardQuery(query: any): string[] {
     }
   }
 
+  // location_id parameter (optional UUID)
+  if (query.location_id !== undefined) {
+    if (typeof query.location_id !== "string" || !isValidUUID(query.location_id)) {
+      errors.push("location_id must be a valid UUID");
+    }
+  }
+
+  // Cannot provide both lat/lng and location_id
+  if ((query.lat !== undefined || query.lng !== undefined) && query.location_id !== undefined) {
+    errors.push("Cannot provide both lat/lng coordinates and location_id. Choose one method.");
+  }
+
   return errors;
 }
 

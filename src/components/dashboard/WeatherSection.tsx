@@ -1,13 +1,22 @@
 import { WeatherCard } from "./WeatherCard";
 import { QuickRecommendationCard } from "./QuickRecommendationCard";
 import type { WeatherSectionProps } from "./types";
+import type { LocationDTO } from "../../types";
 
 export function WeatherSection({
   data,
   lastRefresh,
   coordinates,
+  currentLocationId,
+  userLocations = [],
+  isLoadingLocations = false,
+  onLocationChange,
 }: WeatherSectionProps & {
   coordinates?: { lat: number; lng: number } | null;
+  currentLocationId?: string;
+  userLocations?: LocationDTO[];
+  isLoadingLocations?: boolean;
+  onLocationChange?: (locationId: string | null) => void;
 }) {
   return (
     <section
@@ -24,6 +33,10 @@ export function WeatherSection({
           weather={data}
           refreshedAt={lastRefresh}
           coordinates={coordinates || undefined}
+          currentLocationId={currentLocationId}
+          userLocations={userLocations}
+          isLoadingLocations={isLoadingLocations}
+          onLocationChange={onLocationChange}
         />
         <QuickRecommendationCard
           recommendation={data.quick_recommendation}
