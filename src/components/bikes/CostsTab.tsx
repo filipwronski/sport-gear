@@ -10,7 +10,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { CostKPIs } from "./CostKPIs";
 import { CostBreakdownChart } from "./CostBreakdownChart";
-import { CostTimelineChart } from "./CostTimelineChart";
 import { CostLocationBreakdown } from "./CostLocationBreakdown";
 import { useServiceStats } from "./hooks/useServiceStats";
 import type { GetServiceStatsParams } from "../../types";
@@ -145,8 +144,6 @@ export function CostsTab({ bikeId }: CostsTabProps) {
         <CostLocationBreakdown stats={stats} />
       </div>
 
-      {/* Timeline */}
-      <CostTimelineChart stats={stats} />
 
       {/* Empty state */}
       {stats.total_services === 0 && (
