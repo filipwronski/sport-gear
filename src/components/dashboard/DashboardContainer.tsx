@@ -89,8 +89,6 @@ export default function DashboardContainer({
       </div>
 
       <PersonalizationStatusSection data={data.personalization_status} />
-
-      <QuickActionsBar currentLocationId={currentLocationId} />
     </div>
   );
 }

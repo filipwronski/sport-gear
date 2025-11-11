@@ -47,10 +47,10 @@ export function RemindersTab({ bikeId }: RemindersTabProps) {
       <Card>
         <CardContent className="pt-6">
           <div className="text-center text-red-600">
-            <p className="font-medium">Error loading reminders</p>
+            <p className="font-medium">Błąd ładowania przypomnień</p>
             <p className="text-sm mt-1">{error}</p>
             <Button onClick={refetch} className="mt-4" variant="outline">
-              Try Again
+              Spróbuj ponownie
             </Button>
           </div>
         </CardContent>
@@ -64,17 +64,17 @@ export function RemindersTab({ bikeId }: RemindersTabProps) {
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle>Service Reminders</CardTitle>
+              <CardTitle>Przypomnienia serwisowe</CardTitle>
               <CardDescription>
-                Track upcoming maintenance based on mileage intervals
+                Śledź nadchodzące konserwacje na podstawie przedziałów przebiegu
               </CardDescription>
             </div>
             <Button
               onClick={() =>
-                toast.info("Add reminder functionality will be implemented")
+                toast.info("Funkcjonalność dodawania przypomnień zostanie zaimplementowana")
               }
             >
-              Add Reminder
+              Dodaj przypomnienie
             </Button>
           </div>
         </CardHeader>
@@ -82,15 +82,15 @@ export function RemindersTab({ bikeId }: RemindersTabProps) {
           {overdueCount > 0 && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm font-medium text-red-900">
-                ⚠️ You have {overdueCount} overdue service
-                {overdueCount > 1 ? "s" : ""}
+                ⚠️ Masz {overdueCount} zaległ{overdueCount > 1 ? "ych" : "ą"} usług{overdueCount > 1 ? "" : "ę"}
+                {overdueCount > 1 ? " serwisowych" : " serwisową"}
               </p>
             </div>
           )}
 
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
-              <Label htmlFor="status-filter">Status Filter</Label>
+              <Label htmlFor="status-filter">Filtr statusu</Label>
               <select
                 id="status-filter"
                 value={filters.status || "all"}

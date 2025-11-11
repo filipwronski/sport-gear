@@ -50,18 +50,18 @@ export function ServiceHistoryTab({
 
   const handleExportCSV = () => {
     if (services.length === 0) {
-      toast.error("No services to export");
+      toast.error("Brak usług do eksportu");
       return;
     }
 
     const headers = [
-      "Date",
-      "Service Type",
-      "Mileage",
-      "Location",
-      "Cost",
-      "Currency",
-      "Notes",
+      "Data",
+      "Rodzaj usługi",
+      "Przebieg",
+      "Lokalizacja",
+      "Koszt",
+      "Waluta",
+      "Notatki",
     ];
     const rows = services.map((service) => [
       service.service_date,
@@ -85,11 +85,11 @@ export function ServiceHistoryTab({
     a.download = `bike-services-${bikeId}-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
-    toast.success("Services exported successfully");
+    toast.success("Usługi zostały wyeksportowane");
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this service record?")) {
+    if (!confirm("Czy na pewno chcesz usunąć ten wpis serwisowy?")) {
       return;
     }
 
@@ -149,9 +149,9 @@ export function ServiceHistoryTab({
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle>Service History</CardTitle>
+              <CardTitle>Historia serwisowania</CardTitle>
               <CardDescription>
-                Track all maintenance and repairs for this bike
+                Śledź wszystkie naprawy i konserwację tego roweru
               </CardDescription>
             </div>
             <div className="flex gap-2">
@@ -160,10 +160,10 @@ export function ServiceHistoryTab({
                 variant="outline"
                 disabled={services.length === 0}
               >
-                Export CSV
+                Eksportuj CSV
               </Button>
               <Button onClick={() => setIsAddModalOpen(true)}>
-                Add Service
+                Dodaj usługę
               </Button>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function ServiceHistoryTab({
           <CardContent className="pt-6">
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-              <span className="ml-3 text-gray-600">Loading services...</span>
+              <span className="ml-3 text-gray-600">Ładowanie usług...</span>
             </div>
           </CardContent>
         </Card>
@@ -200,13 +200,13 @@ export function ServiceHistoryTab({
                 />
               </svg>
               <h3 className="mt-4 text-lg font-medium text-gray-900">
-                No service records
+                Brak wpisów serwisowych
               </h3>
               <p className="mt-2 text-sm text-gray-500">
-                Get started by adding your first service record.
+                Rozpocznij dodając swój pierwszy wpis serwisowy.
               </p>
               <Button className="mt-4" onClick={() => setIsAddModalOpen(true)}>
-                Add First Service
+                Dodaj pierwszą usługę
               </Button>
             </div>
           </CardContent>
@@ -223,11 +223,11 @@ export function ServiceHistoryTab({
             {services.length > 0 && (
               <div className="mt-6 flex items-center justify-between border-t pt-4">
                 <p className="text-sm text-gray-600">
-                  Showing {services.length} of {total} services
+                  Wyświetlono {services.length} z {total} usług
                 </p>
                 {hasMore && (
                   <Button onClick={handleLoadMore} variant="outline">
-                    Load More
+                    Załaduj więcej
                   </Button>
                 )}
               </div>

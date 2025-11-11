@@ -31,10 +31,10 @@ export function CostsTab({ bikeId }: CostsTabProps) {
       <Card>
         <CardContent className="pt-6">
           <div className="text-center text-red-600">
-            <p className="font-medium">Error loading cost statistics</p>
+            <p className="font-medium">Błąd ładowania statystyk kosztów</p>
             <p className="text-sm mt-1">{error}</p>
             <Button onClick={refetch} className="mt-4" variant="outline">
-              Try Again
+              Spróbuj ponownie
             </Button>
           </div>
         </CardContent>
@@ -49,7 +49,7 @@ export function CostsTab({ bikeId }: CostsTabProps) {
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
             <span className="ml-3 text-gray-600">
-              Loading cost statistics...
+              Ładowanie statystyk kosztów...
             </span>
           </div>
         </CardContent>
@@ -62,7 +62,7 @@ export function CostsTab({ bikeId }: CostsTabProps) {
       <Card>
         <CardContent className="pt-6">
           <div className="text-center py-12">
-            <p className="text-gray-500">No cost data available</p>
+            <p className="text-gray-500">Brak dostępnych danych kosztowych</p>
           </div>
         </CardContent>
       </Card>
@@ -74,15 +74,15 @@ export function CostsTab({ bikeId }: CostsTabProps) {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Cost Analysis</CardTitle>
+          <CardTitle>Analiza kosztów</CardTitle>
           <CardDescription>
-            Analyze maintenance costs and spending patterns over time
+            Analizuj koszty konserwacji i wzorce wydatków w czasie
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
-              <Label htmlFor="period">Time Period</Label>
+              <Label htmlFor="period">Okres czasu</Label>
               <select
                 id="period"
                 value={filters.period || "year"}
@@ -96,17 +96,17 @@ export function CostsTab({ bikeId }: CostsTabProps) {
                 }
                 className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="month">Last Month</option>
-                <option value="quarter">Last Quarter</option>
-                <option value="year">Last Year</option>
-                <option value="all">All Time</option>
+                <option value="month">Ostatni miesiąc</option>
+                <option value="quarter">Ostatni kwartał</option>
+                <option value="year">Ostatni rok</option>
+                <option value="all">Cały okres</option>
               </select>
             </div>
 
             {filters.period === "all" && (
               <>
                 <div className="flex-1">
-                  <Label htmlFor="from-date">From Date</Label>
+                  <Label htmlFor="from-date">Od daty</Label>
                   <input
                     id="from-date"
                     type="date"
@@ -119,7 +119,7 @@ export function CostsTab({ bikeId }: CostsTabProps) {
                 </div>
 
                 <div className="flex-1">
-                  <Label htmlFor="to-date">To Date</Label>
+                  <Label htmlFor="to-date">Do daty</Label>
                   <input
                     id="to-date"
                     type="date"

@@ -27,12 +27,12 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
 
     // Validation
     if (isNaN(newMileage) || newMileage < 0) {
-      toast.error("Please enter a valid mileage");
+      toast.error("Wprowadź prawidłowy przebieg");
       return;
     }
 
     if (bike.current_mileage && newMileage < bike.current_mileage) {
-      toast.error("New mileage cannot be less than current mileage");
+      toast.error("Nowy przebieg nie może być mniejszy niż obecny przebieg");
       return;
     }
 
@@ -52,10 +52,10 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error?.message || "Failed to update mileage");
+        throw new Error(error.error?.message || "Nie udało się zaktualizować przebiegu");
       }
 
-      toast.success("Mileage updated successfully");
+      toast.success("Przebieg został zaktualizowany");
     } catch (err) {
       // Rollback on error
       if (bike.current_mileage) {
@@ -63,7 +63,7 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
         setMileage(bike.current_mileage.toString());
       }
       toast.error(
-        err instanceof Error ? err.message : "Failed to update mileage",
+        err instanceof Error ? err.message : "Nie udało się zaktualizować przebiegu",
       );
     } finally {
       setIsUpdating(false);
@@ -71,10 +71,10 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
   };
 
   const bikeTypeLabels: Record<string, string> = {
-    szosowy: "Road",
+    szosowy: "Szosowy",
     gravelowy: "Gravel",
     mtb: "MTB",
-    czasowy: "TT",
+    czasowy: "Czasowy",
   };
 
   return (
@@ -86,12 +86,12 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
             <CardDescription className="text-base mt-2">
               {bikeTypeLabels[bike.type] || bike.type}
               {bike.purchase_date &&
-                ` • Purchased: ${new Date(bike.purchase_date).toLocaleDateString()}`}
+                ` • Zakupiony: ${new Date(bike.purchase_date).toLocaleDateString()}`}
             </CardDescription>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
             <div className="text-right">
-              <p className="text-sm text-gray-500">Current Mileage</p>
+              <p className="text-sm text-gray-500">Aktualny przebieg</p>
               <p className="text-2xl font-bold">
                 {bike.current_mileage || 0} km
               </p>
@@ -104,7 +104,7 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
           <div className="flex-1">
             <Input
               type="number"
-              placeholder="New mileage"
+              placeholder="Nowy przebieg"
               value={mileage}
               onChange={(e) => setMileage(e.target.value)}
               disabled={isUpdating}
@@ -116,18 +116,18 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
             disabled={isUpdating}
             className="w-full sm:w-auto"
           >
-            {isUpdating ? "Updating..." : "Update Mileage"}
+            {isUpdating ? "Aktualizuję..." : "Zaktualizuj przebieg"}
           </Button>
         </div>
 
         {bike.next_service && (
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm font-medium text-blue-900">
-              Next Service: {bike.next_service.service_type}
+              Następny serwis: {bike.next_service.service_type}
             </p>
             <p className="text-sm text-blue-700">
-              Target: {bike.next_service.target_mileage} km (
-              {bike.next_service.km_remaining} km remaining)
+              Cel: {bike.next_service.target_mileage} km (
+              pozostało {bike.next_service.km_remaining} km)
             </p>
           </div>
         )}
@@ -142,17 +142,17 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
           <div className="text-center p-3 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-500">Status</p>
             <p className="text-sm font-medium capitalize">
-              {bike.status || "active"}
+              {bike.status || "aktywny"}
             </p>
           </div>
           <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500">Active Reminders</p>
+            <p className="text-xs text-gray-500">Aktywne przypomnienia</p>
             <p className="text-sm font-medium">
               {bike.active_reminders_count || 0}
             </p>
           </div>
           <div className="text-center p-3 bg-gray-50 rounded-lg">
-            <p className="text-xs text-gray-500">Total Cost</p>
+            <p className="text-xs text-gray-500">Całkowity koszt</p>
             <p className="text-sm font-medium">{bike.total_cost || 0} PLN</p>
           </div>
         </div>
