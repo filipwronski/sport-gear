@@ -37,7 +37,7 @@ export default function RecommendationsTabs({
   return (
     <QueryClientProvider client={queryClient}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
+        <TabsList className="grid w-full sm:grid-cols-2 md:grid-cols-3 gap-1 mb-8">
           <TabsTrigger value="current">Aktualna rekomendacja</TabsTrigger>
           <TabsTrigger value="forecast">Prognoza tygodniowa</TabsTrigger>
           <TabsTrigger value="history">Historia treningów</TabsTrigger>

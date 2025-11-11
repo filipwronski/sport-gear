@@ -28,18 +28,6 @@ export default function Header() {
               Strona główna
             </a>
             <a
-              href="/bikes"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Rowery
-            </a>
-            <a
-              href="/community"
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Społeczność
-            </a>
-            <a
               href="/about"
               className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >

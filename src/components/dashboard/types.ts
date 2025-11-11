@@ -2,7 +2,7 @@
 // Dashboard Component Types
 // ============================================================================
 
-import type { DashboardDTO, ApiErrorResponse } from "../../types";
+import type { DashboardDTO, ApiErrorResponse, LocationDTO } from "../../types";
 
 // ============================================================================
 // Props Types
@@ -20,6 +20,10 @@ export interface NavbarProps {
 export interface WeatherSectionProps {
   data: DashboardDTO["weather_summary"];
   lastRefresh?: Date;
+  currentLocationId?: string;
+  userLocations?: LocationDTO[];
+  isLoadingLocations?: boolean;
+  onLocationChange?: (locationId: string | null) => void;
 }
 
 export interface EquipmentStatusSectionProps {

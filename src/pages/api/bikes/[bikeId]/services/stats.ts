@@ -1,7 +1,9 @@
 import type { APIRoute } from "astro";
+import { ServiceRecordService } from "../../../../../services/service-record.service";
+import { ApiError } from "../../../../../lib/errors";
 
 /**
- * GET /api/bikes/{bikeId}/services/stats - Working version without imports
+ * GET /api/bikes/{bikeId}/services/stats
  */
 export const GET: APIRoute = async ({ request, locals, params }) => {
   try {
@@ -21,7 +23,8 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
       );
     }
 
-    const _bikeId = params.bikeId;
+    const userId = locals.userId;
+    const bikeId = params.bikeId!;
 
     // Parse query parameters
     const url = new URL(request.url);
@@ -29,54 +32,22 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
     const from_date = url.searchParams.get("from_date");
     const to_date = url.searchParams.get("to_date");
 
-    // Calculate date range
-    const now = new Date();
-    const today = now.toISOString().split("T")[0];
-    let fromDate = "2020-01-01";
-    let toDate = today;
-
-    if (from_date && to_date) {
-      fromDate = from_date.split("T")[0];
-      toDate = to_date.split("T")[0];
-    } else {
-      switch (period) {
-        case "month":
-          fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0];
-          break;
-        case "quarter":
-          fromDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0];
-          break;
-        case "year":
-          fromDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
-            .toISOString()
-            .split("T")[0];
-          break;
-      }
-    }
-
-    // Mock statistics response
-    const mockStats = {
-      period: {
-        from: fromDate,
-        to: toDate,
-      },
-      total_cost: 0,
-      total_services: 0,
-      cost_per_km: 0,
-      total_mileage: 0,
-      breakdown_by_type: [],
-      breakdown_by_location: {
-        warsztat: { count: 0, total_cost: 0 },
-        samodzielnie: { count: 0, total_cost: 0 },
-      },
-      timeline: [],
+    // Prepare parameters for service
+    const params_obj = {
+      period: period as "month" | "quarter" | "year" | "all",
+      from_date: from_date || undefined,
+      to_date: to_date || undefined,
     };
 
-    return new Response(JSON.stringify(mockStats), {
+    // Get statistics from service
+    const serviceRecordService = new ServiceRecordService();
+    const stats = await serviceRecordService.getServiceStats(
+      userId,
+      bikeId,
+      params_obj,
+    );
+
+    return new Response(JSON.stringify(stats), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
@@ -85,11 +56,36 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
     });
   } catch (error) {
     console.error("Service stats error:", error);
+    console.error("Error details:", {
+      name: error?.name,
+      message: error?.message,
+      stack: error?.stack,
+    });
+
+    // Handle ApiError instances with proper status codes
+    if (error instanceof ApiError) {
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+          },
+        }),
+        {
+          status: error.statusCode,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
     return new Response(
       JSON.stringify({
         error: {
           code: "INTERNAL_ERROR",
           message: "An unexpected error occurred",
+          details:
+            process.env.NODE_ENV === "development" ? error?.message : undefined,
         },
       }),
       {

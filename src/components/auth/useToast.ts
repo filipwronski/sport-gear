@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { toast } from "sonner";
 
 // Types for toast messages
@@ -9,7 +10,7 @@ export interface ToastMessage {
 
 // Centralized toast management for auth components
 export const useToast = () => {
-  const showToast = (message: ToastMessage) => {
+  const showToast = useCallback((message: ToastMessage) => {
     const { type, title, description } = message;
 
     switch (type) {
@@ -38,11 +39,11 @@ export const useToast = () => {
         });
         break;
     }
-  };
+  }, []);
 
-  const clearToasts = () => {
+  const clearToasts = useCallback(() => {
     toast.dismiss();
-  };
+  }, []);
 
   return {
     showToast,

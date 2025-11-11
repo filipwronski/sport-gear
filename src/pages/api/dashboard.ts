@@ -7,6 +7,7 @@
  * Query Parameters:
  * - lat (optional): Latitude for weather data
  * - lng (optional): Longitude for weather data
+ * - location_id (optional): UUID of user's saved location for weather data
  *
  * Response: DashboardDTO with aggregated data from multiple sources
  *
@@ -53,11 +54,15 @@ export const GET: APIRoute = async ({ request, locals }) => {
           }
         : null;
 
+    // Extract location_id (optional)
+    const locationId = query.location_id || null;
+
     // Use DashboardService to aggregate all data
     const dashboardService = new DashboardService();
     const dashboardData = await dashboardService.getDashboard(
       userId,
       coordinates,
+      locationId,
     );
 
     return new Response(JSON.stringify(dashboardData), {

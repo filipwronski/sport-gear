@@ -1,18 +1,30 @@
 import { Cloud, Droplets, Wind, Thermometer } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WeeklyForecast from "../WeeklyForecast";
-import type { WeatherSummaryDTO } from "../../types";
+import { LocationSelector } from "./LocationSelector";
+import type { WeatherSummaryDTO, LocationDTO } from "../../types";
 
 interface WeatherCardProps {
   weather: WeatherSummaryDTO;
   refreshedAt?: Date;
   coordinates?: { lat: number; lng: number };
+  currentLocationId?: string;
+  userLocations?: LocationDTO[];
+  isLoadingLocations?: boolean;
+  onLocationChange?: (
+    locationId: string | null,
+    coordinates?: { lat: number; lng: number },
+  ) => void;
 }
 
 export function WeatherCard({
   weather,
   refreshedAt,
   coordinates,
+  currentLocationId,
+  userLocations = [],
+  isLoadingLocations = false,
+  onLocationChange,
 }: WeatherCardProps) {
   const getWeatherIcon = (description: string) => {
     const lowerDesc = description.toLowerCase();
@@ -46,13 +58,50 @@ export function WeatherCard({
     return `${diffHours} godz temu`;
   };
 
+  const getLocationDisplay = () => {
+    if (!currentLocationId) return "Warszawa"; // Default fallback
+
+    if (currentLocationId === "browser") {
+      return "Twoja lokalizacja";
+    }
+
+    // Check if it's a Polish city
+    if (currentLocationId.startsWith("polish-city-")) {
+      const cityName = currentLocationId.replace("polish-city-", "");
+      return cityName;
+    }
+
+    // Check user locations
+    const userLocation = userLocations.find(
+      (loc) => loc.id === currentLocationId,
+    );
+    if (userLocation) {
+      return userLocation.city;
+    }
+
+    return "Warszawa"; // Fallback
+  };
+
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Cloud className="h-5 w-5" />
-          Dzisiejsza pogoda
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Cloud className="h-5 w-5" />
+            Dzisiejsza pogoda {getLocationDisplay()}
+          </CardTitle>
+          {onLocationChange && (
+            <div className="flex-shrink-0">
+              <LocationSelector
+                currentLocationId={currentLocationId}
+                userLocations={userLocations}
+                isLoadingLocations={isLoadingLocations}
+                onLocationChange={onLocationChange}
+                className="w-48"
+              />
+            </div>
+          )}
+        </div>
         {refreshedAt && (
           <p className="text-xs text-muted-foreground">
             Odświeżono {formatLastRefresh(refreshedAt)}

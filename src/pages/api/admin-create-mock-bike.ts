@@ -13,7 +13,7 @@ export const POST: APIRoute = async () => {
       import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
     );
 
-    const mockUserId = "550e8400-e29b-41d4-a716-446655440000";
+    const mockUserId = "7918f593-a567-4ab4-b5f6-174479002329";
     const mockBikeId = "123e4567-e89b-12d3-a456-426614174000";
 
     // Check if bike already exists
