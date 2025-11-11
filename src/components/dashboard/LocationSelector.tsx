@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -6,7 +6,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { MapPin, Navigation, Loader2 } from "lucide-react";
 import {
   POLISH_CITIES,
@@ -18,7 +17,10 @@ interface LocationSelectorProps {
   currentLocationId?: string;
   userLocations: LocationDTO[];
   isLoadingLocations?: boolean;
-  onLocationChange: (locationId: string | null, coordinates?: { lat: number; lng: number }) => void;
+  onLocationChange: (
+    locationId: string | null,
+    coordinates?: { lat: number; lng: number },
+  ) => void;
   className?: string;
 }
 
@@ -42,7 +44,9 @@ export function LocationSelector({
     }
 
     if (currentLocationId === "browser") {
-      return browserLocation ? "Lokalizacja z przeglądarki" : "Pobieranie lokalizacji...";
+      return browserLocation
+        ? "Lokalizacja z przeglądarki"
+        : "Pobieranie lokalizacji...";
     }
 
     // Check if it's a Polish city
@@ -53,7 +57,9 @@ export function LocationSelector({
     }
 
     // Check user locations
-    const userLocation = userLocations.find(loc => loc.id === currentLocationId);
+    const userLocation = userLocations.find(
+      (loc) => loc.id === currentLocationId,
+    );
     if (userLocation) {
       return `${userLocation.city}, ${userLocation.country_code}`;
     }
@@ -127,7 +133,9 @@ export function LocationSelector({
           <SelectItem value="browser" className="flex items-center gap-2">
             <Navigation className="h-4 w-4" />
             Użyj mojej lokalizacji
-            {isGettingLocation && <Loader2 className="h-4 w-4 animate-spin ml-auto" />}
+            {isGettingLocation && (
+              <Loader2 className="h-4 w-4 animate-spin ml-auto" />
+            )}
           </SelectItem>
 
           {/* Polish Cities Section */}

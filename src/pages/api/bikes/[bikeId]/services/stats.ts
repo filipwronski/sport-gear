@@ -65,7 +65,8 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
         error: {
           code: "INTERNAL_ERROR",
           message: "An unexpected error occurred",
-          details: process.env.NODE_ENV === "development" ? error?.message : undefined,
+          details:
+            process.env.NODE_ENV === "development" ? error?.message : undefined,
         },
       }),
       {

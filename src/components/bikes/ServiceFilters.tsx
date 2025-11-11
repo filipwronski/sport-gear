@@ -62,7 +62,8 @@ export function ServiceFilters({
             onValueChange={(value) =>
               onFiltersChange({
                 ...filters,
-                service_type: value === "all" ? undefined : value as ServiceTypeEnum,
+                service_type:
+                  value === "all" ? undefined : (value as ServiceTypeEnum),
                 offset: 0,
               })
             }
@@ -88,7 +89,8 @@ export function ServiceFilters({
             onValueChange={(value) =>
               onFiltersChange({
                 ...filters,
-                service_location: value === "all" ? undefined : value as ServiceLocationEnum,
+                service_location:
+                  value === "all" ? undefined : (value as ServiceLocationEnum),
                 offset: 0,
               })
             }

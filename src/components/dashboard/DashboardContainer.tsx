@@ -9,15 +9,19 @@ import { WeatherSection } from "./WeatherSection";
 import { EquipmentStatusSection } from "./EquipmentStatusSection";
 import { CommunityActivitySection } from "./CommunityActivitySection";
 import { PersonalizationStatusSection } from "./PersonalizationStatusSection";
-import { QuickActionsBar } from "./QuickActionsBar";
 import type { DashboardContainerProps } from "./types";
 
 export default function DashboardContainer({
   userId,
   initialLocationId,
 }: DashboardContainerProps) {
-  const [currentLocationId, setCurrentLocationId] = useState<string | undefined>(initialLocationId);
-  const [browserCoordinates, setBrowserCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [currentLocationId, setCurrentLocationId] = useState<
+    string | undefined
+  >(initialLocationId);
+  const [browserCoordinates, setBrowserCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const { data, isLoading, error, refetch, lastRefresh, coordinates } =
     useDashboardData(userId, currentLocationId, browserCoordinates);
@@ -41,7 +45,10 @@ export default function DashboardContainer({
   });
 
   // Handle location change
-  const handleLocationChange = (locationId: string | null, coordinates?: { lat: number; lng: number }) => {
+  const handleLocationChange = (
+    locationId: string | null,
+    coordinates?: { lat: number; lng: number },
+  ) => {
     setCurrentLocationId(locationId || undefined);
 
     if (coordinates) {

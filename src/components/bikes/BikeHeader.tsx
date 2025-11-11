@@ -52,7 +52,9 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error?.message || "Nie udało się zaktualizować przebiegu");
+        throw new Error(
+          error.error?.message || "Nie udało się zaktualizować przebiegu",
+        );
       }
 
       toast.success("Przebieg został zaktualizowany");
@@ -63,7 +65,9 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
         setMileage(bike.current_mileage.toString());
       }
       toast.error(
-        err instanceof Error ? err.message : "Nie udało się zaktualizować przebiegu",
+        err instanceof Error
+          ? err.message
+          : "Nie udało się zaktualizować przebiegu",
       );
     } finally {
       setIsUpdating(false);
@@ -126,8 +130,8 @@ export function BikeHeader({ bike, onMileageUpdate }: BikeHeaderProps) {
               Następny serwis: {bike.next_service.service_type}
             </p>
             <p className="text-sm text-blue-700">
-              Cel: {bike.next_service.target_mileage} km (
-              pozostało {bike.next_service.km_remaining} km)
+              Cel: {bike.next_service.target_mileage} km ( pozostało{" "}
+              {bike.next_service.km_remaining} km)
             </p>
           </div>
         )}

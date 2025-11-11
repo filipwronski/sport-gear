@@ -81,7 +81,11 @@ export default function OutfitRecommendationList({
     if (item.includes("szyję") || item.includes("komin")) {
       return "neck";
     }
-    if (item.includes("noski") || item.includes("ochraniacze") || item.includes("skarpetki")) {
+    if (
+      item.includes("noski") ||
+      item.includes("ochraniacze") ||
+      item.includes("skarpetki")
+    ) {
       return "feet";
     }
     return "other";

@@ -66,7 +66,10 @@ export function useDashboardData(
             }
           }
         } catch (profileError) {
-          console.warn("Could not fetch user profile for default location:", profileError);
+          console.warn(
+            "Could not fetch user profile for default location:",
+            profileError,
+          );
         }
       }
 
@@ -79,9 +82,12 @@ export function useDashboardData(
       // If we have a location ID, fetch its coordinates
       else if (locationIdToUse) {
         try {
-          const locationResponse = await fetch(`/api/locations/${locationIdToUse}`, {
-            credentials: "include",
-          });
+          const locationResponse = await fetch(
+            `/api/locations/${locationIdToUse}`,
+            {
+              credentials: "include",
+            },
+          );
           if (locationResponse.ok) {
             const location = await locationResponse.json();
             currentCoordinates = {
@@ -90,13 +96,21 @@ export function useDashboardData(
             };
             url.searchParams.set("lat", currentCoordinates.lat.toString());
             url.searchParams.set("lng", currentCoordinates.lng.toString());
-            console.info(`Using coordinates from location ${locationIdToUse}:`, currentCoordinates);
+            console.info(
+              `Using coordinates from location ${locationIdToUse}:`,
+              currentCoordinates,
+            );
           } else {
-            console.warn(`Could not fetch location ${locationIdToUse}, falling back to geolocation`);
+            console.warn(
+              `Could not fetch location ${locationIdToUse}, falling back to geolocation`,
+            );
             locationIdToUse = null; // Reset to try geolocation
           }
         } catch (locationError) {
-          console.warn(`Error fetching location ${locationIdToUse}:`, locationError);
+          console.warn(
+            `Error fetching location ${locationIdToUse}:`,
+            locationError,
+          );
           locationIdToUse = null; // Reset to try geolocation
         }
       }
@@ -121,7 +135,10 @@ export function useDashboardData(
             };
             url.searchParams.set("lat", currentCoordinates.lat.toString());
             url.searchParams.set("lng", currentCoordinates.lng.toString());
-            console.info("Using coordinates from browser geolocation:", currentCoordinates);
+            console.info(
+              "Using coordinates from browser geolocation:",
+              currentCoordinates,
+            );
           } catch (_geoError) {
             console.warn(
               "Geolocation not available or denied, using default location (Warsaw)",
@@ -168,7 +185,7 @@ export function useDashboardData(
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [_browserCoordinates, _locationId]);
 
   useEffect(() => {
     fetchDashboard();

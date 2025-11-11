@@ -48,9 +48,7 @@ export function ServiceTable({
             <th className="text-left p-2 sm:p-3 font-medium text-sm hidden md:table-cell">
               Notatki
             </th>
-            <th className="text-right p-2 sm:p-3 font-medium text-sm">
-              Akcje
-            </th>
+            <th className="text-right p-2 sm:p-3 font-medium text-sm">Akcje</th>
           </tr>
         </thead>
         <tbody>

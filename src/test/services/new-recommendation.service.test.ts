@@ -811,9 +811,9 @@ describe("New Recommendation Service", () => {
 
       expect(result.items).toContain("koszulka termoaktywna");
       expect(result.items).toContain("krótkie spodenki");
-      // No foot protection needed in hot weather
+      // Hot weather (28°C) - summer socks only, no additional foot protection
+      expect(result.items).toContain("skarpetki letnie");
       expect(result.items).not.toContain("noski na buty");
-      expect(result.items).not.toContain("skarpetki letnie");
       expect(result.items).not.toContain("skarpetki zimowe");
       expect(result.items).not.toContain("ochraniacze na buty");
       // May include hat for sun protection
@@ -859,9 +859,9 @@ describe("New Recommendation Service", () => {
       expect(result.items).toContain("czapka");
       expect(result.items).toContain("rękawiczki jesienne");
       expect(result.items).toContain("komin na szyję");
-      // Cool weather (14°C) - summer socks
+      // Cool weather (14°C) - summer socks with shoe covers for long rides
       expect(result.items).toContain("skarpetki letnie");
-      expect(result.items).not.toContain("noski na buty");
+      expect(result.items).toContain("noski na buty");
     });
 
     it("should include leg warmers for longer rides in cool weather", () => {

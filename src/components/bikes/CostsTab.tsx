@@ -144,7 +144,6 @@ export function CostsTab({ bikeId }: CostsTabProps) {
         <CostLocationBreakdown stats={stats} />
       </div>
 
-
       {/* Empty state */}
       {stats.total_services === 0 && (
         <Card>
@@ -167,8 +166,8 @@ export function CostsTab({ bikeId }: CostsTabProps) {
                 Brak danych kosztowych
               </h3>
               <p className="mt-2 text-sm text-gray-500">
-                Rozpocznij śledzenie kosztów konserwacji roweru, dodając
-                rekordy serwisowe.
+                Rozpocznij śledzenie kosztów konserwacji roweru, dodając rekordy
+                serwisowe.
               </p>
             </div>
           </CardContent>

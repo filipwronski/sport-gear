@@ -21,11 +21,11 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
       );
     }
 
-    const bikeId = params.bikeId;
+    const _bikeId = params.bikeId;
 
     // Parse query parameters
     const url = new URL(request.url);
-    const period = url.searchParams.get("period") || "year";
+    const _period = url.searchParams.get("period") || "year";
 
     // Mock statistics data for testing
     const mockStats = {
@@ -33,7 +33,7 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
         from: "2024-01-01",
         to: "2024-12-31",
       },
-      total_cost: 2450.50,
+      total_cost: 2450.5,
       total_services: 8,
       cost_per_km: 2.45,
       total_mileage: 1000,
@@ -62,14 +62,14 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
         {
           service_type: "Wymiana opon",
           count: 2,
-          total_cost: 500.50,
+          total_cost: 500.5,
           avg_cost: 250.25,
           percentage: 20.4,
         },
       ],
       breakdown_by_location: {
         warsztat: { count: 5, total_cost: 1800 },
-        samodzielnie: { count: 3, total_cost: 650.50 },
+        samodzielnie: { count: 3, total_cost: 650.5 },
       },
       timeline: [
         {
@@ -94,7 +94,7 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
         },
         {
           month: "2024-12",
-          cost: 800.50,
+          cost: 800.5,
           services: 2,
         },
       ],

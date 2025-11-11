@@ -11,7 +11,10 @@ interface WeatherCardProps {
   currentLocationId?: string;
   userLocations?: LocationDTO[];
   isLoadingLocations?: boolean;
-  onLocationChange?: (locationId: string | null, coordinates?: { lat: number; lng: number }) => void;
+  onLocationChange?: (
+    locationId: string | null,
+    coordinates?: { lat: number; lng: number },
+  ) => void;
 }
 
 export function WeatherCard({
@@ -69,7 +72,9 @@ export function WeatherCard({
     }
 
     // Check user locations
-    const userLocation = userLocations.find(loc => loc.id === currentLocationId);
+    const userLocation = userLocations.find(
+      (loc) => loc.id === currentLocationId,
+    );
     if (userLocation) {
       return userLocation.city;
     }

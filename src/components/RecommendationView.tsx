@@ -44,76 +44,79 @@ export default function RecommendationView() {
 
   const { defaultLocation } = useDefaultLocation();
 
-  const fetchRecommendationWithParams = useCallback(async (intensity: WorkoutIntensity, duration: WorkoutDuration) => {
-    setIsLoading(true);
-    setError(null);
+  const fetchRecommendationWithParams = useCallback(
+    async (intensity: WorkoutIntensity, duration: WorkoutDuration) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      // Get coordinates
-      const params: Record<string, string> = {};
+      try {
+        // Get coordinates
+        const params: Record<string, string> = {};
 
-      // Use default location if available
-      if (defaultLocation) {
-        params.lat = defaultLocation.location.latitude.toString();
-        params.lng = defaultLocation.location.longitude.toString();
-      } else if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>(
-            (resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 300000,
-              });
-            },
-          );
-          params.lat = position.coords.latitude.toString();
-          params.lng = position.coords.longitude.toString();
-        } catch (_geoError) {
+        // Use default location if available
+        if (defaultLocation) {
+          params.lat = defaultLocation.location.latitude.toString();
+          params.lng = defaultLocation.location.longitude.toString();
+        } else if (navigator.geolocation) {
+          try {
+            const position = await new Promise<GeolocationPosition>(
+              (resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                  enableHighAccuracy: true,
+                  timeout: 5000,
+                  maximumAge: 300000,
+                });
+              },
+            );
+            params.lat = position.coords.latitude.toString();
+            params.lng = position.coords.longitude.toString();
+          } catch (_geoError) {
+            // Fallback to Warsaw coordinates
+            params.lat = "52.237049";
+            params.lng = "21.017532";
+          }
+        } else {
           // Fallback to Warsaw coordinates
           params.lat = "52.237049";
           params.lng = "21.017532";
         }
-      } else {
-        // Fallback to Warsaw coordinates
-        params.lat = "52.237049";
-        params.lng = "21.017532";
+
+        params.workout_intensity = intensity;
+        params.workout_duration = duration.toString();
+
+        const queryString = new URLSearchParams(params).toString();
+        const response = await fetch(`/api/new-recommendations?${queryString}`);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          const apiError: ApiError = {
+            code: errorData.error?.code || "UNKNOWN_ERROR",
+            message:
+              errorData.error?.message ||
+              "Wystąpił błąd podczas pobierania rekomendacji",
+            statusCode: response.status,
+            details: errorData.error?.details,
+            retryAfter: response.headers.get("Retry-After")
+              ? parseInt(response.headers.get("Retry-After"))
+              : undefined,
+          };
+          throw apiError;
+        }
+
+        const data: NewRecommendationDTO = await response.json();
+        setRecommendation(data);
+
+        // Update original parameters when recommendation is successfully fetched
+        setOriginalWorkoutIntensity(intensity);
+        setOriginalWorkoutDuration(duration);
+      } catch (err) {
+        setError(err as ApiError);
+      } finally {
+        setIsLoading(false);
       }
-
-      params.workout_intensity = intensity;
-      params.workout_duration = duration.toString();
-
-      const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`/api/new-recommendations?${queryString}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        const apiError: ApiError = {
-          code: errorData.error?.code || "UNKNOWN_ERROR",
-          message:
-            errorData.error?.message ||
-            "Wystąpił błąd podczas pobierania rekomendacji",
-          statusCode: response.status,
-          details: errorData.error?.details,
-          retryAfter: response.headers.get("Retry-After")
-            ? parseInt(response.headers.get("Retry-After"))
-            : undefined,
-        };
-        throw apiError;
-      }
-
-      const data: NewRecommendationDTO = await response.json();
-      setRecommendation(data);
-
-      // Update original parameters when recommendation is successfully fetched
-      setOriginalWorkoutIntensity(intensity);
-      setOriginalWorkoutDuration(duration);
-    } catch (err) {
-      setError(err as ApiError);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [defaultLocation]);
+    },
+    [defaultLocation],
+  );
 
   // Fetch function for the button that uses current parameters
   const fetchRecommendation = useCallback(() => {
@@ -122,8 +125,15 @@ export default function RecommendationView() {
 
   // Fetch recommendation on mount and location change only
   useEffect(() => {
-    fetchRecommendationWithParams(originalWorkoutIntensity, originalWorkoutDuration);
-  }, [fetchRecommendationWithParams]);
+    fetchRecommendationWithParams(
+      originalWorkoutIntensity,
+      originalWorkoutDuration,
+    );
+  }, [
+    fetchRecommendationWithParams,
+    originalWorkoutDuration,
+    originalWorkoutIntensity,
+  ]);
 
   // Track when workout parameters change
   const hasWorkoutParamsChanged =
@@ -208,9 +218,7 @@ export default function RecommendationView() {
           disabled={isLoading || !hasWorkoutParamsChanged}
           className="flex items-center gap-2"
         >
-          <RefreshCw
-            className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-          />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
           Zaktualizuj rekomendacje
         </Button>
       </div>

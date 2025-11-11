@@ -150,7 +150,9 @@ export default function FeedbackDialog({
 
   const resetForm = () => {
     setFollowedRecommendation("yes");
-    setActualOutfit(convertClothingItemsToOutfit(recommendation.recommendation.items));
+    setActualOutfit(
+      convertClothingItemsToOutfit(recommendation.recommendation.items),
+    );
     setOverallRating(3);
     setZoneRatings({});
     setNotes("");
@@ -320,18 +322,24 @@ export default function FeedbackDialog({
 
           {/* Share with community */}
           <div className="space-y-2">
-            <div className={`flex items-center justify-between p-3 rounded-lg ${
-              defaultLocation ? 'bg-muted' : 'bg-orange-50 border border-orange-200'
-            }`}>
+            <div
+              className={`flex items-center justify-between p-3 rounded-lg ${
+                defaultLocation
+                  ? "bg-muted"
+                  : "bg-orange-50 border border-orange-200"
+              }`}
+            >
               <div className="space-y-1">
-                <Label htmlFor="share-community" className="text-sm font-medium">
+                <Label
+                  htmlFor="share-community"
+                  className="text-sm font-medium"
+                >
                   Udostępnij społeczności
                 </Label>
                 <p className="text-xs text-muted-foreground">
                   {defaultLocation
                     ? "Inni użytkownicy zobaczą Twoje doświadczenie"
-                    : "Ustaw domyślną lokalizację aby udostępnić doświadczenie społeczności"
-                  }
+                    : "Ustaw domyślną lokalizację aby udostępnić doświadczenie społeczności"}
                 </p>
               </div>
               <Switch
@@ -351,7 +359,8 @@ export default function FeedbackDialog({
               <div className="flex items-center gap-2 p-2 bg-orange-50 border border-orange-200 rounded-lg">
                 <AlertTriangle className="w-4 h-4 text-orange-600 flex-shrink-0" />
                 <p className="text-xs text-orange-700">
-                  Aby udostępnić feedback społeczności, ustaw domyślną lokalizację w ustawieniach profilu.
+                  Aby udostępnić feedback społeczności, ustaw domyślną
+                  lokalizację w ustawieniach profilu.
                 </p>
               </div>
             )}

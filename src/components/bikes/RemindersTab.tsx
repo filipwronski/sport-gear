@@ -71,7 +71,9 @@ export function RemindersTab({ bikeId }: RemindersTabProps) {
             </div>
             <Button
               onClick={() =>
-                toast.info("Funkcjonalność dodawania przypomnień zostanie zaimplementowana")
+                toast.info(
+                  "Funkcjonalność dodawania przypomnień zostanie zaimplementowana",
+                )
               }
             >
               Dodaj przypomnienie
@@ -82,7 +84,8 @@ export function RemindersTab({ bikeId }: RemindersTabProps) {
           {overdueCount > 0 && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm font-medium text-red-900">
-                ⚠️ Masz {overdueCount} zaległ{overdueCount > 1 ? "ych" : "ą"} usług{overdueCount > 1 ? "" : "ę"}
+                ⚠️ Masz {overdueCount} zaległ{overdueCount > 1 ? "ych" : "ą"}{" "}
+                usług{overdueCount > 1 ? "" : "ę"}
                 {overdueCount > 1 ? " serwisowych" : " serwisową"}
               </p>
             </div>

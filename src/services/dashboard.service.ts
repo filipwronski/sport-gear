@@ -67,9 +67,11 @@ export class DashboardService {
       if (!coordinates && locationId) {
         try {
           const locationService = new LocationService();
-          const location = await locationService.getUserLocations(userId).then(
-            locations => locations.find(loc => loc.id === locationId)
-          );
+          const location = await locationService
+            .getUserLocations(userId)
+            .then((locations) =>
+              locations.find((loc) => loc.id === locationId),
+            );
           if (location) {
             resolvedCoordinates = {
               lat: location.location.latitude,
@@ -77,7 +79,10 @@ export class DashboardService {
             };
           }
         } catch (error) {
-          console.warn(`Could not resolve coordinates for location ${locationId}:`, error);
+          console.warn(
+            `Could not resolve coordinates for location ${locationId}:`,
+            error,
+          );
         }
       }
 
