@@ -6,7 +6,10 @@ interface CostLocationBreakdownProps {
 }
 
 export function CostLocationBreakdown({ stats }: CostLocationBreakdownProps) {
-  const { warsztat, samodzielnie } = stats.breakdown_by_location;
+  const {
+    warsztat = { count: 0, total_cost: 0 },
+    samodzielnie = { count: 0, total_cost: 0 },
+  } = stats.breakdown_by_location || {};
   const totalCost = warsztat.total_cost + samodzielnie.total_cost;
   const totalCount = warsztat.count + samodzielnie.count;
 

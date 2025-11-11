@@ -16,11 +16,17 @@ export function CostKPIs({ stats }: CostKPIsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {stats.total_cost.toFixed(2)} PLN
+            {(stats.total_cost || 0).toFixed(2)} PLN
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            Period: {new Date(stats.period.from).toLocaleDateString()} -{" "}
-            {new Date(stats.period.to).toLocaleDateString()}
+            Period:{" "}
+            {stats.period?.from
+              ? new Date(stats.period.from).toLocaleDateString()
+              : "N/A"}{" "}
+            -{" "}
+            {stats.period?.to
+              ? new Date(stats.period.to).toLocaleDateString()
+              : "N/A"}
           </p>
         </CardContent>
       </Card>
@@ -32,7 +38,7 @@ export function CostKPIs({ stats }: CostKPIsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.total_services}</div>
+          <div className="text-2xl font-bold">{stats.total_services || 0}</div>
           <p className="text-xs text-gray-500 mt-1">Rekordy serwisowe</p>
         </CardContent>
       </Card>
@@ -45,7 +51,7 @@ export function CostKPIs({ stats }: CostKPIsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {stats.cost_per_km.toFixed(2)} PLN
+            {(stats.cost_per_km || 0).toFixed(2)} PLN
           </div>
           <p className="text-xs text-gray-500 mt-1">Średni koszt konserwacji</p>
         </CardContent>
@@ -59,7 +65,7 @@ export function CostKPIs({ stats }: CostKPIsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">
-            {stats.total_mileage.toFixed(0)} km
+            {(stats.total_mileage || 0).toFixed(0)} km
           </div>
           <p className="text-xs text-gray-500 mt-1">W okresie</p>
         </CardContent>

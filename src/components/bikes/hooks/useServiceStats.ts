@@ -28,10 +28,15 @@ export function useServiceStats(
       if (filters.to_date) params.append("to_date", filters.to_date);
 
       const response = await fetch(
-        `/api/bikes/${bikeId}/services/stats-test?${params.toString()}`,
+        `/api/bikes/${bikeId}/services/stats?${params.toString()}`,
       );
 
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(
+            "Rower nie został znaleziony lub nie masz do niego dostępu",
+          );
+        }
         throw new Error("Failed to fetch service statistics");
       }
 

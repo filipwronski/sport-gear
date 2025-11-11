@@ -37,7 +37,7 @@ export function CostBreakdownChart({ stats }: CostBreakdownChartProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {stats.breakdown_by_type.map((item, index) => (
+          {(stats.breakdown_by_type || []).map((item, index) => (
             <div key={item.service_type}>
               <div className="flex justify-between text-sm mb-1">
                 <span className="font-medium">
@@ -62,7 +62,7 @@ export function CostBreakdownChart({ stats }: CostBreakdownChartProps) {
           ))}
         </div>
 
-        {stats.breakdown_by_type.length === 0 && (
+        {(stats.breakdown_by_type || []).length === 0 && (
           <p className="text-center text-gray-500 py-8">
             Brak dostępnych danych serwisowych
           </p>

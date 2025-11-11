@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { ServiceRecordService } from "../../../../../services/service-record.service";
+import { ApiError } from "../../../../../lib/errors";
 
 /**
  * GET /api/bikes/{bikeId}/services/stats
@@ -60,6 +61,24 @@ export const GET: APIRoute = async ({ request, locals, params }) => {
       message: error?.message,
       stack: error?.stack,
     });
+
+    // Handle ApiError instances with proper status codes
+    if (error instanceof ApiError) {
+      return new Response(
+        JSON.stringify({
+          error: {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+          },
+        }),
+        {
+          status: error.statusCode,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
     return new Response(
       JSON.stringify({
         error: {

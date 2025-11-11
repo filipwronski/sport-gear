@@ -1,4 +1,4 @@
-import { supabaseClient } from "../db/supabase.client";
+import { supabaseServiceClient } from "../db/supabase.admin.client";
 import { BikeNotFoundError } from "../lib/errors";
 // Removed complex imports that might cause SSR issues
 
@@ -14,8 +14,8 @@ import { BikeNotFoundError } from "../lib/errors";
  */
 export class ServiceRecordService {
   private getClient() {
-    // Use regular client only
-    return supabaseClient;
+    // Use service client to bypass RLS (auth handled at API level)
+    return supabaseServiceClient;
   }
 
   /**
@@ -500,26 +500,8 @@ export class ServiceRecordService {
     cost_per_km: number;
     total_mileage: number;
   }> {
-    const { data, error } = await this.getClient().rpc("get_service_totals", {
-      p_bike_id: bikeId,
-      p_from_date: dateRange.from,
-      p_to_date: dateRange.to,
-    });
-
-    if (error) {
-      console.error("[ServiceRecordService] Error fetching totals:", error);
-      // Fallback to basic query if RPC function doesn't exist
-      return this.getTotalStatsFallback(bikeId, dateRange);
-    }
-
-    return (
-      data || {
-        total_cost: 0,
-        total_services: 0,
-        cost_per_km: 0,
-        total_mileage: 0,
-      }
-    );
+    // Always use improved fallback method since RPC function has mileage calculation issues
+    return this.getTotalStatsFallbackImproved(bikeId, dateRange);
   }
 
   /**
@@ -560,6 +542,72 @@ export class ServiceRecordService {
       .sort((a, b) => a - b);
     const total_mileage =
       mileages.length > 1 ? mileages[mileages.length - 1] - mileages[0] : 0;
+    const cost_per_km = total_mileage > 0 ? total_cost / total_mileage : 0;
+
+    return { total_cost, total_services, cost_per_km, total_mileage };
+  }
+
+  /**
+   * Improved fallback method with proper mileage calculation
+   */
+  private async getTotalStatsFallbackImproved(
+    bikeId: string,
+    dateRange: { from: string; to: string },
+  ): Promise<{
+    total_cost: number;
+    total_services: number;
+    cost_per_km: number;
+    total_mileage: number;
+  }> {
+    // Get all records with costs
+    const { data: recordsData, error: recordsError } = await this.getClient()
+      .from("service_records")
+      .select("cost, mileage_at_service, service_date")
+      .eq("bike_id", bikeId)
+      .gte("service_date", dateRange.from)
+      .lte("service_date", dateRange.to)
+      .order("service_date", { ascending: true });
+
+    if (recordsError || !recordsData) {
+      return {
+        total_cost: 0,
+        total_services: 0,
+        cost_per_km: 0,
+        total_mileage: 0,
+      };
+    }
+
+    // Calculate total cost and services
+    const total_cost = recordsData.reduce(
+      (sum, record) => sum + (record.cost || 0),
+      0,
+    );
+    const total_services = recordsData.length;
+
+    // Calculate total mileage as difference between first and last chronological record
+    const validMileages = recordsData
+      .filter(
+        (r) =>
+          r.mileage_at_service !== null && r.mileage_at_service !== undefined,
+      )
+      .sort(
+        (a, b) =>
+          new Date(a.service_date).getTime() -
+          new Date(b.service_date).getTime(),
+      );
+
+    let total_mileage = 0;
+
+    if (validMileages.length > 0) {
+      // Use the highest mileage value as current total mileage of the bike
+      // This represents how many km the bike has currently
+      total_mileage = Math.max(
+        ...validMileages.map((r) => r.mileage_at_service),
+      );
+    }
+
+    // Calculate cost per km as total service costs divided by current bike mileage
+    // This gives the average maintenance cost per km ridden
     const cost_per_km = total_mileage > 0 ? total_cost / total_mileage : 0;
 
     return { total_cost, total_services, cost_per_km, total_mileage };

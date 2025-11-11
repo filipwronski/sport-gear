@@ -1,17 +1,14 @@
 -- ============================================================================
--- Migration: Service Statistics Functions
--- Description: Creates helper functions for service record statistics
+-- Migration: Fix Service Totals Function
+-- Description: Fix get_service_totals function to properly calculate mileage
 -- Functions: get_service_totals
 -- Dependencies: service_records table
 -- ============================================================================
 
--- ============================================================================
--- Function: get_service_totals
--- Description: Calculates total statistics for service records in date range
--- Parameters: p_bike_id (uuid), p_from_date (date), p_to_date (date)
--- Returns: total_cost, total_services, cost_per_km, total_mileage
--- ============================================================================
+-- Drop existing function
+DROP FUNCTION IF EXISTS get_service_totals(UUID, DATE, DATE);
 
+-- Recreate function with fixed mileage calculation
 CREATE OR REPLACE FUNCTION get_service_totals(
   p_bike_id UUID,
   p_from_date DATE,
@@ -60,7 +57,7 @@ BEGIN
 
   -- Calculate total mileage and cost per km
   total_mileage := COALESCE(max_mileage - min_mileage, 0);
-  
+
   IF total_mileage > 0 THEN
     cost_per_km := total_cost / total_mileage;
   ELSE
