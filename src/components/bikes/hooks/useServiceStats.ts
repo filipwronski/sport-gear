@@ -28,7 +28,7 @@ export function useServiceStats(
       if (filters.to_date) params.append("to_date", filters.to_date);
 
       const response = await fetch(
-        `/api/bikes/${bikeId}/services/stats?${params.toString()}`,
+        `/api/bikes/${bikeId}/services/stats-test?${params.toString()}`,
       );
 
       if (!response.ok) {

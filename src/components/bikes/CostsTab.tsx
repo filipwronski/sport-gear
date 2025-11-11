@@ -167,11 +167,11 @@ export function CostsTab({ bikeId }: CostsTabProps) {
                 />
               </svg>
               <h3 className="mt-4 text-lg font-medium text-gray-900">
-                No cost data
+                Brak danych kosztowych
               </h3>
               <p className="mt-2 text-sm text-gray-500">
-                Start tracking your bike maintenance costs by adding service
-                records.
+                Rozpocznij śledzenie kosztów konserwacji roweru, dodając
+                rekordy serwisowe.
               </p>
             </div>
           </CardContent>

@@ -1,4 +1,5 @@
 import { supabaseClient } from "../db/supabase.client";
+import { BikeNotFoundError } from "../lib/errors";
 // Removed complex imports that might cause SSR issues
 
 /**
@@ -358,15 +359,20 @@ export class ServiceRecordService {
     userId: string,
     bikeId: string,
   ): Promise<void> {
-    const { data, error } = await this.getClient()
+    // First check if bike exists at all
+    const { data: bikeExists, error: existsError } = await this.getClient()
       .from("bikes")
-      .select("id")
+      .select("id, user_id")
       .eq("id", bikeId)
-      .eq("user_id", userId)
       .single();
 
-    if (error || !data) {
-      throw new BikeNotFoundError();
+    if (existsError || !bikeExists) {
+      throw new BikeNotFoundError("Bike not found");
+    }
+
+    // Check if bike belongs to user
+    if (bikeExists.user_id !== userId) {
+      throw new BikeNotFoundError("Bike not found or access denied");
     }
   }
 
