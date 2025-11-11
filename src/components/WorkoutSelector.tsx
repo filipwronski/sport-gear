@@ -53,7 +53,7 @@ export default function WorkoutSelector({
           <RadioGroup
             value={intensity}
             onValueChange={onIntensityChange}
-            className="grid-flow-col"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4"
           >
             {intensityOptions.map((option) => (
               <div
