@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { DashboardDTO } from "../types";
 import type { UseDashboardDataReturn } from "../components/dashboard/types";
+import { getPolishCityByName } from "../constants/location.constants";
 
 export function useDashboardData(
   _userId: string,
@@ -81,37 +82,62 @@ export function useDashboardData(
       }
       // If we have a location ID, fetch its coordinates
       else if (locationIdToUse) {
-        try {
-          const locationResponse = await fetch(
-            `/api/locations/${locationIdToUse}`,
-            {
-              credentials: "include",
-            },
-          );
-          if (locationResponse.ok) {
-            const location = await locationResponse.json();
+        // Handle predefined Polish cities
+        if (locationIdToUse.startsWith("polish-city-")) {
+          const cityName = locationIdToUse.replace("polish-city-", "");
+          const cityData = getPolishCityByName(cityName);
+          if (cityData) {
             currentCoordinates = {
-              lat: location.location.latitude,
-              lng: location.location.longitude,
+              lat: cityData.latitude,
+              lng: cityData.longitude,
             };
             url.searchParams.set("lat", currentCoordinates.lat.toString());
             url.searchParams.set("lng", currentCoordinates.lng.toString());
             console.info(
-              `Using coordinates from location ${locationIdToUse}:`,
+              `Using coordinates from predefined Polish city ${cityName}:`,
               currentCoordinates,
             );
           } else {
             console.warn(
-              `Could not fetch location ${locationIdToUse}, falling back to geolocation`,
+              `Unknown Polish city: ${cityName}, falling back to geolocation`,
             );
             locationIdToUse = null; // Reset to try geolocation
           }
-        } catch (locationError) {
-          console.warn(
-            `Error fetching location ${locationIdToUse}:`,
-            locationError,
-          );
-          locationIdToUse = null; // Reset to try geolocation
+        }
+        // Handle user-created locations (UUID format)
+        else {
+          try {
+            const locationResponse = await fetch(
+              `/api/locations/${locationIdToUse}`,
+              {
+                credentials: "include",
+              },
+            );
+            if (locationResponse.ok) {
+              const location = await locationResponse.json();
+              currentCoordinates = {
+                lat: location.location.latitude,
+                lng: location.location.longitude,
+              };
+              url.searchParams.set("lat", currentCoordinates.lat.toString());
+              url.searchParams.set("lng", currentCoordinates.lng.toString());
+              console.info(
+                `Using coordinates from location ${locationIdToUse}:`,
+                currentCoordinates,
+              );
+            } else {
+              console.warn(
+                `Could not fetch location ${locationIdToUse}, falling back to geolocation`,
+              );
+              locationIdToUse = null; // Reset to try geolocation
+            }
+          } catch (locationError) {
+            console.warn(
+              `Error fetching location ${locationIdToUse}:`,
+              locationError,
+            );
+            locationIdToUse = null; // Reset to try geolocation
+          }
         }
       }
 

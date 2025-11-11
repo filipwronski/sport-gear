@@ -89,8 +89,7 @@ export const FEET_COVERS_RULES: OutfitRule[] = [
 
 // Neck rules
 export const NECK_RULES: OutfitRule[] = [
-  { maxTemp: 5, value: "buff" },
-  { maxTemp: 10, value: "buff", windThreshold: 20 },
+  { maxTemp: 10, value: "buff" },
   { maxTemp: Infinity, value: "nic" },
 ];
 

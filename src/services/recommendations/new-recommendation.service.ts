@@ -361,6 +361,9 @@ export class NewRecommendationService {
     // Never recommend in warm weather, even with wind
     if (temperature >= 20) return false;
 
+    // Always recommend in cold weather (below 10°C)
+    if (effectiveTemp <= 10) return true;
+
     // Recommend from around 13°C with wind
     if (effectiveTemp <= 13 && windSpeed >= 10) return true;
 

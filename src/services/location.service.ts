@@ -579,6 +579,69 @@ export class LocationService {
   }
 
   /**
+   * Fetches a single location by ID for the authenticated user
+   *
+   * @param userId - Authenticated user ID from JWT
+   * @param locationId - UUID of the location to fetch
+   * @returns LocationDTO with extracted coordinates
+   * @throws NotFoundError if location doesn't exist or doesn't belong to user
+   * @throws Error if database operation fails
+   */
+  async getLocation(userId: string, locationId: string): Promise<LocationDTO> {
+    // First try with regular client (with RLS)
+    const { data: location, error } = await supabaseClient
+      .from("user_locations")
+      .select("*")
+      .eq("id", locationId)
+      .eq("user_id", userId)
+      .single();
+
+    let locationData = location;
+
+    // If RLS blocks access, try service client as fallback
+    if (error || !locationData) {
+      console.info(
+        `[LocationService] RLS returned no location for ${locationId}, trying service client fallback`,
+      );
+
+      const { data: serviceData, error: serviceError } =
+        await supabaseServiceClient
+          .from("user_locations")
+          .select("*")
+          .eq("id", locationId)
+          .eq("user_id", userId)
+          .single();
+
+      if (serviceError || !serviceData) {
+        if (serviceError) {
+          console.error(
+            "[LocationService] Service client error:",
+            serviceError,
+          );
+        }
+        throw new NotFoundError("Location not found or access denied");
+      }
+
+      locationData = serviceData;
+    }
+
+    // Extract coordinates using RPC function
+    const { data: coords, error: coordsError } = await supabaseClient.rpc(
+      "get_location_coordinates",
+      { p_location_id: locationId, p_user_id: userId },
+    );
+
+    if (coordsError) {
+      console.warn(
+        `[LocationService] Failed to extract coordinates for location ${locationId}:`,
+        coordsError,
+      );
+    }
+
+    return this.transformToDTO(locationData, coords);
+  }
+
+  /**
    * Transforms database row to LocationDTO
    * Uses provided coordinates from PostGIS extraction
    *
