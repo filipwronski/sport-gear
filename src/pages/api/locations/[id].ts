@@ -15,6 +15,54 @@ import {
 const locationService = new LocationService();
 
 /**
+ * GET /api/locations/{id}
+ * Fetches a single location by ID for authenticated user
+ *
+ * Path params:
+ * - id: UUID - location identifier
+ *
+ * Returns: LocationDTO
+ */
+export const GET: APIRoute = async ({ locals, params }) => {
+  try {
+    const userId = locals.userId;
+    if (!userId) {
+      return createErrorResponse(
+        "UNAUTHORIZED",
+        "User ID not found in request context",
+        401,
+      );
+    }
+
+    // Validate UUID path parameter
+    const locationId = params.id;
+    if (!locationId || !LocationValidator.validateUUID(locationId)) {
+      return createErrorResponse(
+        "BAD_REQUEST",
+        "Invalid location ID format",
+        400,
+      );
+    }
+
+    // Fetch location using service layer
+    const location = await locationService.getLocation(userId, locationId);
+
+    return createSuccessResponse(location);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      return createErrorResponse("NOT_FOUND", error.message, 404);
+    }
+
+    console.error("[GET /api/locations/[id]] Error:", error);
+    return createErrorResponse(
+      "INTERNAL_ERROR",
+      "An unexpected error occurred while fetching location",
+      500,
+    );
+  }
+};
+
+/**
  * PUT /api/locations/{id}
  * Updates an existing location with partial data
  *

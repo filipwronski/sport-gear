@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   GetServicesParams,
   ServiceTypeEnum,
@@ -17,24 +24,24 @@ export function ServiceFilters({
   onFiltersChange,
 }: ServiceFiltersProps) {
   const serviceTypes: { value: ServiceTypeEnum; label: string }[] = [
-    { value: "lancuch", label: "Chain" },
-    { value: "kaseta", label: "Cassette" },
-    { value: "klocki_przod", label: "Front Brake Pads" },
-    { value: "klocki_tyl", label: "Rear Brake Pads" },
-    { value: "opony", label: "Tires" },
-    { value: "przerzutki", label: "Derailleurs" },
-    { value: "hamulce", label: "Brakes" },
-    { value: "przeglad_ogolny", label: "General Service" },
-    { value: "inne", label: "Other" },
+    { value: "lancuch", label: "Łańcuch" },
+    { value: "kaseta", label: "Kaseta" },
+    { value: "klocki_przod", label: "Klocki przednie" },
+    { value: "klocki_tyl", label: "Klocki tylne" },
+    { value: "opony", label: "Opony" },
+    { value: "przerzutki", label: "Przerzutki" },
+    { value: "hamulce", label: "Hamulce" },
+    { value: "przeglad_ogolny", label: "Przegląd ogólny" },
+    { value: "inne", label: "Inne" },
   ];
 
   const sortOptions = [
-    { value: "service_date_desc", label: "Date (Newest)" },
-    { value: "service_date_asc", label: "Date (Oldest)" },
-    { value: "mileage_desc", label: "Mileage (High to Low)" },
-    { value: "mileage_asc", label: "Mileage (Low to High)" },
-    { value: "cost_desc", label: "Cost (High to Low)" },
-    { value: "cost_asc", label: "Cost (Low to High)" },
+    { value: "service_date_desc", label: "Data (Najnowsze)" },
+    { value: "service_date_asc", label: "Data (Najstarsze)" },
+    { value: "mileage_desc", label: "Przebieg (Najwyższy)" },
+    { value: "mileage_asc", label: "Przebieg (Najniższy)" },
+    { value: "cost_desc", label: "Koszt (Najwyższy)" },
+    { value: "cost_asc", label: "Koszt (Najniższy)" },
   ];
 
   const handleClearFilters = () => {
@@ -49,52 +56,58 @@ export function ServiceFilters({
     <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <Label htmlFor="service-type">Service Type</Label>
-          <select
-            id="service-type"
-            value={filters.service_type || ""}
-            onChange={(e) =>
+          <Label htmlFor="service-type">Rodzaj usługi</Label>
+          <Select
+            value={filters.service_type || "all"}
+            onValueChange={(value) =>
               onFiltersChange({
                 ...filters,
-                service_type: e.target.value as ServiceTypeEnum | undefined,
+                service_type:
+                  value === "all" ? undefined : (value as ServiceTypeEnum),
                 offset: 0,
               })
             }
-            className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Types</option>
-            {serviceTypes.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full mt-1">
+              <SelectValue placeholder="Wszystkie rodzaje" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Wszystkie rodzaje</SelectItem>
+              {serviceTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <Label htmlFor="service-location">Location</Label>
-          <select
-            id="service-location"
-            value={filters.service_location || ""}
-            onChange={(e) =>
+          <Label htmlFor="service-location">Lokalizacja</Label>
+          <Select
+            value={filters.service_location || "all"}
+            onValueChange={(value) =>
               onFiltersChange({
                 ...filters,
-                service_location: e.target.value as
-                  | ServiceLocationEnum
-                  | undefined,
+                service_location:
+                  value === "all" ? undefined : (value as ServiceLocationEnum),
                 offset: 0,
               })
             }
-            className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">All Locations</option>
-            <option value="warsztat">Workshop</option>
-            <option value="samodzielnie">Self-Service</option>
-          </select>
+            <SelectTrigger className="w-full mt-1">
+              <SelectValue placeholder="Wszystkie lokalizacje" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Wszystkie lokalizacje</SelectItem>
+              <SelectItem value="warsztat">Warsztat</SelectItem>
+              <SelectItem value="samodzielnie">Samodzielnie</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div>
-          <Label htmlFor="from-date">From Date</Label>
+          <Label htmlFor="from-date">Od daty</Label>
           <Input
             id="from-date"
             type="date"
@@ -106,11 +119,12 @@ export function ServiceFilters({
                 offset: 0,
               })
             }
+            className="mt-1"
           />
         </div>
 
         <div>
-          <Label htmlFor="to-date">To Date</Label>
+          <Label htmlFor="to-date">Do daty</Label>
           <Input
             id="to-date"
             type="date"
@@ -122,34 +136,38 @@ export function ServiceFilters({
                 offset: 0,
               })
             }
+            className="mt-1"
           />
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 items-end">
         <div className="flex-1">
-          <Label htmlFor="sort">Sort By</Label>
-          <select
-            id="sort"
+          <Label htmlFor="sort">Sortuj według</Label>
+          <Select
             value={filters.sort || "service_date_desc"}
-            onChange={(e) =>
+            onValueChange={(value) =>
               onFiltersChange({
                 ...filters,
-                sort: e.target.value as GetServicesParams["sort"],
+                sort: value as GetServicesParams["sort"],
               })
             }
-            className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-full mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Button variant="outline" onClick={handleClearFilters}>
-          Clear Filters
+          Wyczyść filtry
         </Button>
       </div>
     </div>

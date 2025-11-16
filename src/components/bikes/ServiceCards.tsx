@@ -20,20 +20,20 @@ export function ServiceCards({
   onEdit,
 }: ServiceCardsProps) {
   const serviceTypeLabels: Record<string, string> = {
-    lancuch: "Chain",
-    kaseta: "Cassette",
-    klocki_przod: "Front Brake Pads",
-    klocki_tyl: "Rear Brake Pads",
-    opony: "Tires",
-    przerzutki: "Derailleurs",
-    hamulce: "Brakes",
-    przeglad_ogolny: "General Service",
-    inne: "Other",
+    lancuch: "Łańcuch",
+    kaseta: "Kaseta",
+    klocki_przod: "Klocki przednie",
+    klocki_tyl: "Klocki tylne",
+    opony: "Opony",
+    przerzutki: "Przerzutki",
+    hamulce: "Hamulce",
+    przeglad_ogolny: "Przegląd ogólny",
+    inne: "Inne",
   };
 
   const serviceLocationLabels: Record<string, string> = {
-    warsztat: "Workshop",
-    samodzielnie: "Self-Service",
+    warsztat: "Warsztat",
+    samodzielnie: "Samodzielnie",
   };
 
   return (
@@ -53,14 +53,14 @@ export function ServiceCards({
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Mileage:</span>
+              <span className="text-sm text-gray-600">Przebieg:</span>
               <span className="text-sm font-medium">
                 {service.mileage_at_service} km
               </span>
             </div>
             {service.service_location && (
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Location:</span>
+                <span className="text-sm text-gray-600">Lokalizacja:</span>
                 <span className="text-sm font-medium">
                   {serviceLocationLabels[service.service_location]}
                 </span>
@@ -68,7 +68,7 @@ export function ServiceCards({
             )}
             {service.cost && (
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Cost:</span>
+                <span className="text-sm text-gray-600">Koszt:</span>
                 <span className="text-sm font-medium">
                   {service.cost} {service.currency || "PLN"}
                 </span>
@@ -89,7 +89,7 @@ export function ServiceCards({
                   onClick={() => onEdit(service)}
                   className="flex-1"
                 >
-                  Edit
+                  Edytuj
                 </Button>
               )}
               {onDelete && (
@@ -99,7 +99,7 @@ export function ServiceCards({
                   onClick={() => onDelete(service.id)}
                   className="flex-1 text-red-600 hover:text-red-700"
                 >
-                  Delete
+                  Usuń
                 </Button>
               )}
             </CardFooter>

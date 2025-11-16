@@ -6,7 +6,10 @@ interface CostLocationBreakdownProps {
 }
 
 export function CostLocationBreakdown({ stats }: CostLocationBreakdownProps) {
-  const { warsztat, samodzielnie } = stats.breakdown_by_location;
+  const {
+    warsztat = { count: 0, total_cost: 0 },
+    samodzielnie = { count: 0, total_cost: 0 },
+  } = stats.breakdown_by_location || {};
   const totalCost = warsztat.total_cost + samodzielnie.total_cost;
   const totalCount = warsztat.count + samodzielnie.count;
 
@@ -18,7 +21,7 @@ export function CostLocationBreakdown({ stats }: CostLocationBreakdownProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cost by Location</CardTitle>
+        <CardTitle>Koszty wg lokalizacji</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -28,18 +31,18 @@ export function CostLocationBreakdown({ stats }: CostLocationBreakdownProps) {
               <div
                 className="bg-purple-500 flex items-center justify-center text-white text-xs font-medium"
                 style={{ width: `${warsztatPercentage}%` }}
-                title={`Workshop: ${warsztat.total_cost} PLN`}
+                title={`Warsztat: ${warsztat.total_cost} PLN`}
               >
-                {warsztatPercentage > 15 && "Workshop"}
+                {warsztatPercentage > 15 && "Warsztat"}
               </div>
             )}
             {samodzielniePercentage > 0 && (
               <div
                 className="bg-green-500 flex items-center justify-center text-white text-xs font-medium"
                 style={{ width: `${samodzielniePercentage}%` }}
-                title={`Self-Service: ${samodzielnie.total_cost} PLN`}
+                title={`Samodzielnie: ${samodzielnie.total_cost} PLN`}
               >
-                {samodzielniePercentage > 15 && "Self-Service"}
+                {samodzielniePercentage > 15 && "Samodzielnie"}
               </div>
             )}
           </div>
@@ -49,18 +52,18 @@ export function CostLocationBreakdown({ stats }: CostLocationBreakdownProps) {
             <div className="border rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-3 h-3 bg-purple-500 rounded"></div>
-                <span className="font-medium text-sm">Workshop</span>
+                <span className="font-medium text-sm">Warsztat</span>
               </div>
               <div className="space-y-1">
                 <p className="text-2xl font-bold">
                   {warsztat.total_cost.toFixed(2)} PLN
                 </p>
                 <p className="text-xs text-gray-500">
-                  {warsztat.count} services ({warsztatPercentage.toFixed(1)}%)
+                  {warsztat.count} serwisów ({warsztatPercentage.toFixed(1)}%)
                 </p>
                 {warsztat.count > 0 && (
                   <p className="text-xs text-gray-500">
-                    Avg: {(warsztat.total_cost / warsztat.count).toFixed(2)} PLN
+                    Śr: {(warsztat.total_cost / warsztat.count).toFixed(2)} PLN
                   </p>
                 )}
               </div>
@@ -69,19 +72,19 @@ export function CostLocationBreakdown({ stats }: CostLocationBreakdownProps) {
             <div className="border rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span className="font-medium text-sm">Self-Service</span>
+                <span className="font-medium text-sm">Samodzielnie</span>
               </div>
               <div className="space-y-1">
                 <p className="text-2xl font-bold">
                   {samodzielnie.total_cost.toFixed(2)} PLN
                 </p>
                 <p className="text-xs text-gray-500">
-                  {samodzielnie.count} services (
+                  {samodzielnie.count} serwisów (
                   {samodzielniePercentage.toFixed(1)}%)
                 </p>
                 {samodzielnie.count > 0 && (
                   <p className="text-xs text-gray-500">
-                    Avg:{" "}
+                    Śr:{" "}
                     {(samodzielnie.total_cost / samodzielnie.count).toFixed(2)}{" "}
                     PLN
                   </p>
@@ -92,7 +95,7 @@ export function CostLocationBreakdown({ stats }: CostLocationBreakdownProps) {
 
           {totalCount === 0 && (
             <p className="text-center text-gray-500 py-4">
-              No location data available
+              Brak dostępnych danych lokalizacji
             </p>
           )}
         </div>

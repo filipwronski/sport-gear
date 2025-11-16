@@ -32,6 +32,11 @@ export function useServiceStats(
       );
 
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(
+            "Rower nie został znaleziony lub nie masz do niego dostępu",
+          );
+        }
         throw new Error("Failed to fetch service statistics");
       }
 

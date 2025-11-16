@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import WeatherSummary from "./WeatherSummary";
 import WorkoutSelector, {
   type WorkoutIntensity,
@@ -10,7 +10,7 @@ import WorkoutSelector, {
 } from "./WorkoutSelector";
 import CyclistSVG from "./CyclistSVG";
 import OutfitRecommendationList from "./OutfitRecommendationList";
-import AdditionalTipsSection from "./AdditionalTipsSection";
+// import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
 import { useDefaultLocation } from "@/hooks/useLocationSelection";
@@ -44,81 +44,96 @@ export default function RecommendationView() {
 
   const { defaultLocation } = useDefaultLocation();
 
-  const fetchRecommendation = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const fetchRecommendationWithParams = useCallback(
+    async (intensity: WorkoutIntensity, duration: WorkoutDuration) => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      // Get coordinates
-      const params: Record<string, string> = {};
+      try {
+        // Get coordinates
+        const params: Record<string, string> = {};
 
-      // Use default location if available
-      if (defaultLocation) {
-        params.lat = defaultLocation.location.latitude.toString();
-        params.lng = defaultLocation.location.longitude.toString();
-      } else if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>(
-            (resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 300000,
-              });
-            },
-          );
-          params.lat = position.coords.latitude.toString();
-          params.lng = position.coords.longitude.toString();
-        } catch (_geoError) {
+        // Use default location if available
+        if (defaultLocation) {
+          params.lat = defaultLocation.location.latitude.toString();
+          params.lng = defaultLocation.location.longitude.toString();
+        } else if (navigator.geolocation) {
+          try {
+            const position = await new Promise<GeolocationPosition>(
+              (resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                  enableHighAccuracy: true,
+                  timeout: 5000,
+                  maximumAge: 300000,
+                });
+              },
+            );
+            params.lat = position.coords.latitude.toString();
+            params.lng = position.coords.longitude.toString();
+          } catch (_geoError) {
+            // Fallback to Warsaw coordinates
+            params.lat = "52.237049";
+            params.lng = "21.017532";
+          }
+        } else {
           // Fallback to Warsaw coordinates
           params.lat = "52.237049";
           params.lng = "21.017532";
         }
-      } else {
-        // Fallback to Warsaw coordinates
-        params.lat = "52.237049";
-        params.lng = "21.017532";
+
+        params.workout_intensity = intensity;
+        params.workout_duration = duration.toString();
+
+        const queryString = new URLSearchParams(params).toString();
+        const response = await fetch(`/api/new-recommendations?${queryString}`);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          const apiError: ApiError = {
+            code: errorData.error?.code || "UNKNOWN_ERROR",
+            message:
+              errorData.error?.message ||
+              "Wystąpił błąd podczas pobierania rekomendacji",
+            statusCode: response.status,
+            details: errorData.error?.details,
+            retryAfter: response.headers.get("Retry-After")
+              ? parseInt(response.headers.get("Retry-After"))
+              : undefined,
+          };
+          throw apiError;
+        }
+
+        const data: NewRecommendationDTO = await response.json();
+        setRecommendation(data);
+
+        // Update original parameters when recommendation is successfully fetched
+        setOriginalWorkoutIntensity(intensity);
+        setOriginalWorkoutDuration(duration);
+      } catch (err) {
+        setError(err as ApiError);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [defaultLocation],
+  );
 
-      params.workout_intensity = workoutIntensity;
-      params.workout_duration = workoutDuration.toString();
-
-      const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`/api/new-recommendations?${queryString}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        const apiError: ApiError = {
-          code: errorData.error?.code || "UNKNOWN_ERROR",
-          message:
-            errorData.error?.message ||
-            "Wystąpił błąd podczas pobierania rekomendacji",
-          statusCode: response.status,
-          details: errorData.error?.details,
-          retryAfter: response.headers.get("Retry-After")
-            ? parseInt(response.headers.get("Retry-After"))
-            : undefined,
-        };
-        throw apiError;
-      }
-
-      const data: NewRecommendationDTO = await response.json();
-      setRecommendation(data);
-
-      // Update original parameters when recommendation is successfully fetched
-      setOriginalWorkoutIntensity(workoutIntensity);
-      setOriginalWorkoutDuration(workoutDuration);
-    } catch (err) {
-      setError(err as ApiError);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [defaultLocation, workoutIntensity, workoutDuration]);
+  // Fetch function for the button that uses current parameters
+  const fetchRecommendation = useCallback(() => {
+    fetchRecommendationWithParams(workoutIntensity, workoutDuration);
+  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration]);
 
   // Fetch recommendation on mount and location change only
   useEffect(() => {
-    fetchRecommendation();
-  }, [fetchRecommendation]);
+    fetchRecommendationWithParams(
+      originalWorkoutIntensity,
+      originalWorkoutDuration,
+    );
+  }, [
+    fetchRecommendationWithParams,
+    originalWorkoutDuration,
+    originalWorkoutIntensity,
+  ]);
 
   // Track when workout parameters change
   const hasWorkoutParamsChanged =
@@ -182,8 +197,9 @@ export default function RecommendationView() {
 
   return (
     <div className="space-y-6">
-      {/* Workout Parameters Selector */}
-      <div className="space-y-4">
+      {/* Workout Parameters and Weather in one row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Workout Parameters Selector */}
         <WorkoutSelector
           intensity={workoutIntensity}
           duration={workoutDuration}
@@ -191,40 +207,40 @@ export default function RecommendationView() {
           onDurationChange={setWorkoutDuration}
         />
 
-        {/* Update Recommendations Button - always visible, disabled when no changes */}
-        <div className="flex justify-center">
-          <Button
-            onClick={fetchRecommendation}
-            disabled={isLoading || !hasWorkoutParamsChanged}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw
-              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-            />
-            Zaktualizuj rekomendacje
-          </Button>
-        </div>
+        {/* Weather Summary */}
+        <WeatherSummary weather={recommendation.weather} />
       </div>
 
-      {/* Weather Summary */}
-      <WeatherSummary weather={recommendation.weather} />
+      {/* Update Recommendations Button - below the parameters and weather */}
+      <div className="flex justify-center">
+        <Button
+          onClick={fetchRecommendation}
+          disabled={isLoading || !hasWorkoutParamsChanged}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+          Zaktualizuj rekomendacje
+        </Button>
+      </div>
 
       {/* Main recommendation display */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 items-stretch">
         {/* Cyclist SVG */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Sylwetka kolarza</h3>
-          <div className="flex justify-center">
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle>Sylwetka kolarza</CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 flex items-center justify-center">
             <CyclistSVG
               recommendation={recommendation.recommendation}
               selectedZone={selectedZone}
               onZoneClick={handleZoneClick}
             />
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Outfit Recommendation */}
-        <div className="space-y-4">
+        <div className="space-y-4 h-full">
           <OutfitRecommendationList
             recommendation={recommendation.recommendation}
             expandedZone={selectedZone}
@@ -232,13 +248,13 @@ export default function RecommendationView() {
         </div>
       </div>
 
-      {/* Additional AI Tips */}
-      <AdditionalTipsSection
+      {/* Additional AI Tips - DISABLED */}
+      {/* <AdditionalTipsSection
         weatherConditions={recommendation.weather}
         onTipsLoad={(_tips) => {
           // Tips are managed by the hook
         }}
-      />
+      /> */}
 
       {/* Feedback CTA */}
       <AddFeedbackCTA

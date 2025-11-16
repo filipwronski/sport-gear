@@ -53,15 +53,18 @@ export default function WorkoutSelector({
           <RadioGroup
             value={intensity}
             onValueChange={onIntensityChange}
-            className="grid-flow-col"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4"
           >
             {intensityOptions.map((option) => (
-              <div key={option.value} className="flex items-center space-x-2">
+              <div
+                key={option.value}
+                className="flex items-center mt-2 space-x-2"
+              >
                 <RadioGroupItem value={option.value} id={option.value} />
                 <Label htmlFor={option.value} className="flex-1 cursor-pointer">
                   <div className="flex flex-col">
                     <span className="font-medium">{option.label}</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs mt-2 text-muted-foreground">
                       {option.description}
                     </span>
                   </div>

@@ -13,20 +13,20 @@ export function ServiceTable({
   onEdit,
 }: ServiceTableProps) {
   const serviceTypeLabels: Record<string, string> = {
-    lancuch: "Chain",
-    kaseta: "Cassette",
-    klocki_przod: "Front Brake Pads",
-    klocki_tyl: "Rear Brake Pads",
-    opony: "Tires",
-    przerzutki: "Derailleurs",
-    hamulce: "Brakes",
-    przeglad_ogolny: "General Service",
-    inne: "Other",
+    lancuch: "Łańcuch",
+    kaseta: "Kaseta",
+    klocki_przod: "Klocki przednie",
+    klocki_tyl: "Klocki tylne",
+    opony: "Opony",
+    przerzutki: "Przerzutki",
+    hamulce: "Hamulce",
+    przeglad_ogolny: "Przegląd ogólny",
+    inne: "Inne",
   };
 
   const serviceLocationLabels: Record<string, string> = {
-    warsztat: "Workshop",
-    samodzielnie: "Self-Service",
+    warsztat: "Warsztat",
+    samodzielnie: "Samodzielnie",
   };
 
   return (
@@ -34,23 +34,21 @@ export function ServiceTable({
       <table className="w-full border-collapse min-w-[800px]">
         <thead>
           <tr className="bg-gray-100 border-b">
-            <th className="text-left p-2 sm:p-3 font-medium text-sm">Date</th>
+            <th className="text-left p-2 sm:p-3 font-medium text-sm">Data</th>
             <th className="text-left p-2 sm:p-3 font-medium text-sm">
-              Service Type
+              Rodzaj usługi
             </th>
             <th className="text-left p-2 sm:p-3 font-medium text-sm">
-              Mileage
+              Przebieg
             </th>
             <th className="text-left p-2 sm:p-3 font-medium text-sm">
-              Location
+              Lokalizacja
             </th>
-            <th className="text-left p-2 sm:p-3 font-medium text-sm">Cost</th>
+            <th className="text-left p-2 sm:p-3 font-medium text-sm">Koszt</th>
             <th className="text-left p-2 sm:p-3 font-medium text-sm hidden md:table-cell">
-              Notes
+              Notatki
             </th>
-            <th className="text-right p-2 sm:p-3 font-medium text-sm">
-              Actions
-            </th>
+            <th className="text-right p-2 sm:p-3 font-medium text-sm">Akcje</th>
           </tr>
         </thead>
         <tbody>
@@ -91,7 +89,7 @@ export function ServiceTable({
                     size="sm"
                     onClick={() => onEdit(service)}
                   >
-                    Edit
+                    Edytuj
                   </Button>
                 )}
                 {onDelete && (
@@ -101,7 +99,7 @@ export function ServiceTable({
                     onClick={() => onDelete(service.id)}
                     className="text-red-600 hover:text-red-700"
                   >
-                    Delete
+                    Usuń
                   </Button>
                 )}
               </td>

@@ -19,6 +19,34 @@ export default function WeatherSummary({
   const getWeatherIcon = (icon: string) =>
     `http://openweathermap.org/img/wn/${icon}@2x.png`;
 
+  const translateWeatherDescription = (description: string): string => {
+    const lowerDesc = description.toLowerCase();
+
+    if (lowerDesc.includes("clear sky")) return "bezchmurnie";
+    if (lowerDesc.includes("few clouds")) return "kilka chmur";
+    if (lowerDesc.includes("scattered clouds")) return "rozproszone chmury";
+    if (lowerDesc.includes("broken clouds")) return "zachmurzenie umiarkowane";
+    if (lowerDesc.includes("overcast clouds")) return "pochmurnie";
+    if (lowerDesc.includes("light rain")) return "lekki deszcz";
+    if (lowerDesc.includes("moderate rain")) return "umiarkowany deszcz";
+    if (lowerDesc.includes("heavy rain")) return "intensywny deszcz";
+    if (lowerDesc.includes("very heavy rain")) return "ulewny deszcz";
+    if (lowerDesc.includes("extreme rain")) return "ekstremalne opady";
+    if (lowerDesc.includes("freezing rain")) return "marznący deszcz";
+    if (lowerDesc.includes("light snow")) return "lekki śnieg";
+    if (lowerDesc.includes("moderate snow")) return "umiarkowany śnieg";
+    if (lowerDesc.includes("heavy snow")) return "intensywny śnieg";
+    if (lowerDesc.includes("sleet")) return "śnieg z deszczem";
+    if (lowerDesc.includes("thunderstorm")) return "burza";
+    if (lowerDesc.includes("drizzle")) return "mżawka";
+    if (lowerDesc.includes("mist")) return "mgiełka";
+    if (lowerDesc.includes("fog")) return "mgła";
+    if (lowerDesc.includes("haze")) return "zamglenie";
+
+    // Fallback - jeśli nie rozpoznano, zwracamy oryginalny opis
+    return description;
+  };
+
   if (compact) {
     return (
       <div className="flex items-center gap-3 text-sm">
@@ -31,7 +59,7 @@ export default function WeatherSummary({
         <div className="text-muted-foreground">
           💨 {formatWindSpeed(weather.wind_speed)}
         </div>
-        {weather.rain_mm && weather.rain_mm > 0 && (
+        {weather.rain_mm > 0 && (
           <div className="text-muted-foreground">🌧️ {weather.rain_mm} mm</div>
         )}
       </div>
@@ -70,7 +98,7 @@ export default function WeatherSummary({
               <span className="text-sm text-muted-foreground">Wilgotność</span>
               <span className="text-sm">{weather.humidity}%</span>
             </div>
-            {weather.rain_mm && weather.rain_mm > 0 && (
+            {weather.rain_mm > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Opady</span>
                 <span className="text-sm">{weather.rain_mm} mm</span>
@@ -85,7 +113,7 @@ export default function WeatherSummary({
             className="w-12 h-12"
           />
           <p className="text-sm text-muted-foreground capitalize">
-            {weather.description}
+            {translateWeatherDescription(weather.description)}
           </p>
         </div>
       </CardContent>

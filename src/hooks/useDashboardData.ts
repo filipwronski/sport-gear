@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import type { DashboardDTO } from "../types";
 import type { UseDashboardDataReturn } from "../components/dashboard/types";
+import { getPolishCityByName } from "../constants/location.constants";
 
 export function useDashboardData(
   _userId: string,
   _locationId?: string,
+  _browserCoordinates?: { lat: number; lng: number } | null,
 ): UseDashboardDataReturn & {
   coordinates: { lat: number; lng: number } | null;
 } {
@@ -26,42 +28,161 @@ export function useDashboardData(
     try {
       const url = new URL("/api/dashboard", window.location.origin);
 
-      // Try to get user's current location for weather data
-      if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>(
-            (resolve, reject) => {
-              navigator.geolocation.getCurrentPosition(resolve, reject, {
-                enableHighAccuracy: true,
-                timeout: 5000,
-                maximumAge: 300000, // 5 minutes
-              });
-            },
-          );
+      // Priority order for location:
+      // 1. Location passed via props/URL parameter
+      // 2. Browser coordinates (when locationId is "browser")
+      // 3. User's default location from profile
+      // 4. Browser geolocation
+      // 5. Warsaw as fallback
 
-          currentCoordinates = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          };
-          url.searchParams.set("lat", currentCoordinates.lat.toString());
-          url.searchParams.set("lng", currentCoordinates.lng.toString());
-        } catch (_geoError) {
+      let locationIdToUse: string | null = null;
+      let coordinatesToUse: { lat: number; lng: number } | null = null;
+
+      // Check if browser coordinates are provided (from location selector)
+      if (_browserCoordinates) {
+        coordinatesToUse = _browserCoordinates;
+        console.info(`Using browser coordinates:`, coordinatesToUse);
+      }
+      // Check if location_id is provided via props
+      else if (_locationId) {
+        if (_locationId === "browser") {
+          // Browser was selected but no coordinates provided yet
+          // This shouldn't happen in normal flow, but handle gracefully
+          console.warn("Browser location selected but no coordinates provided");
+        } else {
+          locationIdToUse = _locationId;
+          console.info(`Using location from props: ${locationIdToUse}`);
+        }
+      } else {
+        // Try to get user's default location from profile
+        try {
+          const profileResponse = await fetch("/api/profile", {
+            credentials: "include",
+          });
+          if (profileResponse.ok) {
+            const profile = await profileResponse.json();
+            if (profile.default_location_id) {
+              locationIdToUse = profile.default_location_id;
+              console.info(`Using user's default location: ${locationIdToUse}`);
+            }
+          }
+        } catch (profileError) {
           console.warn(
-            "Geolocation not available or denied, using default location (Warsaw)",
+            "Could not fetch user profile for default location:",
+            profileError,
+          );
+        }
+      }
+
+      // If we have coordinates from browser selection, use them
+      if (coordinatesToUse) {
+        currentCoordinates = coordinatesToUse;
+        url.searchParams.set("lat", currentCoordinates.lat.toString());
+        url.searchParams.set("lng", currentCoordinates.lng.toString());
+      }
+      // If we have a location ID, fetch its coordinates
+      else if (locationIdToUse) {
+        // Handle predefined Polish cities
+        if (locationIdToUse.startsWith("polish-city-")) {
+          const cityName = locationIdToUse.replace("polish-city-", "");
+          const cityData = getPolishCityByName(cityName);
+          if (cityData) {
+            currentCoordinates = {
+              lat: cityData.latitude,
+              lng: cityData.longitude,
+            };
+            url.searchParams.set("lat", currentCoordinates.lat.toString());
+            url.searchParams.set("lng", currentCoordinates.lng.toString());
+            console.info(
+              `Using coordinates from predefined Polish city ${cityName}:`,
+              currentCoordinates,
+            );
+          } else {
+            console.warn(
+              `Unknown Polish city: ${cityName}, falling back to geolocation`,
+            );
+            locationIdToUse = null; // Reset to try geolocation
+          }
+        }
+        // Handle user-created locations (UUID format)
+        else {
+          try {
+            const locationResponse = await fetch(
+              `/api/locations/${locationIdToUse}`,
+              {
+                credentials: "include",
+              },
+            );
+            if (locationResponse.ok) {
+              const location = await locationResponse.json();
+              currentCoordinates = {
+                lat: location.location.latitude,
+                lng: location.location.longitude,
+              };
+              url.searchParams.set("lat", currentCoordinates.lat.toString());
+              url.searchParams.set("lng", currentCoordinates.lng.toString());
+              console.info(
+                `Using coordinates from location ${locationIdToUse}:`,
+                currentCoordinates,
+              );
+            } else {
+              console.warn(
+                `Could not fetch location ${locationIdToUse}, falling back to geolocation`,
+              );
+              locationIdToUse = null; // Reset to try geolocation
+            }
+          } catch (locationError) {
+            console.warn(
+              `Error fetching location ${locationIdToUse}:`,
+              locationError,
+            );
+            locationIdToUse = null; // Reset to try geolocation
+          }
+        }
+      }
+
+      // If no coordinates or location ID, try browser geolocation or use profile default
+      if (!coordinatesToUse && !locationIdToUse) {
+        if (navigator.geolocation) {
+          try {
+            const position = await new Promise<GeolocationPosition>(
+              (resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                  enableHighAccuracy: true,
+                  timeout: 5000,
+                  maximumAge: 300000, // 5 minutes
+                });
+              },
+            );
+
+            currentCoordinates = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            };
+            url.searchParams.set("lat", currentCoordinates.lat.toString());
+            url.searchParams.set("lng", currentCoordinates.lng.toString());
+            console.info(
+              "Using coordinates from browser geolocation:",
+              currentCoordinates,
+            );
+          } catch (_geoError) {
+            console.warn(
+              "Geolocation not available or denied, using default location (Warsaw)",
+            );
+            // Fallback to Warsaw coordinates for demo purposes
+            currentCoordinates = { lat: 52.237049, lng: 21.017532 };
+            url.searchParams.set("lat", currentCoordinates.lat.toString());
+            url.searchParams.set("lng", currentCoordinates.lng.toString());
+          }
+        } else {
+          console.warn(
+            "Geolocation not supported, using default location (Warsaw)",
           );
           // Fallback to Warsaw coordinates for demo purposes
           currentCoordinates = { lat: 52.237049, lng: 21.017532 };
           url.searchParams.set("lat", currentCoordinates.lat.toString());
           url.searchParams.set("lng", currentCoordinates.lng.toString());
         }
-      } else {
-        console.warn(
-          "Geolocation not supported, using default location (Warsaw)",
-        );
-        // Fallback to Warsaw coordinates for demo purposes
-        currentCoordinates = { lat: 52.237049, lng: 21.017532 };
-        url.searchParams.set("lat", currentCoordinates.lat.toString());
-        url.searchParams.set("lng", currentCoordinates.lng.toString());
       }
 
       const response = await fetch(url.toString(), {
@@ -90,7 +211,7 @@ export function useDashboardData(
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [_browserCoordinates, _locationId]);
 
   useEffect(() => {
     fetchDashboard();

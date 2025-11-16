@@ -12,7 +12,7 @@ import { HeroCTAButtons, BottomCTAButton } from "../components/CTAButtons.tsx";
 
 <Layout
   title="CycleGear - Zarządzanie rowerami i sprzętem sportowym"
-  description="Profesjonalna aplikacja do zarządzania rowerami, serwisowaniem i społecznością rowerową. Śledź swoje rowery, planuj serwis i dziel się doświadczeniami."
+  description="CycleGear - aplikacja z dwoma głównymi funkcjami: inteligentnym doborem ubrań rowerowych na podstawie pogody i treningu oraz zarządzaniem serwisem rowerowym. Śledź koszty i przeglądy."
 >
   <!-- Hero Section -->
   <section
@@ -20,13 +20,12 @@ import { HeroCTAButtons, BottomCTAButton } from "../components/CTAButtons.tsx";
   >
     <div class="container mx-auto text-center max-w-4xl">
       <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-        Zarządzaj swoimi rowerami
+        Dobór ubrań i serwis rowerów
         <span class="block text-blue-600">jak profesjonalista</span>
       </h1>
       <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-        CycleGear to kompleksowa aplikacja do śledzenia stanu rowerów,
-        planowania serwisu i dzielenia się doświadczeniami ze społecznością
-        rowerową.
+        CycleGear oferuje inteligentny dobór ubrań rowerowych na podstawie
+        pogody i treningu oraz kompleksowe zarządzanie serwisem i kosztami.
       </p>
       <HeroCTAButtons client:load />
     </div>
@@ -44,7 +43,36 @@ import { HeroCTAButtons, BottomCTAButton } from "../components/CTAButtons.tsx";
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <Card className="text-center">
+          <CardHeader>
+            <div
+              class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <svg
+                class="w-8 h-8 text-orange-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2m-9 0h10m-9 0V1m10 3V1m0 3l1 1v16a2 2 0 01-2 2H6a2 2 0 01-2-2V5l1-1z"
+                ></path>
+              </svg>
+            </div>
+            <CardTitle className="text-xl">Rekomendacje ubrań</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CardDescription className="text-base">
+              Inteligentne sugestie stroju rowerowego na podstawie warunków
+              pogodowych i typu treningu. Zawsze odpowiednio ubrany na jazdę.
+            </CardDescription>
+          </CardContent>
+        </Card>
+
         <Card className="text-center">
           <CardHeader>
             <div
@@ -141,8 +169,8 @@ import { HeroCTAButtons, BottomCTAButton } from "../components/CTAButtons.tsx";
         Dołącz do tysięcy rowerzystów już dziś
       </h2>
       <p class="text-xl text-blue-100 mb-8">
-        Zacznij śledzić swoje rowery i połącz się ze społecznością. Pierwsze 30
-        dni całkowicie za darmo!
+        Zacznij śledzić swoje rowery i połącz się ze społecznością. Wszystko
+        dostępne całkowicie za darmo!
       </p>
       <BottomCTAButton client:load />
     </div>

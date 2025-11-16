@@ -7,15 +7,15 @@ interface CostBreakdownChartProps {
 
 export function CostBreakdownChart({ stats }: CostBreakdownChartProps) {
   const serviceTypeLabels: Record<string, string> = {
-    lancuch: "Chain",
-    kaseta: "Cassette",
-    klocki_przod: "Front Brake Pads",
-    klocki_tyl: "Rear Brake Pads",
-    opony: "Tires",
-    przerzutki: "Derailleurs",
-    hamulce: "Brakes",
-    przeglad_ogolny: "General Service",
-    inne: "Other",
+    lancuch: "Łańcuch",
+    kaseta: "Kaseta",
+    klocki_przod: "Klocki hamulcowe przednie",
+    klocki_tyl: "Klocki hamulcowe tylne",
+    opony: "Opony",
+    przerzutki: "Przerzutki",
+    hamulce: "Hamulce",
+    przeglad_ogolny: "Przegląd ogólny",
+    inne: "Inne",
   };
 
   const colors = [
@@ -33,11 +33,11 @@ export function CostBreakdownChart({ stats }: CostBreakdownChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cost Breakdown by Service Type</CardTitle>
+        <CardTitle>Podział kosztów wg rodzaju serwisu</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {stats.breakdown_by_type.map((item, index) => (
+          {(stats.breakdown_by_type || []).map((item, index) => (
             <div key={item.service_type}>
               <div className="flex justify-between text-sm mb-1">
                 <span className="font-medium">
@@ -55,16 +55,16 @@ export function CostBreakdownChart({ stats }: CostBreakdownChartProps) {
                 ></div>
               </div>
               <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>{item.count} services</span>
-                <span>Avg: {item.avg_cost.toFixed(2)} PLN</span>
+                <span>{item.count} serwisów</span>
+                <span>Śr: {item.avg_cost.toFixed(2)} PLN</span>
               </div>
             </div>
           ))}
         </div>
 
-        {stats.breakdown_by_type.length === 0 && (
+        {(stats.breakdown_by_type || []).length === 0 && (
           <p className="text-center text-gray-500 py-8">
-            No service data available
+            Brak dostępnych danych serwisowych
           </p>
         )}
       </CardContent>

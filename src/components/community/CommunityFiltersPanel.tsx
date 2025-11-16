@@ -166,7 +166,7 @@ function TemperatureRangeInput({
           <SelectContent>
             {TEMPERATURE_RANGE_OPTIONS.map((option) => (
               <SelectItem key={option.value} value={String(option.value)}>
-                ±{option.label}
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
