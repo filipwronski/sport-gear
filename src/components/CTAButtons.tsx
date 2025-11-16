@@ -15,11 +15,7 @@ export function HeroCTAButtons() {
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-      <Button
-        size="lg"
-        className="text-lg px-8 py-3"
-        onClick={handleStartFree}
-      >
+      <Button size="lg" className="text-lg px-8 py-3" onClick={handleStartFree}>
         Rozpocznij za darmo
       </Button>
       <Button

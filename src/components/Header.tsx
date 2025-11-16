@@ -108,11 +108,7 @@ export default function Header() {
                 O nas
               </button>
               <div className="px-3 py-2">
-                <Button
-                  onClick={handleCTAClick}
-                  className="w-full"
-                  size="sm"
-                >
+                <Button onClick={handleCTAClick} className="w-full" size="sm">
                   Konto użytkownika
                 </Button>
               </div>
