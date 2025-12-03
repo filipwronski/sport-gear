@@ -15,6 +15,7 @@ import type {
   ReputationBadgeEnum,
 } from "../types";
 import { InternalServerError } from "../lib/errors";
+import { LocationService } from "./location.service";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -134,6 +135,50 @@ export class ProfileService {
 
       console.error("Error creating profile:", error);
       throw new InternalServerError("Failed to create profile");
+    }
+
+    // Create default location (Warsaw) for new user using service client
+    try {
+      // Use RPC function directly with service client to ensure it works for new users
+      const { data: locationId, error: locationError } =
+        await supabaseServiceClient.rpc("insert_location", {
+          p_user_id: userId,
+          p_latitude: 52.2297,
+          p_longitude: 21.0122,
+          p_city: "Warsaw",
+          p_country_code: "PL",
+          p_is_default: true,
+          p_label: "Default Location",
+        });
+
+      if (locationError) {
+        console.error(
+          `Failed to create default location for user ${userId}:`,
+          locationError,
+        );
+      } else {
+        console.info(
+          `Created default location (Warsaw) for user: ${userId}, location ID: ${locationId}`,
+        );
+
+        // Fetch the updated profile to get the default_location_id set by trigger
+        const { data: updatedProfile, error: fetchUpdatedError } =
+          await supabaseServiceClient
+            .from("profiles")
+            .select("*")
+            .eq("id", userId)
+            .single();
+
+        if (!fetchUpdatedError && updatedProfile) {
+          return this.transformRowToDTO(updatedProfile);
+        }
+      }
+    } catch (locationError) {
+      console.warn(
+        `Failed to create default location for user ${userId}:`,
+        locationError,
+      );
+      // Don't throw - profile creation succeeded, location creation is optional
     }
 
     return this.transformRowToDTO(data);

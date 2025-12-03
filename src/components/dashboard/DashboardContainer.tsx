@@ -33,10 +33,50 @@ export default function DashboardContainer({
     fetchLocations,
   } = useLocations();
 
-  // Load user locations on mount
+  // Load user locations on mount and set default location from profile
   useEffect(() => {
-    fetchLocations();
-  }, [fetchLocations]);
+    const loadInitialData = async () => {
+      // Fetch user locations
+      await fetchLocations();
+
+      // If no location is selected initially, try to get default from profile
+      if (!initialLocationId) {
+        try {
+          const profileResponse = await fetch("/api/profile", {
+            credentials: "include",
+          });
+          if (profileResponse.ok) {
+            const profile = await profileResponse.json();
+            if (profile.default_location_id) {
+              console.info(
+                `Setting default location from profile: ${profile.default_location_id}`,
+              );
+              setCurrentLocationId(profile.default_location_id);
+            }
+          }
+        } catch (error) {
+          console.warn("Could not fetch profile for default location:", error);
+        }
+      }
+    };
+
+    loadInitialData();
+    // Only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-select default location when locations are loaded and no location is selected
+  useEffect(() => {
+    if (userLocations.length > 0 && !currentLocationId) {
+      const defaultLocation = userLocations.find((loc) => loc.is_default);
+      if (defaultLocation) {
+        console.info(
+          `Auto-selecting default location from loaded locations: ${defaultLocation.city}`,
+        );
+        setCurrentLocationId(defaultLocation.id);
+      }
+    }
+  }, [userLocations, currentLocationId]);
 
   useAutoRefresh({
     enabled: !!data && !error,

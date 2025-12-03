@@ -61,7 +61,12 @@ export function LocationSelector({
       (loc) => loc.id === currentLocationId,
     );
     if (userLocation) {
-      return `${userLocation.city}, ${userLocation.country_code}`;
+      return `${userLocation.city}, ${userLocation.country_code}${userLocation.is_default ? " (domyślna)" : ""}`;
+    }
+
+    // If we have a currentLocationId but can't find it yet, and we're still loading, show loading
+    if (isLoadingLocations) {
+      return "Ładowanie...";
     }
 
     return "Nieznana lokalizacja";

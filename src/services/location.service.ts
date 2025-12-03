@@ -82,6 +82,10 @@ export class LocationService {
       }
 
       if (!serviceData || serviceData.length === 0) {
+        // No locations found - user may need to create one in profile settings
+        console.info(
+          `[LocationService] No locations found for user ${userId}`,
+        );
         return [];
       }
 
