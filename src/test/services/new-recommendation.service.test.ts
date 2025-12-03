@@ -115,7 +115,7 @@ describe("New Recommendation Service", () => {
       };
 
       const effectiveTemp = service["getEffectiveTemperature"](input);
-      expect(effectiveTemp).toBe(13); // 15 - 2 for intensive workout (feels hotter, needs cooler clothing)
+      expect(effectiveTemp).toBe(20); // 15 + 5 for intensive workout (feels hotter, needs cooler clothing)
     });
 
     it("should slightly adjust effective temperature for tempo workouts", () => {
@@ -128,7 +128,7 @@ describe("New Recommendation Service", () => {
       };
 
       const effectiveTemp = service["getEffectiveTemperature"](input);
-      expect(effectiveTemp).toBe(14); // 15 - 1 for tempo workout (feels hotter, needs cooler clothing)
+      expect(effectiveTemp).toBe(18); // 15 + 3 for tempo workout (feels hotter, needs cooler clothing)
     });
 
     it("should apply wind chill for recreational workouts in cold", () => {
@@ -834,7 +834,7 @@ describe("New Recommendation Service", () => {
       expect(result.items).toContain("koszulka termoaktywna");
       expect(result.items).toContain("długie spodnie");
       expect(result.items).toContain("bluza");
-      expect(result.items).toContain("kurtka przeciwwiatrowa");
+      expect(result.items).toContain("kamizelka przeciwwiatrowa");
       expect(result.items).toContain("czapka");
       expect(result.items).toContain("rękawiczki zimowe");
       expect(result.items).toContain("komin na szyję");
