@@ -15,6 +15,7 @@ interface WeatherCardProps {
     locationId: string | null,
     coordinates?: { lat: number; lng: number },
   ) => void;
+  onDaySelect?: (date: string) => void;
 }
 
 export function WeatherCard({
@@ -25,6 +26,7 @@ export function WeatherCard({
   userLocations = [],
   isLoadingLocations = false,
   onLocationChange,
+  onDaySelect,
 }: WeatherCardProps) {
   const getWeatherIcon = (description: string) => {
     const lowerDesc = description.toLowerCase();
@@ -151,10 +153,7 @@ export function WeatherCard({
                 latitude: coordinates.lat,
                 longitude: coordinates.lng,
               }}
-              onDaySelect={(date) => {
-                // Could navigate to recommendations with specific date
-                console.info("Selected forecast date:", date);
-              }}
+              onDaySelect={onDaySelect}
             />
           </div>
         )}

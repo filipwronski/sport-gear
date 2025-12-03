@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { WeatherCard } from "./WeatherCard";
 import { QuickRecommendationCard } from "./QuickRecommendationCard";
 import type { WeatherSectionProps } from "./types";
@@ -18,6 +19,11 @@ export function WeatherSection({
   isLoadingLocations?: boolean;
   onLocationChange?: (locationId: string | null) => void;
 }) {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const handleDaySelect = (date: string) => {
+    setSelectedDate(date);
+  };
   return (
     <section
       className="mb-6 md:mb-8 space-y-6"
@@ -37,11 +43,13 @@ export function WeatherSection({
           userLocations={userLocations}
           isLoadingLocations={isLoadingLocations}
           onLocationChange={onLocationChange}
+          onDaySelect={handleDaySelect}
         />
         <QuickRecommendationCard
           recommendation={data.quick_recommendation}
           locationId={data.location_id}
           coordinates={coordinates || undefined}
+          selectedDate={selectedDate}
         />
       </div>
     </section>

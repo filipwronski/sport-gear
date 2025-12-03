@@ -150,7 +150,7 @@ function WeeklyForecastInternal({
         <div>
           <h3 className="text-lg font-semibold">Prognoza tygodniowa</h3>
           <p className="text-sm text-muted-foreground">
-            Kliknij na dzień aby zobaczyć rekomendację dla tej daty
+            Kliknij na dzień aby zobaczyć rekomendację ubioru dla tej daty
           </p>
         </div>
         <Button
@@ -168,7 +168,7 @@ function WeeklyForecastInternal({
 
       {/* Loading state */}
       {isLoading && !forecast && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4">
           {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
           ))}
@@ -186,15 +186,8 @@ function WeeklyForecastInternal({
 
       {/* Forecast grid */}
       {forecast && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
-          {forecast.forecast
-            .filter((day) => {
-              // Filter out today's forecast since it's already shown above
-              const today = new Date();
-              const dayDate = new Date(day.date);
-              return dayDate.toDateString() !== today.toDateString();
-            })
-            .map((day) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4">
+          {forecast.forecast.map((day) => (
               <ForecastDayCard
                 key={day.date}
                 day={day}

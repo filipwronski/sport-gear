@@ -12,17 +12,39 @@ interface QuickRecommendationCardProps {
   recommendation: string;
   locationId?: string;
   coordinates?: { lat: number; lng: number };
+  selectedDate?: string | null;
 }
 
 export function QuickRecommendationCard({
   recommendation,
   locationId,
   coordinates,
+  selectedDate,
 }: QuickRecommendationCardProps) {
   const [outfitRecommendation, setOutfitRecommendation] =
     useState<ClothingRecommendationDTO | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const getTitle = () => {
+    if (!selectedDate) {
+      return "Szybka rekomendacja ubioru";
+    }
+
+    const date = new Date(selectedDate);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Szybka rekomendacja ubioru - dziś";
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return "Szybka rekomendacja ubioru - jutro";
+    } else {
+      const dayName = date.toLocaleDateString('pl-PL', { weekday: 'long' });
+      return `Szybka rekomendacja ubioru - ${dayName.toLowerCase()}`;
+    }
+  };
 
   const handleViewDetails = () => {
     const url = locationId
@@ -49,6 +71,14 @@ export function QuickRecommendationCard({
           workout_duration: "60",
         });
 
+        // Add date parameter if a specific date is selected
+        if (selectedDate) {
+          // Convert date string to ISO format for API
+          const date = new Date(selectedDate);
+          const isoDate = date.toISOString();
+          params.set("date", isoDate);
+        }
+
         const response = await fetch(`/api/new-recommendations?${params}`, {
           credentials: "include",
         });
@@ -68,14 +98,14 @@ export function QuickRecommendationCard({
     };
 
     fetchOutfitRecommendation();
-  }, [coordinates]);
+  }, [coordinates, selectedDate]);
 
   return (
     <Card className="h-full">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Compass className="h-5 w-5" />
-          Szybka rekomendacja ubioru
+          {getTitle()}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

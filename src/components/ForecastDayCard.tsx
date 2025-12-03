@@ -22,16 +22,20 @@ export default function ForecastDayCard({
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
+    const dateStr = date.toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "numeric",
+    });
+
     if (date.toDateString() === today.toDateString()) {
-      return "Dzisiaj";
+      return `dzisiaj - ${dateStr}`;
     } else if (date.toDateString() === tomorrow.toDateString()) {
-      return "Jutro";
+      return `jutro - ${dateStr}`;
     } else {
-      return date.toLocaleDateString("pl-PL", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
+      const dayName = date.toLocaleDateString("pl-PL", {
+        weekday: "long",
       });
+      return `${dayName.toLowerCase()} - ${dateStr}`;
     }
   };
 
