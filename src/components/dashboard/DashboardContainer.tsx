@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { useLocations } from "../../components/profile/hooks/useLocations";
+import { useProfile } from "../../components/profile/hooks/useProfile";
 import { WEATHER_REFRESH_INTERVAL_MS } from "./types";
 import { SkeletonLoader } from "./SkeletonLoader";
 import { ErrorDisplay } from "./ErrorDisplay";
@@ -11,7 +13,26 @@ import { CommunityActivitySection } from "./CommunityActivitySection";
 import { PersonalizationStatusSection } from "./PersonalizationStatusSection";
 import type { DashboardContainerProps } from "./types";
 
-export default function DashboardContainer({
+// Create a client for dashboard
+const dashboardQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: (failureCount, error: unknown) => {
+        const status = (error as any)?.status;
+        if (status >= 400 && status < 500) {
+          return status === 408 || status === 429;
+        }
+        return failureCount < 3;
+      },
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+  },
+});
+
+// Internal component that uses React Query hooks
+function DashboardContainerInternal({
   userId,
   initialLocationId,
 }: DashboardContainerProps) {
@@ -32,6 +53,12 @@ export default function DashboardContainer({
     isLoading: isLoadingLocations,
     fetchLocations,
   } = useLocations();
+
+  // Profile hook for updating default location
+  const { updateProfile } = useProfile();
+
+  // Query client for invalidating cache
+  const queryClient = useQueryClient();
 
   // Load user locations on mount and set default location from profile
   useEffect(() => {
@@ -85,7 +112,7 @@ export default function DashboardContainer({
   });
 
   // Handle location change
-  const handleLocationChange = (
+  const handleLocationChange = async (
     locationId: string | null,
     coordinates?: { lat: number; lng: number },
   ) => {
@@ -107,6 +134,19 @@ export default function DashboardContainer({
 
     // Update URL without triggering a page reload
     window.history.replaceState({}, "", url.toString());
+
+    // If user selected a specific user location (not suggested city), update default location in profile
+    if (locationId && !locationId.startsWith("suggested-city-") && locationId !== "browser") {
+      try {
+        await updateProfile({ default_location_id: locationId });
+        console.log(`Updated default location to: ${locationId}`);
+
+        // Invalidate default location cache so other components refresh
+        queryClient.invalidateQueries({ queryKey: ["defaultLocation"] });
+      } catch (error) {
+        console.error("Failed to update default location:", error);
+      }
+    }
   };
 
   if (isLoading) return <SkeletonLoader />;
@@ -137,5 +177,14 @@ export default function DashboardContainer({
 
       <PersonalizationStatusSection data={data.personalization_status} />
     </div>
+  );
+}
+
+// Wrapper component with QueryClientProvider
+export default function DashboardContainer(props: DashboardContainerProps) {
+  return (
+    <QueryClientProvider client={dashboardQueryClient}>
+      <DashboardContainerInternal {...props} />
+    </QueryClientProvider>
   );
 }

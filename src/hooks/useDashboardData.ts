@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { DashboardDTO } from "../types";
 import type { UseDashboardDataReturn } from "../components/dashboard/types";
-import { getPolishCityByName } from "../constants/location.constants";
+import { getSuggestedCityByName } from "../constants/location.constants";
 
 export function useDashboardData(
   _userId: string,
@@ -82,10 +82,10 @@ export function useDashboardData(
       }
       // If we have a location ID, fetch its coordinates
       else if (locationIdToUse) {
-        // Handle predefined Polish cities
-        if (locationIdToUse.startsWith("polish-city-")) {
-          const cityName = locationIdToUse.replace("polish-city-", "");
-          const cityData = getPolishCityByName(cityName);
+        // Handle predefined suggested cities
+        if (locationIdToUse.startsWith("suggested-city-")) {
+          const cityName = locationIdToUse.replace("suggested-city-", "");
+          const cityData = getSuggestedCityByName(cityName);
           if (cityData) {
             currentCoordinates = {
               lat: cityData.latitude,
@@ -94,7 +94,7 @@ export function useDashboardData(
             url.searchParams.set("lat", currentCoordinates.lat.toString());
             url.searchParams.set("lng", currentCoordinates.lng.toString());
             console.info(
-              `Using coordinates from predefined Polish city ${cityName}:`,
+              `Using coordinates from predefined suggested city ${cityName}:`,
               currentCoordinates,
             );
           } else {

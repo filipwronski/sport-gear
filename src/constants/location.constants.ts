@@ -1,9 +1,9 @@
 /**
- * Predefined Polish cities for default location selection
- * Contains 10 largest cities in Poland by population
+ * Predefined cities for default location selection
+ * Contains popular cities from various countries
  * Coordinates are rounded to 3 decimal places for privacy (~100m accuracy)
  */
-export interface PolishCity {
+export interface SuggestedCity {
   name: string;
   latitude: number;
   longitude: number;
@@ -11,10 +11,10 @@ export interface PolishCity {
 }
 
 /**
- * 10 largest cities in Poland by population (2024 data)
- * Coordinates sourced from reliable geographic data
+ * Popular cities for location suggestions
+ * Includes major cities from Poland and other countries
  */
-export const POLISH_CITIES: PolishCity[] = [
+export const SUGGESTED_CITIES: SuggestedCity[] = [
   {
     name: "Warszawa",
     latitude: 52.23,
@@ -75,22 +75,28 @@ export const POLISH_CITIES: PolishCity[] = [
     longitude: 19.023,
     country_code: "PL",
   },
+  {
+    name: "Calpe",
+    latitude: 38.644,
+    longitude: 0.044,
+    country_code: "ES",
+  },
 ];
 
 /**
- * Helper function to get Polish city by name
+ * Helper function to get suggested city by name
  */
-export function getPolishCityByName(name: string): PolishCity | undefined {
-  return POLISH_CITIES.find(
+export function getSuggestedCityByName(name: string): SuggestedCity | undefined {
+  return SUGGESTED_CITIES.find(
     (city) => city.name.toLowerCase() === name.toLowerCase(),
   );
 }
 
 /**
- * Helper function to check if a city name is a predefined Polish city
+ * Helper function to check if a city name is a predefined suggested city
  */
-export function isPolishCity(name: string): boolean {
-  return POLISH_CITIES.some(
+export function isSuggestedCity(name: string): boolean {
+  return SUGGESTED_CITIES.some(
     (city) => city.name.toLowerCase() === name.toLowerCase(),
   );
 }

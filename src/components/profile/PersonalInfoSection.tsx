@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/select";
 import { User, MapPin } from "lucide-react";
 import {
-  POLISH_CITIES,
-  getPolishCityByName,
+  SUGGESTED_CITIES,
+  getSuggestedCityByName,
 } from "../../constants/location.constants";
 import type {
   ProfileDTO,
@@ -80,10 +80,10 @@ export function PersonalInfoSection({
     try {
       let actualLocationId = defaultLocationId;
 
-      // If user selected a Polish city, create it as a location if it doesn't exist
-      if (defaultLocationId.startsWith("polish-city-")) {
-        const cityName = defaultLocationId.replace("polish-city-", "");
-        const cityData = getPolishCityByName(cityName);
+      // If user selected a suggested city, create it as a location if it doesn't exist
+      if (defaultLocationId.startsWith("suggested-city-")) {
+        const cityName = defaultLocationId.replace("suggested-city-", "");
+        const cityData = getSuggestedCityByName(cityName);
 
         if (cityData) {
           // Check if this city already exists in user's locations
@@ -229,26 +229,28 @@ export function PersonalInfoSection({
                   ? "Ładowanie lokalizacji..."
                   : defaultLocation
                     ? `${defaultLocation.city}, ${defaultLocation.country_code}`
-                    : defaultLocationId.startsWith("polish-city-")
-                      ? getPolishCityByName(
-                          defaultLocationId.replace("polish-city-", ""),
-                        )?.name + ", PL"
+                    : defaultLocationId.startsWith("suggested-city-")
+                      ? (() => {
+                          const cityName = defaultLocationId.replace("suggested-city-", "");
+                          const cityData = getSuggestedCityByName(cityName);
+                          return cityData ? `${cityData.name}, ${cityData.country_code}` : "Nieznana lokalizacja";
+                        })()
                       : "Brak wybranej lokalizacji"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">Brak domyślnej lokalizacji</SelectItem>
 
-              {/* Polish Cities Section */}
+              {/* Suggested Cities Section */}
               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                Największe miasta Polski
+                Popularne miasta
               </div>
-              {POLISH_CITIES.map((city) => {
-                const cityValue = `polish-city-${city.name}`;
+              {SUGGESTED_CITIES.map((city) => {
+                const cityValue = `suggested-city-${city.name}`;
                 const existingLocation = locations.find(
                   (loc) =>
                     loc.city.toLowerCase() === city.name.toLowerCase() &&
-                    loc.country_code === "PL",
+                    loc.country_code === city.country_code,
                 );
                 return (
                   <SelectItem key={cityValue} value={cityValue}>

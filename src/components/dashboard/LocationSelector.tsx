@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/select";
 import { MapPin, Navigation, Loader2 } from "lucide-react";
 import {
-  POLISH_CITIES,
-  getPolishCityByName,
+  SUGGESTED_CITIES,
+  getSuggestedCityByName,
 } from "../../constants/location.constants";
 import type { LocationDTO } from "../../types";
 
@@ -49,11 +49,11 @@ export function LocationSelector({
         : "Pobieranie lokalizacji...";
     }
 
-    // Check if it's a Polish city
-    if (currentLocationId.startsWith("polish-city-")) {
-      const cityName = currentLocationId.replace("polish-city-", "");
-      const cityData = getPolishCityByName(cityName);
-      return cityData ? `${cityData.name}, PL` : "Nieznana lokalizacja";
+    // Check if it's a suggested city
+    if (currentLocationId.startsWith("suggested-city-")) {
+      const cityName = currentLocationId.replace("suggested-city-", "");
+      const cityData = getSuggestedCityByName(cityName);
+      return cityData ? `${cityData.name}, ${cityData.country_code}` : "Nieznana lokalizacja";
     }
 
     // Check user locations
@@ -143,16 +143,16 @@ export function LocationSelector({
             )}
           </SelectItem>
 
-          {/* Polish Cities Section */}
+          {/* Suggested Cities Section */}
           <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide border-t mt-1 pt-2">
-            Największe miasta Polski
+            Popularne miasta
           </div>
-          {POLISH_CITIES.map((city) => {
-            const cityValue = `polish-city-${city.name}`;
+          {SUGGESTED_CITIES.map((city) => {
+            const cityValue = `suggested-city-${city.name}`;
             const existingLocation = userLocations.find(
               (loc) =>
                 loc.city.toLowerCase() === city.name.toLowerCase() &&
-                loc.country_code === "PL",
+                loc.country_code === city.country_code,
             );
             return (
               <SelectItem key={cityValue} value={cityValue}>

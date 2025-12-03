@@ -15,13 +15,14 @@ import WeeklyForecast from "./WeeklyForecast";
 // import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
-import { useDefaultLocation } from "@/hooks/useLocationSelection";
+import { useQuery } from "@tanstack/react-query";
 import { useLocations } from "./profile/hooks/useLocations";
-import { getPolishCityByName } from "../constants/location.constants";
+import { getSuggestedCityByName } from "../constants/location.constants";
 import type {
   ZoneType,
   FeedbackDTO,
   NewRecommendationDTO,
+  LocationDTO,
   ApiError,
 } from "../types";
 
@@ -50,18 +51,77 @@ export default function RecommendationView() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Location state for the selector
-  const [currentLocationId, setCurrentLocationId] = useState<string | null>(null);
+  const [currentLocationId, setCurrentLocationId] = useState<string | null>(
+    null,
+  );
 
-  const { defaultLocation } = useDefaultLocation();
-  const { locations: userLocations, isLoading: isLoadingLocations, fetchLocations } = useLocations();
+  // Current location coordinates for WeeklyForecast
+  const [currentCoordinates, setCurrentCoordinates] = useState<
+    | {
+        latitude: number;
+        longitude: number;
+      }
+    | undefined
+  >(undefined);
+
+  const { data: defaultLocation } = useQuery({
+    queryKey: ["defaultLocation"],
+    queryFn: async () => {
+      const response = await fetch("/api/locations?default_only=true", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch default location");
+      }
+      const locations: LocationDTO[] = await response.json();
+      return locations.length > 0 ? locations[0] : null;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+  const {
+    locations: userLocations,
+    isLoading: isLoadingLocations,
+    fetchLocations,
+  } = useLocations();
 
   // Fetch user locations on mount
   useEffect(() => {
     fetchLocations();
   }, [fetchLocations]);
 
+  // Set currentLocationId based on defaultLocation or first user location
+  useEffect(() => {
+    if (!currentLocationId && !isLoadingLocations) {
+      if (defaultLocation) {
+        setCurrentLocationId(defaultLocation.id);
+        setCurrentCoordinates(defaultLocation.location);
+      } else if (userLocations.length > 0) {
+        const firstDefault = userLocations.find((loc) => loc.is_default);
+        const selectedLocation = firstDefault || userLocations[0];
+        setCurrentLocationId(selectedLocation.id);
+        setCurrentCoordinates(selectedLocation.location);
+      } else {
+        // If no locations exist, set to Warsaw (suggested-city-Warszawa)
+        // User can change it later using LocationSelector
+        setCurrentLocationId("suggested-city-Warszawa");
+        const warsawData = getSuggestedCityByName("Warszawa");
+        if (warsawData) {
+          setCurrentCoordinates({
+            latitude: warsawData.latitude,
+            longitude: warsawData.longitude,
+          });
+        }
+      }
+    }
+  }, [defaultLocation, userLocations, currentLocationId, isLoadingLocations]);
+
   const fetchRecommendationWithParams = useCallback(
-    async (intensity: WorkoutIntensity, duration: WorkoutDuration, date?: string | null, selectedCoordinates?: { lat: number; lng: number }) => {
+    async (
+      intensity: WorkoutIntensity,
+      duration: WorkoutDuration,
+      date?: string | null,
+      selectedCoordinates?: { lat: number; lng: number },
+    ) => {
       setIsLoading(true);
       setError(null);
 
@@ -73,6 +133,11 @@ export default function RecommendationView() {
         if (selectedCoordinates) {
           params.lat = selectedCoordinates.lat.toString();
           params.lng = selectedCoordinates.lng.toString();
+        }
+        // Use current coordinates if user has selected a location
+        else if (currentCoordinates) {
+          params.lat = currentCoordinates.latitude.toString();
+          params.lng = currentCoordinates.longitude.toString();
         }
         // Use default location if available
         else if (defaultLocation) {
@@ -122,7 +187,7 @@ export default function RecommendationView() {
             statusCode: response.status,
             details: errorData.error?.details,
             retryAfter: response.headers.get("Retry-After")
-              ? parseInt(response.headers.get("Retry-After"))
+              ? parseInt(response.headers.get("Retry-After")!)
               : undefined,
           };
           throw apiError;
@@ -140,48 +205,82 @@ export default function RecommendationView() {
         setIsLoading(false);
       }
     },
-    [defaultLocation, userLocations],
+    [currentCoordinates, defaultLocation],
   );
 
   // Handle location change from selector
-  const handleLocationChange = useCallback((
-    locationId: string | null,
-    coordinates?: { lat: number; lng: number },
-  ) => {
-    setCurrentLocationId(locationId);
+  const handleLocationChange = useCallback(
+    (locationId: string | null, coordinates?: { lat: number; lng: number }) => {
+      setCurrentLocationId(locationId);
 
-    // Resolve coordinates based on locationId
-    let selectedCoordinates: { lat: number; lng: number } | undefined = coordinates;
+      // Resolve coordinates based on locationId
+      let selectedCoordinates: { lat: number; lng: number } | undefined =
+        coordinates;
 
-    if (!selectedCoordinates && locationId) {
-      // Handle Polish cities
-      if (locationId.startsWith("polish-city-")) {
-        const cityName = locationId.replace("polish-city-", "");
-        const cityData = getPolishCityByName(cityName);
-        if (cityData) {
-          selectedCoordinates = { lat: cityData.latitude, lng: cityData.longitude };
+      if (!selectedCoordinates && locationId) {
+        // Handle suggested cities
+        if (locationId.startsWith("suggested-city-")) {
+          const cityName = locationId.replace("suggested-city-", "");
+          const cityData = getSuggestedCityByName(cityName);
+          if (cityData) {
+            selectedCoordinates = {
+              lat: cityData.latitude,
+              lng: cityData.longitude,
+            };
+          }
+        }
+        // Handle user locations
+        else {
+          const userLocation = userLocations.find(
+            (loc) => loc.id === locationId,
+          );
+          if (userLocation) {
+            selectedCoordinates = {
+              lat: userLocation.location.latitude,
+              lng: userLocation.location.longitude,
+            };
+          }
         }
       }
-      // Handle user locations
-      else {
-        const userLocation = userLocations.find(loc => loc.id === locationId);
-        if (userLocation) {
-          selectedCoordinates = {
-            lat: userLocation.location.latitude,
-            lng: userLocation.location.longitude
-          };
-        }
-      }
-    }
 
-    // Refetch recommendations with new coordinates
-    fetchRecommendationWithParams(workoutIntensity, workoutDuration, selectedDate, selectedCoordinates);
-  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration, selectedDate, userLocations]);
+      // Update current coordinates for WeeklyForecast
+      if (selectedCoordinates) {
+        setCurrentCoordinates({
+          latitude: selectedCoordinates.lat,
+          longitude: selectedCoordinates.lng,
+        });
+      }
+
+      // Refetch recommendations with new coordinates
+      fetchRecommendationWithParams(
+        workoutIntensity,
+        workoutDuration,
+        selectedDate,
+        selectedCoordinates,
+      );
+    },
+    [
+      fetchRecommendationWithParams,
+      workoutIntensity,
+      workoutDuration,
+      selectedDate,
+      userLocations,
+    ],
+  );
 
   // Fetch function for the button that uses current parameters
   const fetchRecommendation = useCallback(() => {
-    fetchRecommendationWithParams(workoutIntensity, workoutDuration, selectedDate);
-  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration, selectedDate]);
+    fetchRecommendationWithParams(
+      workoutIntensity,
+      workoutDuration,
+      selectedDate,
+    );
+  }, [
+    fetchRecommendationWithParams,
+    workoutIntensity,
+    workoutDuration,
+    selectedDate,
+  ]);
 
   // Fetch recommendation on mount and location change only
   useEffect(() => {
@@ -209,12 +308,15 @@ export default function RecommendationView() {
     setFeedbackCount((prev) => prev + 1);
   };
 
-  const handleDaySelect = useCallback((date: string) => {
-    const newDate = date || null;
-    setSelectedDate(newDate);
-    // Fetch recommendation for selected date with current workout parameters
-    fetchRecommendationWithParams(workoutIntensity, workoutDuration, newDate);
-  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration]);
+  const handleDaySelect = useCallback(
+    (date: string) => {
+      const newDate = date || null;
+      setSelectedDate(newDate);
+      // Fetch recommendation for selected date with current workout parameters
+      fetchRecommendationWithParams(workoutIntensity, workoutDuration, newDate);
+    },
+    [fetchRecommendationWithParams, workoutIntensity, workoutDuration],
+  );
 
   if (isLoading) {
     return (
@@ -281,7 +383,7 @@ export default function RecommendationView() {
         {/* Weather Summary */}
         <WeatherSummary
           weather={recommendation.weather}
-          currentLocationId={currentLocationId}
+          currentLocationId={currentLocationId || undefined}
           userLocations={userLocations}
           isLoadingLocations={isLoadingLocations}
           onLocationChange={handleLocationChange}
@@ -292,7 +394,7 @@ export default function RecommendationView() {
 
       {/* Weekly Forecast - second row */}
       <WeeklyForecast
-        location={defaultLocation?.location}
+        location={currentCoordinates || defaultLocation?.location}
         selectedDate={selectedDate || undefined}
         onDaySelect={handleDaySelect}
       />

@@ -72,7 +72,7 @@ function WeeklyForecastInternal({
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["forecast", location ? location.latitude : "geolocation"],
+    queryKey: ["forecast", location ? `${location.latitude},${location.longitude}` : "geolocation"],
     queryFn: async () => {
       // Use provided location coordinates if available
       if (location) {
