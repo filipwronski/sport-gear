@@ -53,7 +53,9 @@ export function LocationSelector({
     if (currentLocationId.startsWith("suggested-city-")) {
       const cityName = currentLocationId.replace("suggested-city-", "");
       const cityData = getSuggestedCityByName(cityName);
-      return cityData ? `${cityData.name}, ${cityData.country_code}` : "Nieznana lokalizacja";
+      return cityData
+        ? `${cityData.name}, ${cityData.country_code}`
+        : "Nieznana lokalizacja";
     }
 
     // Check user locations

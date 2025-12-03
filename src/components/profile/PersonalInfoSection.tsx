@@ -231,9 +231,14 @@ export function PersonalInfoSection({
                     ? `${defaultLocation.city}, ${defaultLocation.country_code}`
                     : defaultLocationId.startsWith("suggested-city-")
                       ? (() => {
-                          const cityName = defaultLocationId.replace("suggested-city-", "");
+                          const cityName = defaultLocationId.replace(
+                            "suggested-city-",
+                            "",
+                          );
                           const cityData = getSuggestedCityByName(cityName);
-                          return cityData ? `${cityData.name}, ${cityData.country_code}` : "Nieznana lokalizacja";
+                          return cityData
+                            ? `${cityData.name}, ${cityData.country_code}`
+                            : "Nieznana lokalizacja";
                         })()
                       : "Brak wybranej lokalizacji"}
               </SelectValue>

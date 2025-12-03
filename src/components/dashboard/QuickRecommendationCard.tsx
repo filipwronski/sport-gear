@@ -41,7 +41,7 @@ export function QuickRecommendationCard({
     } else if (date.toDateString() === tomorrow.toDateString()) {
       return "Szybka rekomendacja ubioru - jutro";
     } else {
-      const dayName = date.toLocaleDateString('pl-PL', { weekday: 'long' });
+      const dayName = date.toLocaleDateString("pl-PL", { weekday: "long" });
       return `Szybka rekomendacja ubioru - ${dayName.toLowerCase()}`;
     }
   };

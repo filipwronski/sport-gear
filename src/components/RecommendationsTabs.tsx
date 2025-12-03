@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import RecommendationView from "./RecommendationView";
 import OutfitHistory from "./OutfitHistory";
-import { useDefaultLocation } from "@/hooks/useLocationSelection";
 
 // Create a client for recommendations
 const queryClient = new QueryClient({
@@ -31,7 +30,6 @@ export default function RecommendationsTabs({
   defaultLocationId,
 }: RecommendationsTabsProps) {
   const [activeTab, setActiveTab] = useState("current");
-  const { defaultLocation } = useDefaultLocation();
 
   return (
     <QueryClientProvider client={queryClient}>

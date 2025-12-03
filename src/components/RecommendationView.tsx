@@ -12,7 +12,6 @@ import WorkoutSelector, {
 import CyclistSVG from "./CyclistSVG";
 import OutfitRecommendationList from "./OutfitRecommendationList";
 import WeeklyForecast from "./WeeklyForecast";
-// import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
 import { useQuery } from "@tanstack/react-query";
@@ -424,14 +423,6 @@ export default function RecommendationView() {
           />
         </div>
       </div>
-
-      {/* Additional AI Tips - DISABLED */}
-      {/* <AdditionalTipsSection
-        weatherConditions={recommendation.weather}
-        onTipsLoad={(_tips) => {
-          // Tips are managed by the hook
-        }}
-      /> */}
 
       {/* Feedback CTA */}
       <AddFeedbackCTA

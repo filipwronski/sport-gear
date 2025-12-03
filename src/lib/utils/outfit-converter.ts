@@ -34,6 +34,10 @@ export function convertClothingItemsToOutfit(items: ClothingItem[]): OutfitDTO {
       case "koszulka termoaktywna":
         outfit.torso.base = "termo";
         break;
+      case "koszulka rowerowa":
+        // Cycling jersey is the visible layer, so it takes priority
+        outfit.torso.base = "koszulka_kr";
+        break;
 
       // Torso mid layer
       case "bluza":

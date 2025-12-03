@@ -24,6 +24,7 @@ export default function OutfitRecommendationList({
       nogawki: "Nogawki",
       rękawki: "Rękawki",
       "koszulka termoaktywna": "Koszulka termoaktywna",
+      "koszulka rowerowa": "Koszulka rowerowa",
       bluza: "Bluza",
       kurtka: "Kurtka",
       "krótkie spodenki": "Krótkie spodenki",
@@ -109,9 +110,11 @@ export default function OutfitRecommendationList({
     }
 
     // Otherwise show day of week
-    const dayName = dateObj.toLocaleDateString("pl-PL", {
-      weekday: "long",
-    }).toLowerCase();
+    const dayName = dateObj
+      .toLocaleDateString("pl-PL", {
+        weekday: "long",
+      })
+      .toLowerCase();
 
     return ` - ${dayName}`;
   };

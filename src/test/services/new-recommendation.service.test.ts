@@ -809,7 +809,7 @@ describe("New Recommendation Service", () => {
 
       const result = service.generateRecommendation(input);
 
-      expect(result.items).toContain("koszulka termoaktywna");
+      expect(result.items).toContain("koszulka rowerowa");
       expect(result.items).toContain("krótkie spodenki");
       // Hot weather (28°C) - summer socks only, no additional foot protection
       expect(result.items).toContain("skarpetki letnie");

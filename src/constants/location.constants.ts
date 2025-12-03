@@ -86,7 +86,9 @@ export const SUGGESTED_CITIES: SuggestedCity[] = [
 /**
  * Helper function to get suggested city by name
  */
-export function getSuggestedCityByName(name: string): SuggestedCity | undefined {
+export function getSuggestedCityByName(
+  name: string,
+): SuggestedCity | undefined {
   return SUGGESTED_CITIES.find(
     (city) => city.name.toLowerCase() === name.toLowerCase(),
   );

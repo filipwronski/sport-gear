@@ -15,7 +15,6 @@ import type {
   ReputationBadgeEnum,
 } from "../types";
 import { InternalServerError } from "../lib/errors";
-import { LocationService } from "./location.service";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 

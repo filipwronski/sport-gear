@@ -5,7 +5,6 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Eye, EyeOff, Mail, Lock, CheckCircle, XCircle } from "lucide-react";
 import { useAuth, type RegisterFormData } from "./useAuth";
-import GoogleAuthButton from "./GoogleAuthButton";
 
 export interface RegisterFormProps {
   onSuccess: () => void;

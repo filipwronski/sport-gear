@@ -51,7 +51,7 @@ export default function RecommendationFilters({
       setIsInitialized(true);
 
       const params: GetRecommendationParams = {
-        location_id: "coordinates", // Placeholder - coordinates are handled by useRecommendation hook
+        location_id: "coordinates", // Placeholder - coordinates are handled by RecommendationView
         activity_type: activityType,
         duration_minutes: durationMinutes,
       };
@@ -75,7 +75,7 @@ export default function RecommendationFilters({
     if (!isInitialized) return;
 
     const params: GetRecommendationParams = {
-      location_id: "coordinates", // Placeholder - coordinates are handled by useRecommendation hook
+      location_id: "coordinates", // Placeholder - coordinates are handled by RecommendationView
       activity_type: activityType,
       duration_minutes: durationMinutes,
     };
@@ -95,7 +95,7 @@ export default function RecommendationFilters({
 
   const handleRefresh = () => {
     const params: GetRecommendationParams = {
-      location_id: "coordinates", // Placeholder - coordinates are handled by useRecommendation hook
+      location_id: "coordinates", // Placeholder - coordinates are handled by RecommendationView
       activity_type: activityType,
       duration_minutes: durationMinutes,
     };

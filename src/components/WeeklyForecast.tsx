@@ -72,7 +72,10 @@ function WeeklyForecastInternal({
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ["forecast", location ? `${location.latitude},${location.longitude}` : "geolocation"],
+    queryKey: [
+      "forecast",
+      location ? `${location.latitude},${location.longitude}` : "geolocation",
+    ],
     queryFn: async () => {
       // Use provided location coordinates if available
       if (location) {
@@ -188,13 +191,13 @@ function WeeklyForecastInternal({
       {forecast && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-4">
           {forecast.forecast.map((day) => (
-              <ForecastDayCard
-                key={day.date}
-                day={day}
-                isSelected={selectedDate === day.date}
-                onClick={() => handleDayClick(day.date)}
-              />
-            ))}
+            <ForecastDayCard
+              key={day.date}
+              day={day}
+              isSelected={selectedDate === day.date}
+              onClick={() => handleDayClick(day.date)}
+            />
+          ))}
         </div>
       )}
 

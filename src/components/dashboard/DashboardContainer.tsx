@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { useQueryClient, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useAutoRefresh } from "@/hooks/useAutoRefresh";
 import { useLocations } from "../../components/profile/hooks/useLocations";
@@ -60,7 +64,7 @@ function DashboardContainerInternal({
   // Query client for invalidating cache
   const queryClient = useQueryClient();
 
-  // Load user locations on mount and set default location from profile
+  // Load initial data on mount
   useEffect(() => {
     const loadInitialData = async () => {
       // Fetch user locations
@@ -88,9 +92,7 @@ function DashboardContainerInternal({
     };
 
     loadInitialData();
-    // Only run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialLocationId, fetchLocations, setCurrentLocationId]);
 
   // Auto-select default location when locations are loaded and no location is selected
   useEffect(() => {
@@ -136,10 +138,14 @@ function DashboardContainerInternal({
     window.history.replaceState({}, "", url.toString());
 
     // If user selected a specific user location (not suggested city), update default location in profile
-    if (locationId && !locationId.startsWith("suggested-city-") && locationId !== "browser") {
+    if (
+      locationId &&
+      !locationId.startsWith("suggested-city-") &&
+      locationId !== "browser"
+    ) {
       try {
         await updateProfile({ default_location_id: locationId });
-        console.log(`Updated default location to: ${locationId}`);
+        console.info(`Updated default location to: ${locationId}`);
 
         // Invalidate default location cache so other components refresh
         queryClient.invalidateQueries({ queryKey: ["defaultLocation"] });

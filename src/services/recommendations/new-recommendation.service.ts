@@ -92,9 +92,9 @@ export class NewRecommendationService {
 
     // Adjust for workout intensity - higher intensity makes you feel hotter, so you need cooler clothing
     if (workoutIntensity === "intensywny") {
-      effectiveTemp -= 2;
+      effectiveTemp += 5;
     } else if (workoutIntensity === "tempo") {
-      effectiveTemp -= 1;
+      effectiveTemp += 3;
     }
 
     // Adjust for long rides - body adapts to cold
@@ -119,8 +119,19 @@ export class NewRecommendationService {
       effectiveTemp,
     } as AdjustedRecommendationInput;
 
-    // Base layer - always recommend thermal shirt
-    items.push("koszulka termoaktywna");
+    // Base layer - thermal shirt for cold/moderate conditions, regular shirt for warm
+    if (effectiveTemp <= 20) {
+      items.push("koszulka termoaktywna");
+
+      // Add cycling jersey over thermal shirt in moderate temperatures
+      // This provides better moisture management and professional look
+      if (effectiveTemp > 14) {
+        items.push("koszulka rowerowa");
+      }
+    } else {
+      // Warm weather - just cycling jersey
+      items.push("koszulka rowerowa");
+    }
 
     // Legs based on temperature and duration
     if (this.shouldWearLongPants(adjustedInput)) {

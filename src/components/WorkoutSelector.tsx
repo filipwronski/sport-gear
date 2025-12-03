@@ -62,7 +62,9 @@ export default function WorkoutSelector({
               size="sm"
               className="flex items-center gap-2"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+              />
               Zaktualizuj rekomendacje
             </Button>
           )}

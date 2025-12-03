@@ -79,6 +79,7 @@ export type ClothingItem =
   | "nogawki"
   | "rękawki"
   | "koszulka termoaktywna"
+  | "koszulka rowerowa"
   | "bluza"
   | "kurtka"
   | "krótkie spodenki"
@@ -250,19 +251,6 @@ export interface WeatherDTO {
   rain_mm: number;
   description: string;
   icon: string;
-}
-
-/**
- * AI-generated outfit recommendation
- * Combines weather data with personalized outfit suggestion
- */
-export interface RecommendationDTO {
-  weather: WeatherDTO;
-  recommendation: OutfitDTO;
-  additional_tips: string[];
-  personalized: boolean;
-  thermal_adjustment: number;
-  computation_time_ms: number;
 }
 
 /**

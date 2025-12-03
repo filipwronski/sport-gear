@@ -130,6 +130,7 @@ export default function CyclistSVG({
         case "torso":
           return (
             item === "koszulka termoaktywna" ||
+            item === "koszulka rowerowa" ||
             item === "bluza" ||
             item === "kurtka" ||
             item === "kurtka przeciwwiatrowa" ||
