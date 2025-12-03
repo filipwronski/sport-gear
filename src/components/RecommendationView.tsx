@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { formatISO } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +11,13 @@ import WorkoutSelector, {
 } from "./WorkoutSelector";
 import CyclistSVG from "./CyclistSVG";
 import OutfitRecommendationList from "./OutfitRecommendationList";
+import WeeklyForecast from "./WeeklyForecast";
 // import AdditionalTipsSection from "./AdditionalTipsSection";
 import AddFeedbackCTA from "./AddFeedbackCTA";
 import FeedbackDialog from "./FeedbackDialog";
 import { useDefaultLocation } from "@/hooks/useLocationSelection";
+import { useLocations } from "./profile/hooks/useLocations";
+import { getPolishCityByName } from "../constants/location.constants";
 import type {
   ZoneType,
   FeedbackDTO,
@@ -42,10 +46,22 @@ export default function RecommendationView() {
   const [originalWorkoutDuration, setOriginalWorkoutDuration] =
     useState<WorkoutDuration>(60);
 
+  // Selected date for forecast recommendations
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  // Location state for the selector
+  const [currentLocationId, setCurrentLocationId] = useState<string | null>(null);
+
   const { defaultLocation } = useDefaultLocation();
+  const { locations: userLocations, isLoading: isLoadingLocations, fetchLocations } = useLocations();
+
+  // Fetch user locations on mount
+  useEffect(() => {
+    fetchLocations();
+  }, [fetchLocations]);
 
   const fetchRecommendationWithParams = useCallback(
-    async (intensity: WorkoutIntensity, duration: WorkoutDuration) => {
+    async (intensity: WorkoutIntensity, duration: WorkoutDuration, date?: string | null, selectedCoordinates?: { lat: number; lng: number }) => {
       setIsLoading(true);
       setError(null);
 
@@ -53,8 +69,13 @@ export default function RecommendationView() {
         // Get coordinates
         const params: Record<string, string> = {};
 
+        // Use selected coordinates if provided (from location selector)
+        if (selectedCoordinates) {
+          params.lat = selectedCoordinates.lat.toString();
+          params.lng = selectedCoordinates.lng.toString();
+        }
         // Use default location if available
-        if (defaultLocation) {
+        else if (defaultLocation) {
           params.lat = defaultLocation.location.latitude.toString();
           params.lng = defaultLocation.location.longitude.toString();
         } else if (navigator.geolocation) {
@@ -83,6 +104,10 @@ export default function RecommendationView() {
 
         params.workout_intensity = intensity;
         params.workout_duration = duration.toString();
+
+        if (date) {
+          params.date = formatISO(new Date(date), { representation: "date" });
+        }
 
         const queryString = new URLSearchParams(params).toString();
         const response = await fetch(`/api/new-recommendations?${queryString}`);
@@ -115,19 +140,55 @@ export default function RecommendationView() {
         setIsLoading(false);
       }
     },
-    [defaultLocation],
+    [defaultLocation, userLocations],
   );
+
+  // Handle location change from selector
+  const handleLocationChange = useCallback((
+    locationId: string | null,
+    coordinates?: { lat: number; lng: number },
+  ) => {
+    setCurrentLocationId(locationId);
+
+    // Resolve coordinates based on locationId
+    let selectedCoordinates: { lat: number; lng: number } | undefined = coordinates;
+
+    if (!selectedCoordinates && locationId) {
+      // Handle Polish cities
+      if (locationId.startsWith("polish-city-")) {
+        const cityName = locationId.replace("polish-city-", "");
+        const cityData = getPolishCityByName(cityName);
+        if (cityData) {
+          selectedCoordinates = { lat: cityData.latitude, lng: cityData.longitude };
+        }
+      }
+      // Handle user locations
+      else {
+        const userLocation = userLocations.find(loc => loc.id === locationId);
+        if (userLocation) {
+          selectedCoordinates = {
+            lat: userLocation.location.latitude,
+            lng: userLocation.location.longitude
+          };
+        }
+      }
+    }
+
+    // Refetch recommendations with new coordinates
+    fetchRecommendationWithParams(workoutIntensity, workoutDuration, selectedDate, selectedCoordinates);
+  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration, selectedDate, userLocations]);
 
   // Fetch function for the button that uses current parameters
   const fetchRecommendation = useCallback(() => {
-    fetchRecommendationWithParams(workoutIntensity, workoutDuration);
-  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration]);
+    fetchRecommendationWithParams(workoutIntensity, workoutDuration, selectedDate);
+  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration, selectedDate]);
 
   // Fetch recommendation on mount and location change only
   useEffect(() => {
     fetchRecommendationWithParams(
       originalWorkoutIntensity,
       originalWorkoutDuration,
+      null, // Start with current day recommendation
     );
   }, [
     fetchRecommendationWithParams,
@@ -147,6 +208,13 @@ export default function RecommendationView() {
   const handleFeedbackSubmitted = (_feedback: FeedbackDTO) => {
     setFeedbackCount((prev) => prev + 1);
   };
+
+  const handleDaySelect = useCallback((date: string) => {
+    const newDate = date || null;
+    setSelectedDate(newDate);
+    // Fetch recommendation for selected date with current workout parameters
+    fetchRecommendationWithParams(workoutIntensity, workoutDuration, newDate);
+  }, [fetchRecommendationWithParams, workoutIntensity, workoutDuration]);
 
   if (isLoading) {
     return (
@@ -205,30 +273,36 @@ export default function RecommendationView() {
           duration={workoutDuration}
           onIntensityChange={setWorkoutIntensity}
           onDurationChange={setWorkoutDuration}
+          onUpdate={fetchRecommendation}
+          isLoading={isLoading}
+          hasChanges={hasWorkoutParamsChanged}
         />
 
         {/* Weather Summary */}
-        <WeatherSummary weather={recommendation.weather} />
+        <WeatherSummary
+          weather={recommendation.weather}
+          currentLocationId={currentLocationId}
+          userLocations={userLocations}
+          isLoadingLocations={isLoadingLocations}
+          onLocationChange={handleLocationChange}
+        />
       </div>
 
-      {/* Update Recommendations Button - below the parameters and weather */}
-      <div className="flex justify-center">
-        <Button
-          onClick={fetchRecommendation}
-          disabled={isLoading || !hasWorkoutParamsChanged}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-          Zaktualizuj rekomendacje
-        </Button>
-      </div>
+      {/* Update Recommendations Button - moved to WorkoutSelector component */}
+
+      {/* Weekly Forecast - second row */}
+      <WeeklyForecast
+        location={defaultLocation?.location}
+        selectedDate={selectedDate || undefined}
+        onDaySelect={handleDaySelect}
+      />
 
       {/* Main recommendation display */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 xl:gap-8 items-stretch">
         {/* Cyclist SVG */}
         <Card className="h-full">
           <CardHeader>
-            <CardTitle>Sylwetka kolarza</CardTitle>
+            <CardTitle>Chronione strefy</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 flex items-center justify-center">
             <CyclistSVG
@@ -244,6 +318,7 @@ export default function RecommendationView() {
           <OutfitRecommendationList
             recommendation={recommendation.recommendation}
             expandedZone={selectedZone}
+            selectedDate={selectedDate}
           />
         </div>
       </div>

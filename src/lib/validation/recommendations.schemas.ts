@@ -27,7 +27,7 @@ export const GetRecommendationsSchema = z.object({
     .default(90),
   date: z
     .string()
-    .datetime("Invalid date format")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
     .optional()
     .refine((date) => {
       if (!date) return true;
@@ -66,7 +66,7 @@ export const GetNewRecommendationsSchema = z.object({
     .default(60),
   date: z
     .string()
-    .datetime("Invalid date format")
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
     .optional()
     .refine((date) => {
       if (!date) return true;

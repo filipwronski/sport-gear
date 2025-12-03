@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import RecommendationView from "./RecommendationView";
-import WeeklyForecast from "./WeeklyForecast";
 import OutfitHistory from "./OutfitHistory";
 import { useDefaultLocation } from "@/hooks/useLocationSelection";
 
@@ -37,29 +36,14 @@ export default function RecommendationsTabs({
   return (
     <QueryClientProvider client={queryClient}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full sm:grid-cols-2 md:grid-cols-3 gap-1 mb-8">
+        <TabsList className="grid w-full sm:grid-cols-2 gap-1 mb-8">
           <TabsTrigger value="current">Aktualna rekomendacja</TabsTrigger>
-          <TabsTrigger value="forecast">Prognoza tygodniowa</TabsTrigger>
           <TabsTrigger value="history">Historia treningów</TabsTrigger>
         </TabsList>
 
         <TabsContent value="current" className="space-y-6">
           <RecommendationView defaultLocationId={defaultLocationId} />
         </TabsContent>
-
-        {activeTab === "forecast" && (
-          <TabsContent value="forecast" className="space-y-6">
-            <WeeklyForecast
-              location={defaultLocation?.location}
-              onDaySelect={(date) => {
-                // Switch to current tab with selected date
-                // This would need URL state management for full implementation
-                console.info("Selected date:", date);
-                setActiveTab("current");
-              }}
-            />
-          </TabsContent>
-        )}
 
         {activeTab === "history" && (
           <TabsContent value="history" className="space-y-6">

@@ -34,6 +34,7 @@ const forecastQueryClient = new QueryClient({
  */
 interface WeeklyForecastProps {
   location?: Coordinates;
+  selectedDate?: string | null;
   onDaySelect?: (date: string) => void;
 }
 
@@ -55,9 +56,9 @@ async function fetchForecast(params: GetForecastParams): Promise<ForecastDTO> {
 // Internal component that uses React Query
 function WeeklyForecastInternal({
   location,
+  selectedDate,
   onDaySelect,
 }: WeeklyForecastProps) {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -124,7 +125,6 @@ function WeeklyForecastInternal({
   });
 
   const handleDayClick = (date: string) => {
-    setSelectedDate(date);
     if (onDaySelect) {
       onDaySelect(date);
     }

@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 export type WorkoutIntensity =
   | "rekreacyjny"
@@ -15,6 +17,9 @@ interface WorkoutSelectorProps {
   duration: WorkoutDuration;
   onIntensityChange: (intensity: WorkoutIntensity) => void;
   onDurationChange: (duration: WorkoutDuration) => void;
+  onUpdate?: () => void;
+  isLoading?: boolean;
+  hasChanges?: boolean;
 }
 
 export default function WorkoutSelector({
@@ -22,6 +27,9 @@ export default function WorkoutSelector({
   duration,
   onIntensityChange,
   onDurationChange,
+  onUpdate,
+  isLoading = false,
+  hasChanges = false,
 }: WorkoutSelectorProps) {
   const intensityOptions = [
     {
@@ -45,7 +53,20 @@ export default function WorkoutSelector({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Parametry treningu</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Parametry treningu</CardTitle>
+          {onUpdate && (
+            <Button
+              onClick={onUpdate}
+              disabled={isLoading || !hasChanges}
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
+              Zaktualizuj rekomendacje
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-3">

@@ -7,6 +7,7 @@ interface OutfitRecommendationListProps {
   recommendation: ClothingRecommendationDTO;
   title?: string;
   expandedZone?: string;
+  selectedDate?: string | null;
 }
 
 /**
@@ -16,6 +17,7 @@ export default function OutfitRecommendationList({
   recommendation,
   title: _title = "Zalecane ubranie",
   expandedZone: _expandedZone,
+  selectedDate,
 }: OutfitRecommendationListProps) {
   const getClothingLabel = (item: ClothingItem): string => {
     const labels: Record<ClothingItem, string> = {
@@ -91,6 +93,29 @@ export default function OutfitRecommendationList({
     return "other";
   };
 
+  const getDayOfWeekSuffix = (date?: string | null): string => {
+    if (!date) return "";
+
+    const dateObj = new Date(date);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    // Check if it's today or tomorrow
+    if (dateObj.toDateString() === today.toDateString()) {
+      return " - dzisiaj";
+    } else if (dateObj.toDateString() === tomorrow.toDateString()) {
+      return " - jutro";
+    }
+
+    // Otherwise show day of week
+    const dayName = dateObj.toLocaleDateString("pl-PL", {
+      weekday: "long",
+    }).toLowerCase();
+
+    return ` - ${dayName}`;
+  };
+
   // Group items by category
   const groupedItems = recommendation.items.reduce(
     (acc, item) => {
@@ -120,7 +145,7 @@ export default function OutfitRecommendationList({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CheckCircle className="w-5 h-5 text-green-600" />
-          Szczegóły rekomendacji
+          Szczegóły rekomendacji{getDayOfWeekSuffix(selectedDate)}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-1">

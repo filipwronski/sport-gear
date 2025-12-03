@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { WeatherDTO } from "../types";
+import { LocationSelector } from "./dashboard/LocationSelector";
+import type { WeatherDTO, LocationDTO } from "../types";
 
 /**
  * WeatherSummary - Displays current weather conditions
@@ -8,11 +9,22 @@ import type { WeatherDTO } from "../types";
 interface WeatherSummaryProps {
   weather: WeatherDTO;
   compact?: boolean;
+  currentLocationId?: string;
+  userLocations?: LocationDTO[];
+  isLoadingLocations?: boolean;
+  onLocationChange?: (
+    locationId: string | null,
+    coordinates?: { lat: number; lng: number },
+  ) => void;
 }
 
 export default function WeatherSummary({
   weather,
   compact = false,
+  currentLocationId,
+  userLocations = [],
+  isLoadingLocations = false,
+  onLocationChange,
 }: WeatherSummaryProps) {
   const formatTemperature = (temp: number) => `${Math.round(temp)}°C`;
   const formatWindSpeed = (speed: number) => `${Math.round(speed)} km/h`;
@@ -69,7 +81,20 @@ export default function WeatherSummary({
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Aktualne warunki pogodowe</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Aktualne warunki pogodowe</CardTitle>
+          {onLocationChange && (
+            <div className="flex-shrink-0">
+              <LocationSelector
+                currentLocationId={currentLocationId}
+                userLocations={userLocations}
+                isLoadingLocations={isLoadingLocations}
+                onLocationChange={onLocationChange}
+                className="w-48"
+              />
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4">
