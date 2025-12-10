@@ -30,9 +30,13 @@ export default function Header() {
           <div className="flex-shrink-0">
             <a
               href="/"
-              className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+              className="flex items-center space-x-2 text-gray-900 hover:text-blue-600 transition-colors"
             >
-              CycleGear
+              <img
+                src="/logo.png"
+                alt="CycleGear logo"
+                className="h-12 w-auto"
+              />
             </a>
           </div>
 

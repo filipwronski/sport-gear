@@ -21,18 +21,12 @@ CycleGear helps road cyclists make confident decisions about what to wear before
 ### Key Features
 
 #### 🌤️ Intelligent Outfit Assistant
-- AI-powered outfit recommendations for 7 body zones (head, torso, arms, hands, legs, feet, neck)
+- outfit recommendations for 7 body zones (head, torso, arms, hands, legs, feet, neck)
 - Real-time weather data integration from OpenWeather API
 - Personalized thermal profile based on user feedback
 - Interactive SVG cyclist visualization showing recommended layers
 - **7-day weather forecast with quick outfit suggestions** ✨ NEW
 - History of proven outfits for similar conditions
-
-#### 👥 Local Community
-- Share your outfit choices with nearby cyclists (within 50km radius)
-- Browse what others are wearing in similar weather conditions
-- Reputation system based on feedback count (Novice, Regular, Expert, Master)
-- Anonymized data sharing for privacy
 
 #### 🚴 Equipment Management
 - Track multiple bikes with detailed service history
@@ -78,12 +72,11 @@ CycleGear helps road cyclists make confident decisions about what to wear before
 
 ### APIs & AI
 - **[OpenWeather API](https://openweathermap.org/api)** - Current weather and 7-day forecast
-- **[OpenRouter](https://openrouter.ai/)** (Claude Haiku) - AI-enhanced recommendations and tips
 - **Rule-based Algorithm** - Core recommendation logic (zero API costs, instant response)
 - **Linear Regression** - Thermal adjustment personalization
 
 ### Deployment & Infrastructure
-- **[Cloudflare Pages](https://pages.cloudflare.com/)** - Hosting with global CDN
+- **[Vercel](https://vercel.com/)** - Hosting with global CDN
 - **[GitHub Actions](https://github.com/features/actions)** - CI/CD pipeline tracking and monitoring
 
 ### Development Tools
@@ -91,7 +84,6 @@ CycleGear helps road cyclists make confident decisions about what to wear before
 - **ESLint** + **Prettier** - Code linting and formatting
 - **Husky** + **lint-staged** - Pre-commit hooks
 - **Vitest** - Unit testing
-- **Playwright** - End-to-end testing
 - **React Testing Library** - Component testing
 
 ## Getting Started Locally
@@ -130,8 +122,6 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 # OpenWeather API
 OPENWEATHER_API_KEY=your_openweather_api_key
 
-# OpenRouter AI
-OPENROUTER_API_KEY=your_openrouter_api_key
 
 # Optional - Analytics
 PLAUSIBLE_DOMAIN=your_domain
