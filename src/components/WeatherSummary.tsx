@@ -129,7 +129,9 @@ export default function WeatherSummary({
             {weather.rain_mm > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Opady</span>
-                <span className="text-sm">{formatRain(weather.rain_mm)} mm</span>
+                <span className="text-sm">
+                  {formatRain(weather.rain_mm)} mm
+                </span>
               </div>
             )}
           </div>
