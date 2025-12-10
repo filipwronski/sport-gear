@@ -64,9 +64,13 @@ export default function Navbar({ userId }: NavbarProps) {
           <div className="flex-shrink-0">
             <button
               onClick={() => handleNavClick("/dashboard")}
-              className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+              className="flex items-center space-x-2 text-gray-900 hover:text-blue-600 transition-colors"
             >
-              CycleGear
+              <img
+                src="/logo.png"
+                alt="CycleGear logo"
+                className="h-12 w-auto"
+              />
             </button>
           </div>
 

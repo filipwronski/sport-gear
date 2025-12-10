@@ -32,7 +32,7 @@ interface ThermalPreferencesSectionProps {
 
 const THERMAL_FEELING_OPTIONS: { value: ThermalFeelingEnum; label: string }[] =
   [
-    { value: "marzlak", label: "Marzlak - szybko mi zimno" },
+    { value: "marzlak", label: "Zmarźlak - szybko mi zimno" },
     { value: "neutralnie", label: "Neutralnie - normalna wrażliwość" },
     { value: "szybko_mi_goraco", label: "Szybko mi gorąco - wolniej się pocę" },
   ];

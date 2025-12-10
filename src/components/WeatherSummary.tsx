@@ -28,6 +28,7 @@ export default function WeatherSummary({
 }: WeatherSummaryProps) {
   const formatTemperature = (temp: number) => `${Math.round(temp)}°C`;
   const formatWindSpeed = (speed: number) => `${Math.round(speed)} km/h`;
+  const formatRain = (rain: number) => rain.toFixed(2);
   const getWeatherIcon = (icon: string) =>
     `http://openweathermap.org/img/wn/${icon}@2x.png`;
 
@@ -72,7 +73,9 @@ export default function WeatherSummary({
           💨 {formatWindSpeed(weather.wind_speed)}
         </div>
         {weather.rain_mm > 0 && (
-          <div className="text-muted-foreground">🌧️ {weather.rain_mm} mm</div>
+          <div className="text-muted-foreground">
+            🌧️ {formatRain(weather.rain_mm)} mm
+          </div>
         )}
       </div>
     );
@@ -126,7 +129,7 @@ export default function WeatherSummary({
             {weather.rain_mm > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Opady</span>
-                <span className="text-sm">{weather.rain_mm} mm</span>
+                <span className="text-sm">{formatRain(weather.rain_mm)} mm</span>
               </div>
             )}
           </div>

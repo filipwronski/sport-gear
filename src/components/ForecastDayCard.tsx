@@ -49,6 +49,8 @@ export default function ForecastDayCard({
     return "🌤️"; // default partly cloudy
   };
 
+  const formatRain = (rain: number) => rain.toFixed(2);
+
   return (
     <Card
       className={`cursor-pointer transition-all hover:shadow-md ${
@@ -83,7 +85,7 @@ export default function ForecastDayCard({
 
           <div className="text-xs text-muted-foreground space-y-1">
             <div>💨 {day.wind_speed} km/h</div>
-            {day.rain_mm > 0 && <div>🌧️ {day.rain_mm} mm</div>}
+            {day.rain_mm > 0 && <div>🌧️ {formatRain(day.rain_mm)} mm</div>}
           </div>
         </div>
       </CardContent>
