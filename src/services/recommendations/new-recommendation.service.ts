@@ -112,6 +112,9 @@ export class NewRecommendationService {
   ): ClothingRecommendationDTO {
     const items: ClothingItem[] = [];
 
+    // Always recommend helmet for safety
+    items.push("kask");
+
     // Calculate effective temperature considering wind chill and heat index
     const effectiveTemp = this.getEffectiveTemperature(input);
     const adjustedInput: AdjustedRecommendationInput = {
@@ -120,14 +123,13 @@ export class NewRecommendationService {
     } as AdjustedRecommendationInput;
 
     // Base layer - thermal shirt for cold/moderate conditions, regular shirt for warm
-    if (effectiveTemp <= 20) {
+    if (effectiveTemp <= 12) {
+      // Cold weather: thermal shirt + sweatshirt (no cycling jersey needed)
       items.push("koszulka termoaktywna");
-
-      // Add cycling jersey over thermal shirt in moderate temperatures
-      // This provides better moisture management and professional look
-      if (effectiveTemp > 14) {
-        items.push("koszulka rowerowa");
-      }
+    } else if (effectiveTemp <= 20) {
+      // Moderate weather: thermal shirt + cycling jersey (sweatshirt not needed)
+      items.push("koszulka termoaktywna");
+      items.push("koszulka rowerowa");
     } else {
       // Warm weather - just cycling jersey
       items.push("koszulka rowerowa");
@@ -181,26 +183,31 @@ export class NewRecommendationService {
   private shouldWearLongPants(
     input: NewRecommendationInput | AdjustedRecommendationInput,
   ): boolean {
-    const effectiveTemp =
-      "effectiveTemp" in input
-        ? input.effectiveTemp
-        : this.getEffectiveTemperature(input);
-    const { workoutDuration, workoutIntensity, windSpeed } = input;
+    const { temperature, windSpeed, humidity, workoutDuration } = input;
+    
+    // For legs, use temperature with wind chill but WITHOUT workout intensity adjustment
+    // Legs work hard during cycling and still feel cold, unlike torso which generates heat
+    let legTemp = temperature;
+    
+    // Apply wind chill for cold conditions
+    if (temperature <= 15) {
+      legTemp = this.calculateWindChill(temperature, windSpeed);
+    }
+    
+    // Apply heat index for hot and humid conditions
+    if (temperature >= 18 && humidity >= 50) {
+      legTemp = this.calculateHeatIndex(temperature, humidity);
+    }
 
-    // Always long pants in cold weather (using effective temperature)
-    if (effectiveTemp <= 10) return true;
-
-    // Long pants for intensive workouts in moderate temperatures
-    if (workoutIntensity === "intensywny" && effectiveTemp <= 15) return true;
-
-    // Long pants for tempo workouts in cool conditions
-    if (workoutIntensity === "tempo" && effectiveTemp <= 14) return true;
+    // Short shorts only for temperatures above 15°C
+    // Always long pants for temperatures <= 15°C
+    if (legTemp <= 15) return true;
 
     // Long pants for long rides with wind
     if (workoutDuration >= 120 && windSpeed >= 15) return true;
 
     // Long pants for very long rides in moderate temperatures (not in extreme heat)
-    if (workoutDuration >= 180 && effectiveTemp <= 25) return true;
+    if (workoutDuration >= 180 && legTemp <= 25) return true;
 
     return false;
   }
@@ -228,43 +235,21 @@ export class NewRecommendationService {
       return;
     }
 
-    // Cold weather
-    if (effectiveTemp <= 6) {
+    // Cold weather - always recommend sweatshirt below 12°C
+    if (effectiveTemp <= 12) {
       items.push("bluza");
 
-      if (windSpeed >= 15 || (windSpeed >= 10 && humidity >= 80)) {
-        items.push("kurtka przeciwwiatrowa");
-      } else if (effectiveTemp <= 2) {
-        items.push("kurtka zimowa");
-      }
-      return;
-    }
-
-    // Moderate cold
-    if (effectiveTemp <= 13) {
-      // Always add layers for intensive workouts
-      if (workoutIntensity === "intensywny") {
-        items.push("bluza");
+      // Add outer layers based on severity
+      if (effectiveTemp <= 6) {
+        if (windSpeed >= 15 || (windSpeed >= 10 && humidity >= 80)) {
+          items.push("kurtka przeciwwiatrowa");
+        } else if (effectiveTemp <= 2) {
+          items.push("kurtka zimowa");
+        }
+      } else {
+        // Moderate cold (6-12°C) - add windproof layer if needed
         if (windSpeed >= 15) {
           items.push("kamizelka przeciwwiatrowa");
-        }
-      }
-      // Add layers for tempo workouts in cooler conditions
-      else if (workoutIntensity === "tempo") {
-        if (effectiveTemp <= 11) {
-          items.push("bluza");
-          if (effectiveTemp <= 8 || windSpeed >= 15) {
-            items.push("kamizelka przeciwwiatrowa");
-          }
-        }
-      }
-      // Add layers for recreational workouts in cool conditions
-      else if (workoutIntensity === "rekreacyjny") {
-        if (effectiveTemp <= 10 || workoutDuration >= 120) {
-          items.push("bluza");
-          if (windSpeed >= 15) {
-            items.push("kamizelka przeciwwiatrowa");
-          }
         }
       }
       return;

@@ -175,12 +175,26 @@ describe("New Recommendation Service", () => {
       expect(result).toBe(true);
     });
 
-    it("should recommend long pants for intensive workouts in moderate cold", () => {
+    it("should recommend long pants for temperatures at or below 15°C", () => {
       const input = {
         temperature: 15,
         humidity: 60,
         windSpeed: 10,
-        workoutIntensity: "intensywny" as const,
+        workoutIntensity: "rekreacyjny" as const,
+        workoutDuration: 60,
+        effectiveTemp: 15,
+      };
+
+      const result = service["shouldWearLongPants"](input);
+      expect(result).toBe(true);
+    });
+
+    it("should recommend long pants for effective temperature at or below 15°C", () => {
+      const input = {
+        temperature: 12,
+        humidity: 60,
+        windSpeed: 10,
+        workoutIntensity: "rekreacyjny" as const,
         workoutDuration: 60,
         effectiveTemp: 14,
       };
@@ -189,32 +203,18 @@ describe("New Recommendation Service", () => {
       expect(result).toBe(true);
     });
 
-    it("should recommend long pants for intensive workouts in cooler effective temperatures", () => {
+    it("should recommend short shorts for temperatures above 15°C", () => {
       const input = {
-        temperature: 12,
+        temperature: 18,
         humidity: 60,
-        windSpeed: 10,
-        workoutIntensity: "intensywny" as const,
+        windSpeed: 5,
+        workoutIntensity: "rekreacyjny" as const,
         workoutDuration: 60,
-        effectiveTemp: 14,
+        effectiveTemp: 18,
       };
 
       const result = service["shouldWearLongPants"](input);
-      expect(result).toBe(true);
-    });
-
-    it("should recommend long pants for tempo workouts in cool conditions", () => {
-      const input = {
-        temperature: 12,
-        humidity: 60,
-        windSpeed: 10,
-        workoutIntensity: "tempo" as const,
-        workoutDuration: 60,
-        effectiveTemp: 13,
-      };
-
-      const result = service["shouldWearLongPants"](input);
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
     it("should recommend long pants for long rides with wind", () => {
@@ -242,6 +242,21 @@ describe("New Recommendation Service", () => {
       };
 
       const result = service["shouldWearLongPants"](input);
+      expect(result).toBe(true);
+    });
+
+    it("should recommend long pants for intensive workouts in cold weather (ignoring intensity adjustment)", () => {
+      const input = {
+        temperature: 10,
+        humidity: 60,
+        windSpeed: 17,
+        workoutIntensity: "intensywny" as const,
+        workoutDuration: 60,
+      };
+
+      const result = service["shouldWearLongPants"](input);
+      // Despite intensive workout adding +5°C to body temp,
+      // legs still work hard and feel cold, so long pants are needed
       expect(result).toBe(true);
     });
 
@@ -341,6 +356,22 @@ describe("New Recommendation Service", () => {
       expect(items).toContain("bluza");
     });
 
+    it("should always recommend sweatshirt below 12°C regardless of intensity", () => {
+      const shortRecreationalInput = {
+        temperature: 11,
+        humidity: 60,
+        windSpeed: 5,
+        workoutIntensity: "rekreacyjny" as const,
+        workoutDuration: 60,
+        effectiveTemp: 11,
+      };
+      const items: any[] = [];
+
+      service["addUpperBodyLayers"](shortRecreationalInput, items);
+
+      expect(items).toContain("bluza");
+    });
+
     it("should recommend layers for long recreational rides", () => {
       const input = {
         temperature: 12,
@@ -355,6 +386,22 @@ describe("New Recommendation Service", () => {
       service["addUpperBodyLayers"](input, items);
 
       expect(items).toContain("bluza");
+    });
+
+    it("should not recommend sweatshirt above 12°C for short recreational rides", () => {
+      const input = {
+        temperature: 14,
+        humidity: 60,
+        windSpeed: 5,
+        workoutIntensity: "rekreacyjny" as const,
+        workoutDuration: 60,
+        effectiveTemp: 14,
+      };
+      const items: any[] = [];
+
+      service["addUpperBodyLayers"](input, items);
+
+      expect(items).not.toContain("bluza");
     });
 
     it("should recommend wind protection for long rides in mild weather", () => {
@@ -788,7 +835,9 @@ describe("New Recommendation Service", () => {
 
       const result = service.generateRecommendation(input);
 
+      expect(result.items).toContain("kask");
       expect(result.items).toContain("koszulka termoaktywna");
+      expect(result.items).not.toContain("koszulka rowerowa"); // No cycling jersey when sweatshirt is recommended
       expect(result.items).toContain("długie spodnie");
       expect(result.items).toContain("bluza");
       expect(result.items).toContain("kurtka zimowa");
@@ -809,6 +858,7 @@ describe("New Recommendation Service", () => {
 
       const result = service.generateRecommendation(input);
 
+      expect(result.items).toContain("kask");
       expect(result.items).toContain("koszulka rowerowa");
       expect(result.items).toContain("krótkie spodenki");
       // Hot weather (28°C) - summer socks only, no additional foot protection
@@ -831,7 +881,9 @@ describe("New Recommendation Service", () => {
 
       const result = service.generateRecommendation(input);
 
+      expect(result.items).toContain("kask");
       expect(result.items).toContain("koszulka termoaktywna");
+      expect(result.items).not.toContain("koszulka rowerowa"); // No cycling jersey when sweatshirt is recommended
       expect(result.items).toContain("długie spodnie");
       expect(result.items).toContain("bluza");
       expect(result.items).toContain("kamizelka przeciwwiatrowa");
@@ -852,9 +904,11 @@ describe("New Recommendation Service", () => {
 
       const result = service.generateRecommendation(input);
 
+      expect(result.items).toContain("kask");
       expect(result.items).toContain("koszulka termoaktywna");
+      expect(result.items).toContain("koszulka rowerowa"); // At 14°C with long ride, cycling jersey is recommended
       expect(result.items).toContain("długie spodnie");
-      expect(result.items).toContain("bluza");
+      // At 14°C, bluza might be added for very long rides
       expect(result.items).toContain("kamizelka przeciwwiatrowa");
       expect(result.items).toContain("czapka");
       expect(result.items).toContain("rękawiczki jesienne");
@@ -877,6 +931,68 @@ describe("New Recommendation Service", () => {
 
       expect(result.items).toContain("nogawki");
     });
+
+    it("should recommend cycling jersey instead of sweatshirt for moderate temperatures (13-20°C)", () => {
+      const input: NewRecommendationInput = {
+        temperature: 16,
+        humidity: 60,
+        windSpeed: 8,
+        workoutIntensity: "rekreacyjny",
+        workoutDuration: 60,
+      };
+
+      const result = service.generateRecommendation(input);
+
+      expect(result.items).toContain("kask");
+      expect(result.items).toContain("koszulka termoaktywna");
+      expect(result.items).toContain("koszulka rowerowa");
+      expect(result.items).not.toContain("bluza"); // No sweatshirt for moderate temperatures
+      expect(result.items).toContain("krótkie spodenki");
+    });
+
+    it("should recommend sweatshirt instead of cycling jersey for cold temperatures (≤12°C)", () => {
+      const input: NewRecommendationInput = {
+        temperature: 10,
+        humidity: 60,
+        windSpeed: 8,
+        workoutIntensity: "rekreacyjny",
+        workoutDuration: 60,
+      };
+
+      const result = service.generateRecommendation(input);
+
+      expect(result.items).toContain("kask");
+      expect(result.items).toContain("koszulka termoaktywna");
+      expect(result.items).not.toContain("koszulka rowerowa"); // No cycling jersey when sweatshirt is recommended
+      expect(result.items).toContain("bluza");
+      expect(result.items).toContain("długie spodnie");
+    });
+  });
+
+  describe("Safety", () => {
+    it("should always recommend helmet regardless of conditions", () => {
+      const coldInput: NewRecommendationInput = {
+        temperature: -10,
+        humidity: 60,
+        windSpeed: 20,
+        workoutIntensity: "rekreacyjny",
+        workoutDuration: 60,
+      };
+
+      const warmInput: NewRecommendationInput = {
+        temperature: 30,
+        humidity: 50,
+        windSpeed: 5,
+        workoutIntensity: "intensywny",
+        workoutDuration: 120,
+      };
+
+      const coldResult = service.generateRecommendation(coldInput);
+      const warmResult = service.generateRecommendation(warmInput);
+
+      expect(coldResult.items).toContain("kask");
+      expect(warmResult.items).toContain("kask");
+    });
   });
 
   describe("Edge Cases", () => {
@@ -891,6 +1007,7 @@ describe("New Recommendation Service", () => {
 
       const result = service.generateRecommendation(input);
 
+      expect(result.items).toContain("kask");
       expect(result.items).toContain("kurtka zimowa");
       expect(result.items).toContain("rękawiczki zimowe");
       expect(result.items).toContain("ochraniacze na buty");

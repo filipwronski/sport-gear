@@ -124,7 +124,7 @@ export default function CyclistSVG({
     return recommendation.items.filter((item) => {
       switch (zone) {
         case "head":
-          return item === "czapka";
+          return item === "czapka" || item === "kask";
         case "neck":
           return item === "komin na szyję";
         case "torso":

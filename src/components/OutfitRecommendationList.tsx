@@ -30,6 +30,7 @@ export default function OutfitRecommendationList({
       "krótkie spodenki": "Krótkie spodenki",
       "długie spodnie": "Długie spodnie",
       czapka: "Czapka",
+      kask: "Kask",
       "rękawiczki letnie": "Rękawiczki letnie",
       "rękawiczki jesienne": "Rękawiczki jesienne",
       "rękawiczki zimowe": "Rękawiczki zimowe",
@@ -78,7 +79,7 @@ export default function OutfitRecommendationList({
     if (item.includes("rękawiczki") || item.includes("rękawki")) {
       return "hands"; // Changed to match CyclistSVG zone name
     }
-    if (item.includes("czapka")) {
+    if (item.includes("czapka") || item.includes("kask")) {
       return "head";
     }
     if (item.includes("szyję") || item.includes("komin")) {

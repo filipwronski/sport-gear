@@ -144,5 +144,28 @@ describe("Outfit Converter", () => {
         neck: "komin",
       });
     });
+
+    it("should handle helmet (kask) without affecting outfit visualization", () => {
+      const clothingItems = ["kask", "koszulka rowerowa", "krótkie spodenki"];
+
+      const outfit = convertClothingItemsToOutfit(clothingItems);
+
+      // Helmet should not affect the outfit structure
+      // It's always recommended but not part of visual outfit display
+      expect(outfit.head).toBe("nic");
+      expect(outfit.torso.base).toBe("koszulka_kr");
+      expect(outfit.legs).toBe("krotkie");
+    });
+
+    it("should handle helmet with hat", () => {
+      const clothingItems = ["kask", "czapka", "koszulka termoaktywna", "długie spodnie"];
+
+      const outfit = convertClothingItemsToOutfit(clothingItems);
+
+      // Hat should still be displayed in outfit even with helmet
+      expect(outfit.head).toBe("czapka");
+      expect(outfit.torso.base).toBe("termo");
+      expect(outfit.legs).toBe("dlugie");
+    });
   });
 });

@@ -29,6 +29,10 @@ export function convertClothingItemsToOutfit(items: ClothingItem[]): OutfitDTO {
       case "czapka":
         outfit.head = "czapka";
         break;
+      case "kask":
+        // Helmet is always recommended but not part of outfit visualization
+        // Keep current head value as hat is still relevant for outfit display
+        break;
 
       // Torso base layer
       case "koszulka termoaktywna":

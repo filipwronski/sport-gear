@@ -85,6 +85,7 @@ export type ClothingItem =
   | "krótkie spodenki"
   | "długie spodnie"
   | "czapka"
+  | "kask"
   | "rękawiczki letnie"
   | "rękawiczki jesienne"
   | "rękawiczki zimowe"
