@@ -183,17 +183,17 @@ export class NewRecommendationService {
   private shouldWearLongPants(
     input: NewRecommendationInput | AdjustedRecommendationInput,
   ): boolean {
-    const { temperature, windSpeed, humidity, workoutDuration } = input;
-    
+    const { temperature, windSpeed, humidity } = input;
+
     // For legs, use temperature with wind chill but WITHOUT workout intensity adjustment
     // Legs work hard during cycling and still feel cold, unlike torso which generates heat
     let legTemp = temperature;
-    
+
     // Apply wind chill for cold conditions
     if (temperature <= 15) {
       legTemp = this.calculateWindChill(temperature, windSpeed);
     }
-    
+
     // Apply heat index for hot and humid conditions
     if (temperature >= 18 && humidity >= 50) {
       legTemp = this.calculateHeatIndex(temperature, humidity);
@@ -202,12 +202,6 @@ export class NewRecommendationService {
     // Short shorts only for temperatures above 15°C
     // Always long pants for temperatures <= 15°C
     if (legTemp <= 15) return true;
-
-    // Long pants for long rides with wind
-    if (workoutDuration >= 120 && windSpeed >= 15) return true;
-
-    // Long pants for very long rides in moderate temperatures (not in extreme heat)
-    if (workoutDuration >= 180 && legTemp <= 25) return true;
 
     return false;
   }

@@ -217,34 +217,6 @@ describe("New Recommendation Service", () => {
       expect(result).toBe(false);
     });
 
-    it("should recommend long pants for long rides with wind", () => {
-      const input = {
-        temperature: 18,
-        humidity: 60,
-        windSpeed: 20,
-        workoutIntensity: "rekreacyjny" as const,
-        workoutDuration: 140,
-        effectiveTemp: 18,
-      };
-
-      const result = service["shouldWearLongPants"](input);
-      expect(result).toBe(true);
-    });
-
-    it("should recommend long pants for very long rides regardless of temperature", () => {
-      const input = {
-        temperature: 25,
-        humidity: 60,
-        windSpeed: 5,
-        workoutIntensity: "rekreacyjny" as const,
-        workoutDuration: 250,
-        effectiveTemp: 25,
-      };
-
-      const result = service["shouldWearLongPants"](input);
-      expect(result).toBe(true);
-    });
-
     it("should recommend long pants for intensive workouts in cold weather (ignoring intensity adjustment)", () => {
       const input = {
         temperature: 10,
@@ -260,7 +232,7 @@ describe("New Recommendation Service", () => {
       expect(result).toBe(true);
     });
 
-    it("should not recommend long pants for mild weather short rides", () => {
+    it("should not recommend long pants for mild weather", () => {
       const input = {
         temperature: 20,
         humidity: 60,
@@ -274,14 +246,14 @@ describe("New Recommendation Service", () => {
       expect(result).toBe(false);
     });
 
-    it("should not recommend long pants for ultra-long rides in extreme heat", () => {
+    it("should not recommend long pants for warm weather", () => {
       const input = {
-        temperature: 30,
+        temperature: 25,
         humidity: 60,
         windSpeed: 5,
         workoutIntensity: "rekreacyjny" as const,
-        workoutDuration: 250, // 4+ hours
-        effectiveTemp: 30,
+        workoutDuration: 60,
+        effectiveTemp: 25,
       };
 
       const result = service["shouldWearLongPants"](input);
@@ -920,15 +892,16 @@ describe("New Recommendation Service", () => {
 
     it("should include leg warmers for longer rides in cool weather", () => {
       const input: NewRecommendationInput = {
-        temperature: 14,
+        temperature: 16,
         humidity: 60,
-        windSpeed: 8,
+        windSpeed: 5,
         workoutIntensity: "rekreacyjny",
-        workoutDuration: 120,
+        workoutDuration: 90,
       };
 
       const result = service.generateRecommendation(input);
 
+      expect(result.items).toContain("krótkie spodenki");
       expect(result.items).toContain("nogawki");
     });
 
@@ -1052,8 +1025,12 @@ describe("New Recommendation Service", () => {
 
       const result = service.generateRecommendation(input);
 
-      expect(result.items).toContain("długie spodnie");
+      // At 20°C, short shorts are recommended regardless of ride duration
+      expect(result.items).toContain("krótkie spodenki");
+      // Hat for sun protection on long rides
       expect(result.items).toContain("czapka");
+      // Arm warmers not needed at 20°C
+      expect(result.items).not.toContain("rękawki");
     });
 
     it("should recommend bluza at 8°C for recreational rides", () => {

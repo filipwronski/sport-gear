@@ -158,7 +158,12 @@ describe("Outfit Converter", () => {
     });
 
     it("should handle helmet with hat", () => {
-      const clothingItems = ["kask", "czapka", "koszulka termoaktywna", "długie spodnie"];
+      const clothingItems = [
+        "kask",
+        "czapka",
+        "koszulka termoaktywna",
+        "długie spodnie",
+      ];
 
       const outfit = convertClothingItemsToOutfit(clothingItems);
 
